@@ -1,0 +1,866 @@
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>מגדלי ים התיכון 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: lienzo 3D a pantalla completa; barra de control flotante arriba, leyenda abajo-izquierda, ficha del dispositivo abajo-derecha. Look único claro (fondo blanco, preferencia del cliente). */
+:root{
+  --bg:#FFFFFF; --panel:#FFFFFF; --ink:#1F2630; --muted:#6B7480; --line:#DDE1E6; --soft:#F3F5F7;
+  --accent:#D9620B; --bus:#1A9E4B; --net:#D62839; --pwr:#1F66D1;
+  --display:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:var(--display);}
+body{overflow:hidden}
+#stage{position:fixed;inset:0;background:var(--bg)}
+#stage canvas{display:block;width:100%;height:100%;outline:none}
+.bar{position:fixed;left:16px;right:16px;top:calc(12px + env(safe-area-inset-top,0px));display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;
+  background:var(--panel);border:1px solid var(--line);padding:8px 12px;box-shadow:0 2px 10px rgba(30,40,55,.06);z-index:5}
+.brand{display:flex;flex-direction:column;gap:1px;margin-right:6px;min-width:0}
+.brand b{font-size:17px;font-weight:700;letter-spacing:.01em;line-height:1.1}
+.brand span{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.grp{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.grp label.cap{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-right:2px}
+button,select{font-family:var(--display);font-size:14px;font-weight:600;color:var(--ink);background:var(--soft);border:1px solid var(--line);padding:5px 10px;cursor:pointer;border-radius:3px}
+button:hover{border-color:#B9C0C8}
+button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+button.play{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.play[aria-pressed="true"]{background:#fff;color:var(--accent)}
+.seg{display:flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:#fff}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.seg button+button{border-left:1px solid var(--line)}
+.legend{position:fixed;left:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--panel);border:1px solid var(--line);padding:10px 12px;max-width:min(360px,calc(100% - 32px));z-index:4}
+.legend h3{margin:0 0 6px;font-size:12px;font-family:var(--mono);font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.legend ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.legend li{display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:center;font-size:13.5px;line-height:1.2}
+.sw{height:6px;border-radius:3px}
+.sw.dash{background:repeating-linear-gradient(90deg,var(--bus) 0 6px,transparent 6px 9px)!important}
+.chip{width:14px;height:14px;border:1px solid rgba(0,0,0,.25);justify-self:center}
+.tri{width:14px;height:14px;justify-self:center;border:1px solid rgba(0,0,0,.25);background:linear-gradient(90deg,#E53935 0 33%,#2E9F4F 33% 66%,#1E6BD6 66%)}
+.info{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--accent);padding:10px 14px;width:min(320px,calc(100% - 32px));z-index:4}
+.info h4{margin:0 0 4px;font-size:16px}
+.info dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:13px}
+.info dt{font-family:var(--mono);font-size:10.5px;color:var(--muted);text-transform:uppercase;padding-top:2px}
+.info dd{margin:0}
+.info .x{position:absolute;right:6px;top:4px;background:none;border:0;font-size:18px;color:var(--muted);padding:2px 6px}
+.hint{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:6px}
+.tag{position:absolute;transform:translate(-50%,-100%);font-size:12px;font-weight:600;white-space:nowrap;pointer-events:none;color:var(--ink);background:rgba(255,255,255,.92);border:1px solid var(--line);padding:1px 6px;z-index:3}
+.tag.room{font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-color:transparent;background:rgba(255,255,255,.75)}
+.tag.room.apt{font-size:14px;background:#fff;border:1px solid #E8C9AE;color:#8A3E05}
+.tag.dev{font-family:var(--mono);font-size:10.5px;font-weight:500;border-color:#E8C9AE;color:#8A3E05}
+#tags{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:2}
+.timeline{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--panel);border:1px solid var(--line);padding:6px 12px;font-size:14px;font-weight:600;z-index:4;max-width:calc(100% - 32px);text-align:center}
+.timeline small{display:block;font-family:var(--mono);font-size:10px;color:var(--muted);font-weight:400}
+.loading{position:fixed;inset:0;display:grid;place-items:center;font-family:var(--mono);color:var(--muted);font-size:13px;z-index:1}
+[dir="rtl"] .legend li{direction:rtl}
+.pad{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:repeat(3,56px);grid-template-rows:56px 56px auto;gap:6px;z-index:6}
+.pad button{font-size:22px;padding:0;border-radius:8px;background:#fff;box-shadow:0 2px 8px rgba(30,40,55,.12);touch-action:none;user-select:none}
+.pad[hidden]{display:none}
+.pad button.b{grid-column:2}
+.pad button:active{background:var(--accent);color:#fff}
+.fphint{grid-column:1/4;font-family:var(--mono);font-size:10.5px;color:var(--muted);background:#fff;border:1px solid var(--line);padding:4px 6px;text-align:center}
+body.fpmode .legend{display:none}
+.docpanel{position:fixed;right:16px;top:120px;width:min(380px,calc(100% - 32px));background:#fff;border:1px solid var(--line);border-top:3px solid var(--accent);padding:12px 14px;z-index:7;box-shadow:0 6px 24px rgba(30,40,55,.12)}
+.docview{position:fixed;inset:0;background:rgba(240,242,245,.85);z-index:9;display:grid;place-items:center;padding:16px}
+.docview[hidden]{display:none}
+.dv-in{position:relative;background:#fff;border:1px solid var(--line);border-top:3px solid var(--accent);padding:12px 14px;width:min(1100px,100%)}
+.dv-in h4{margin:0 0 8px;font-size:17px}
+.dv-in .x{position:absolute;right:6px;top:4px;background:none;border:0;font-size:22px;color:var(--muted);padding:2px 8px}
+.docpanel h4{margin:0 0 8px;font-size:17px}
+.docpanel ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.docpanel a{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:center;text-decoration:none;color:var(--ink);border:1px solid var(--line);padding:8px 10px;border-radius:4px}
+.docpanel a:hover{border-color:var(--accent)}
+.docpanel b{font-family:var(--mono);font-size:11px;color:#fff;background:var(--accent);text-align:center;padding:3px 0;border-radius:3px}
+.docpanel small{display:block;color:var(--muted);font-size:12px}
+.docpanel .x{position:absolute;right:6px;top:4px;background:none;border:0;font-size:18px;color:var(--muted);padding:2px 6px}
+body.fpmode .info{bottom:auto;top:96px}
+#stage canvas.fpcur{cursor:grab}
+body.capture .bar,body.capture .legend,body.capture .info,body.capture .pad,body.capture .docpanel,body.capture .docview{display:none!important}
+@media (max-width:720px){.legend{display:none}.bar{gap:6px}.brand span{display:none}button,select{font-size:13px;padding:4px 8px}}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+
+<div id="stage"><div class="loading" id="loading">Cargando modelo 3D…</div></div>
+<div id="tags"></div>
+
+<div class="bar" role="toolbar" aria-label="Controles">
+  <div class="brand"><b id="t-title">Pabellón · Llamada de enfermería</b><span id="t-sub">ACE BG · Advantecnia · Modelo 3D</span></div>
+  <div class="grp"><div class="seg" role="group">
+    <button id="m-eq" aria-pressed="true"></button><button id="m-wi" aria-pressed="false"></button></div></div>
+  <div class="grp"><label class="cap" for="view" id="t-view"></label>
+    <select id="view"></select></div>
+  <div class="grp"><label class="cap" for="scen" id="t-lights"></label>
+    <select id="scen"></select></div>
+  <div class="grp">
+    <button id="walk" class="play" aria-pressed="false"></button>
+    <button id="lbl" aria-pressed="true"></button>
+    <button id="cut" aria-pressed="false"></button>
+    <button id="fp" class="play" aria-pressed="false"></button>
+    <select id="goto" aria-label="Ir a"></select>
+    <button id="docs" hidden></button>
+  </div>
+  <div class="grp" style="margin-left:auto"><div class="seg" role="group" aria-label="Idioma">
+    <button data-lang="es" aria-pressed="true">ES</button><button data-lang="en" aria-pressed="false">EN</button><button data-lang="he" aria-pressed="false">עב</button></div></div>
+</div>
+
+<div class="legend" id="legend"></div>
+<div class="info" id="info" hidden><button class="x" id="info-x" aria-label="Cerrar">×</button><h4 id="i-title"></h4><dl id="i-dl"></dl></div>
+<div class="timeline" id="tl" hidden></div>
+<div class="docpanel" id="docpanel" hidden><button class="x" id="doc-x" aria-label="Cerrar">×</button><h4 id="doc-t"></h4><ul id="doc-list"></ul></div>
+<div class="docview" id="docview" hidden><div class="dv-in"><button class="x" id="dv-x" aria-label="Cerrar">×</button><h4 id="dv-t"></h4><div id="dv-body"></div></div></div>
+<script type="application/json" id="docs-data">[{"f": "plans_2D_HE.pdf", "mb": 2.4}, {"f": "README_HE.md", "mb": 0.0}]</script>
+<div class="pad" id="pad" hidden><button data-k="L" aria-label="Girar izquierda">⟲</button><button data-k="F" aria-label="Adelante">▲</button><button data-k="R" aria-label="Girar derecha">⟳</button><button data-k="B" aria-label="Atrás" class="b">▼</button><div class="fphint" id="fphint"></div></div>
+
+<script type="application/json" id="model-data">{"meta":{"project":"Migdalei Yam a Tijon – Departamentos tutelados","client":"ACE BG · Advantecnia","units":"m","wall_h":2.8,"ceil":2.6,"tray":2.68,"x_end":30.0,"corridor_w":2.0,"depth":10.0,"highlight":["D1","D2"],"building":{"floors":6,"apts_per_floor":6,"h_floor":3.2,"ground":{"reception":true,"desk_code":"ACE52190200","server_code":"ACE51010103","switch_code":"ACEUCM6302"}}},"walls":[{"a":[0,2.0],"b":[30.0,2.0],"t":0.2,"h":2.8,"ext":false,"openings":[{"lo":4.6,"hi":5.4,"z0":0.0,"z1":2.1,"kind":"door"},{"lo":14.75,"hi":15.55,"z0":0.0,"z1":2.1,"kind":"door"},{"lo":23.6,"hi":24.4,"z0":0.0,"z1":2.1,"kind":"door"}]},{"a":[0,0],"b":[30.0,0],"t":0.2,"h":2.8,"ext":false,"openings":[{"lo":25.75,"hi":26.55,"z0":0.0,"z1":2.1,"kind":"door"},{"lo":19.3,"hi":20.3,"z0":0.0,"z1":2.1,"kind":"door"},{"lo":20.85,"hi":21.75,"z0":0.0,"z1":2.1,"kind":"door"},{"lo":12.6,"hi":13.4,"z0":0.0,"z1":2.1,"kind":"door"},{"lo":3.75,"hi":4.55,"z0":0.0,"z1":2.1,"kind":"door"}]},{"a":[0,12.0],"b":[30.0,12.0],"t":0.3,"h":2.8,"ext":true,"openings":[{"lo":0.6,"hi":3.8,"z0":0.9,"z1":2.2,"kind":"window"},{"lo":7.15,"hi":8.45,"z0":0.9,"z1":2.2,"kind":"window"},{"lo":9.0,"hi":10.6,"z0":0.9,"z1":2.2,"kind":"window"},{"lo":11.6,"hi":14.8,"z0":0.9,"z1":2.2,"kind":"window"},{"lo":17.35,"hi":18.75,"z0":0.9,"z1":2.2,"kind":"window"},{"lo":19.6,"hi":22.8,"z0":0.9,"z1":2.2,"kind":"window"},{"lo":26.15,"hi":27.45,"z0":0.9,"z1":2.2,"kind":"window"},{"lo":28.0,"hi":29.6,"z0":0.9,"z1":2.2,"kind":"window"}]},{"a":[0,-10.0],"b":[30.0,-10.0],"t":0.3,"h":2.8,"ext":true,"openings":[{"lo":22.6,"hi":25.8,"z0":0.9,"z1":2.2,"kind":"window"},{"lo":28.35,"hi":29.75,"z0":0.9,"z1":2.2,"kind":"window"},{"lo":8.6,"hi":11.8,"z0":0.9,"z1":2.2,"kind":"window"},{"lo":15.15,"hi":16.45,"z0":0.9,"z1":2.2,"kind":"window"},{"lo":17.0,"hi":18.6,"z0":0.9,"z1":2.2,"kind":"window"},{"lo":0.6,"hi":3.8,"z0":0.9,"z1":2.2,"kind":"window"},{"lo":6.35,"hi":7.75,"z0":0.9,"z1":2.2,"kind":"window"}]},{"a":[30.0,-10.0],"b":[30.0,12.0],"t":0.3,"h":2.8,"ext":true,"openings":[{"lo":0.3,"hi":1.7,"z0":0.9,"z1":2.2,"kind":"window"}]},{"a":[0,-10.0],"b":[0,0],"t":0.3,"h":2.8,"ext":true,"openings":[]},{"a":[0,2.0],"b":[0,12.0],"t":0.3,"h":2.8,"ext":true,"openings":[]},{"a":[0,0],"b":[0,2.0],"t":0.3,"h":2.8,"ext":true,"openings":[{"lo":0.4,"hi":1.6,"z0":0.0,"z1":2.1,"kind":"door"}]},{"a":[0.0,2.0],"b":[0.0,12.0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[11.0,2.0],"b":[11.0,12.0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[4.4,2.0],"b":[4.4,5.0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[6.4,4.6],"b":[8.8,4.6],"t":0.12,"h":2.8,"ext":false,"openings":[{"lo":7.0,"hi":7.8,"z0":0.0,"z1":2.1,"kind":"door"}]},{"a":[6.4,2.0],"b":[6.4,8.4],"t":0.12,"h":2.8,"ext":false,"openings":[{"lo":4.6,"hi":5.6,"z0":0,"z1":2.1,"kind":"open"}]},{"a":[8.8,2.0],"b":[8.8,4.6],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[8.8,4.6],"b":[11.0,4.6],"t":0.12,"h":2.8,"ext":false,"openings":[{"lo":9.0,"hi":9.8,"z0":0.0,"z1":2.1,"kind":"door"}]},{"a":[6.4,5.6],"b":[8.6,5.6],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[8.6,5.6],"b":[8.6,12.0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[4.4,8.4],"b":[8.6,8.4],"t":0.12,"h":2.8,"ext":false,"openings":[{"lo":4.6,"hi":5.5,"z0":0.0,"z1":2.1,"kind":"door"},{"lo":7.65,"hi":8.45,"z0":0.0,"z1":2.1,"kind":"door"}]},{"a":[4.4,8.4],"b":[4.4,12.0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[8.6,5.6],"b":[11.0,5.6],"t":0.12,"h":2.8,"ext":false,"openings":[{"lo":9.3,"hi":10.1,"z0":0.0,"z1":2.1,"kind":"door"}]},{"a":[11.0,2.0],"b":[11.0,12.0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[19.0,2.0],"b":[19.0,12.0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[14.6,2.0],"b":[14.6,5.0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[16.4,2.0],"b":[16.4,7.4],"t":0.12,"h":2.8,"ext":false,"openings":[{"lo":5.6,"hi":6.4,"z0":0.0,"z1":2.1,"kind":"door"},{"lo":2.9,"hi":3.7,"z0":0.0,"z1":2.1,"kind":"door"}]},{"a":[16.4,4.4],"b":[19.0,4.4],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[14.6,7.4],"b":[19.0,7.4],"t":0.12,"h":2.8,"ext":false,"openings":[{"lo":14.8,"hi":15.7,"z0":0.0,"z1":2.1,"kind":"door"}]},{"a":[14.6,7.4],"b":[14.6,12.0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[19.0,2.0],"b":[19.0,12.0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[30.0,2.0],"b":[30.0,12.0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[23.4,2.0],"b":[23.4,5.0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[25.4,4.6],"b":[27.8,4.6],"t":0.12,"h":2.8,"ext":false,"openings":[{"lo":26.0,"hi":26.8,"z0":0.0,"z1":2.1,"kind":"door"}]},{"a":[25.4,2.0],"b":[25.4,8.4],"t":0.12,"h":2.8,"ext":false,"openings":[{"lo":4.6,"hi":5.6,"z0":0,"z1":2.1,"kind":"open"}]},{"a":[27.8,2.0],"b":[27.8,4.6],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[27.8,4.6],"b":[30.0,4.6],"t":0.12,"h":2.8,"ext":false,"openings":[{"lo":28.0,"hi":28.8,"z0":0.0,"z1":2.1,"kind":"door"}]},{"a":[25.4,5.6],"b":[27.6,5.6],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[27.6,5.6],"b":[27.6,12.0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[23.4,8.4],"b":[27.6,8.4],"t":0.12,"h":2.8,"ext":false,"openings":[{"lo":23.6,"hi":24.5,"z0":0.0,"z1":2.1,"kind":"door"},{"lo":26.65,"hi":27.45,"z0":0.0,"z1":2.1,"kind":"door"}]},{"a":[23.4,8.4],"b":[23.4,12.0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[27.6,5.6],"b":[30.0,5.6],"t":0.12,"h":2.8,"ext":false,"openings":[{"lo":28.3,"hi":29.1,"z0":0.0,"z1":2.1,"kind":"door"}]},{"a":[22.0,-10.0],"b":[22.0,0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[30.0,-10.0],"b":[30.0,0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[25.6,-3.0],"b":[25.6,0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[27.4,-5.4],"b":[27.4,0],"t":0.12,"h":2.8,"ext":false,"openings":[{"lo":-4.4,"hi":-3.6,"z0":0.0,"z1":2.1,"kind":"door"},{"lo":-1.7,"hi":-0.9,"z0":0.0,"z1":2.1,"kind":"door"}]},{"a":[27.4,-2.4],"b":[30.0,-2.4],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[25.6,-5.4],"b":[30.0,-5.4],"t":0.12,"h":2.8,"ext":false,"openings":[{"lo":25.8,"hi":26.7,"z0":0.0,"z1":2.1,"kind":"door"}]},{"a":[25.6,-10.0],"b":[25.6,-5.4],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[19.0,-10.0],"b":[19.0,0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[22.0,-10.0],"b":[22.0,0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[19.0,-2.4],"b":[22.0,-2.4],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[20.6,-2.4],"b":[20.6,0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[8.0,-10.0],"b":[8.0,0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[19.0,-10.0],"b":[19.0,0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[12.4,-3.0],"b":[12.4,0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[14.4,-2.6],"b":[16.8,-2.6],"t":0.12,"h":2.8,"ext":false,"openings":[{"lo":15.0,"hi":15.8,"z0":0.0,"z1":2.1,"kind":"door"}]},{"a":[14.4,-6.4],"b":[14.4,0],"t":0.12,"h":2.8,"ext":false,"openings":[{"lo":-3.6,"hi":-2.6,"z0":0,"z1":2.1,"kind":"open"}]},{"a":[16.8,-2.6],"b":[16.8,0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[16.8,-2.6],"b":[19.0,-2.6],"t":0.12,"h":2.8,"ext":false,"openings":[{"lo":17.0,"hi":17.8,"z0":0.0,"z1":2.1,"kind":"door"}]},{"a":[14.4,-3.6],"b":[16.6,-3.6],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[16.6,-10.0],"b":[16.6,-3.6],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[12.4,-6.4],"b":[16.6,-6.4],"t":0.12,"h":2.8,"ext":false,"openings":[{"lo":12.6,"hi":13.5,"z0":0.0,"z1":2.1,"kind":"door"},{"lo":15.65,"hi":16.45,"z0":0.0,"z1":2.1,"kind":"door"}]},{"a":[12.4,-10.0],"b":[12.4,-6.4],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[16.6,-3.6],"b":[19.0,-3.6],"t":0.12,"h":2.8,"ext":false,"openings":[{"lo":17.3,"hi":18.1,"z0":0.0,"z1":2.1,"kind":"door"}]},{"a":[0.0,-10.0],"b":[0.0,0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[8.0,-10.0],"b":[8.0,0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[3.6,-3.0],"b":[3.6,0],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[5.4,-5.4],"b":[5.4,0],"t":0.12,"h":2.8,"ext":false,"openings":[{"lo":-4.4,"hi":-3.6,"z0":0.0,"z1":2.1,"kind":"door"},{"lo":-1.7,"hi":-0.9,"z0":0.0,"z1":2.1,"kind":"door"}]},{"a":[5.4,-2.4],"b":[8.0,-2.4],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[3.6,-5.4],"b":[8.0,-5.4],"t":0.12,"h":2.8,"ext":false,"openings":[{"lo":3.8,"hi":4.7,"z0":0.0,"z1":2.1,"kind":"door"}]},{"a":[3.6,-10.0],"b":[3.6,-5.4],"t":0.12,"h":2.8,"ext":false,"openings":[]}],"doors":[{"horiz":false,"axis":0,"lo":0.4,"hi":1.6,"hinge":"lo","swing":-1,"label":"Escalera","leaves":2,"t":0.3,"h":2.1},{"horiz":true,"axis":8.4,"lo":4.6,"hi":5.5,"hinge":"lo","swing":1,"label":"","leaves":1,"t":0.12,"h":2.1},{"horiz":true,"axis":8.4,"lo":7.65,"hi":8.45,"hinge":"hi","swing":1,"label":"","leaves":1,"t":0.12,"h":2.1},{"horiz":true,"axis":4.6,"lo":7.0,"hi":7.8,"hinge":"lo","swing":-1,"label":"","leaves":1,"t":0.12,"h":2.1},{"horiz":true,"axis":5.6,"lo":9.3,"hi":10.1,"hinge":"lo","swing":1,"label":"","leaves":1,"t":0.12,"h":2.1},{"horiz":true,"axis":4.6,"lo":9.0,"hi":9.8,"hinge":"hi","swing":-1,"label":"","leaves":1,"t":0.12,"h":2.1},{"horiz":true,"axis":2.0,"lo":4.6,"hi":5.4,"hinge":"lo","swing":1,"label":"1","leaves":1,"t":0.2,"h":2.1},{"horiz":true,"axis":7.4,"lo":14.8,"hi":15.7,"hinge":"lo","swing":1,"label":"","leaves":1,"t":0.12,"h":2.1},{"horiz":false,"axis":16.4,"lo":5.6,"hi":6.4,"hinge":"lo","swing":1,"label":"","leaves":1,"t":0.12,"h":2.1},{"horiz":false,"axis":16.4,"lo":2.9,"hi":3.7,"hinge":"lo","swing":1,"label":"","leaves":1,"t":0.12,"h":2.1},{"horiz":true,"axis":2.0,"lo":14.75,"hi":15.55,"hinge":"lo","swing":1,"label":"2","leaves":1,"t":0.2,"h":2.1},{"horiz":true,"axis":8.4,"lo":23.6,"hi":24.5,"hinge":"lo","swing":1,"label":"","leaves":1,"t":0.12,"h":2.1},{"horiz":true,"axis":8.4,"lo":26.65,"hi":27.45,"hinge":"hi","swing":1,"label":"","leaves":1,"t":0.12,"h":2.1},{"horiz":true,"axis":4.6,"lo":26.0,"hi":26.8,"hinge":"lo","swing":-1,"label":"","leaves":1,"t":0.12,"h":2.1},{"horiz":true,"axis":5.6,"lo":28.3,"hi":29.1,"hinge":"lo","swing":1,"label":"","leaves":1,"t":0.12,"h":2.1},{"horiz":true,"axis":4.6,"lo":28.0,"hi":28.8,"hinge":"hi","swing":-1,"label":"","leaves":1,"t":0.12,"h":2.1},{"horiz":true,"axis":2.0,"lo":23.6,"hi":24.4,"hinge":"lo","swing":1,"label":"3","leaves":1,"t":0.2,"h":2.1},{"horiz":true,"axis":-5.4,"lo":25.8,"hi":26.7,"hinge":"lo","swing":-1,"label":"","leaves":1,"t":0.12,"h":2.1},{"horiz":false,"axis":27.4,"lo":-4.4,"hi":-3.6,"hinge":"hi","swing":1,"label":"","leaves":1,"t":0.12,"h":2.1},{"horiz":false,"axis":27.4,"lo":-1.7,"hi":-0.9,"hinge":"hi","swing":1,"label":"","leaves":1,"t":0.12,"h":2.1},{"horiz":true,"axis":0,"lo":25.75,"hi":26.55,"hinge":"lo","swing":-1,"label":"4","leaves":1,"t":0.2,"h":2.1},{"horiz":true,"axis":0,"lo":19.3,"hi":20.3,"hinge":"lo","swing":-1,"label":"Ascensor","leaves":1,"t":0.2,"h":2.1},{"horiz":true,"axis":0,"lo":20.85,"hi":21.75,"hinge":"hi","swing":-1,"label":"Sala comunicaciones","leaves":1,"t":0.2,"h":2.1},{"horiz":true,"axis":-6.4,"lo":12.6,"hi":13.5,"hinge":"lo","swing":-1,"label":"","leaves":1,"t":0.12,"h":2.1},{"horiz":true,"axis":-6.4,"lo":15.65,"hi":16.45,"hinge":"hi","swing":-1,"label":"","leaves":1,"t":0.12,"h":2.1},{"horiz":true,"axis":-2.6,"lo":15.0,"hi":15.8,"hinge":"lo","swing":1,"label":"","leaves":1,"t":0.12,"h":2.1},{"horiz":true,"axis":-3.6,"lo":17.3,"hi":18.1,"hinge":"lo","swing":-1,"label":"","leaves":1,"t":0.12,"h":2.1},{"horiz":true,"axis":-2.6,"lo":17.0,"hi":17.8,"hinge":"hi","swing":1,"label":"","leaves":1,"t":0.12,"h":2.1},{"horiz":true,"axis":0,"lo":12.6,"hi":13.4,"hinge":"lo","swing":-1,"label":"5","leaves":1,"t":0.2,"h":2.1},{"horiz":true,"axis":-5.4,"lo":3.8,"hi":4.7,"hinge":"lo","swing":-1,"label":"","leaves":1,"t":0.12,"h":2.1},{"horiz":false,"axis":5.4,"lo":-4.4,"hi":-3.6,"hinge":"hi","swing":1,"label":"","leaves":1,"t":0.12,"h":2.1},{"horiz":false,"axis":5.4,"lo":-1.7,"hi":-0.9,"hinge":"hi","swing":1,"label":"","leaves":1,"t":0.12,"h":2.1},{"horiz":true,"axis":0,"lo":3.75,"hi":4.55,"hinge":"lo","swing":-1,"label":"6","leaves":1,"t":0.2,"h":2.1}],"windows":[{"horiz":false,"axis":30.0,"lo":0.3,"hi":1.7,"z0":0.9,"z1":2.2,"t":0.3,"label":"Ventana pasillo"},{"horiz":true,"axis":12.0,"lo":0.6,"hi":3.8,"z0":0.9,"z1":2.2,"t":0.3,"label":"Ventana living"},{"horiz":true,"axis":12.0,"lo":7.15,"hi":8.45,"z0":0.9,"z1":2.2,"t":0.3,"label":"Ventana dormitorio"},{"horiz":true,"axis":12.0,"lo":9.0,"hi":10.6,"z0":0.9,"z1":2.2,"t":0.3,"label":"Ventana dormitorio 2"},{"horiz":true,"axis":12.0,"lo":11.6,"hi":14.8,"z0":0.9,"z1":2.2,"t":0.3,"label":"Ventana living"},{"horiz":true,"axis":12.0,"lo":17.35,"hi":18.75,"z0":0.9,"z1":2.2,"t":0.3,"label":"Ventana dormitorio"},{"horiz":true,"axis":12.0,"lo":19.6,"hi":22.8,"z0":0.9,"z1":2.2,"t":0.3,"label":"Ventana living"},{"horiz":true,"axis":12.0,"lo":26.15,"hi":27.45,"z0":0.9,"z1":2.2,"t":0.3,"label":"Ventana dormitorio"},{"horiz":true,"axis":12.0,"lo":28.0,"hi":29.6,"z0":0.9,"z1":2.2,"t":0.3,"label":"Ventana dormitorio 2"},{"horiz":true,"axis":-10.0,"lo":22.6,"hi":25.8,"z0":0.9,"z1":2.2,"t":0.3,"label":"Ventana living"},{"horiz":true,"axis":-10.0,"lo":28.35,"hi":29.75,"z0":0.9,"z1":2.2,"t":0.3,"label":"Ventana dormitorio"},{"horiz":true,"axis":-10.0,"lo":8.6,"hi":11.8,"z0":0.9,"z1":2.2,"t":0.3,"label":"Ventana living"},{"horiz":true,"axis":-10.0,"lo":15.15,"hi":16.45,"z0":0.9,"z1":2.2,"t":0.3,"label":"Ventana dormitorio"},{"horiz":true,"axis":-10.0,"lo":17.0,"hi":18.6,"z0":0.9,"z1":2.2,"t":0.3,"label":"Ventana dormitorio 2"},{"horiz":true,"axis":-10.0,"lo":0.6,"hi":3.8,"z0":0.9,"z1":2.2,"t":0.3,"label":"Ventana living"},{"horiz":true,"axis":-10.0,"lo":6.35,"hi":7.75,"z0":0.9,"z1":2.2,"t":0.3,"label":"Ventana dormitorio"}],"items":[{"type":"stairs","c":[-1.7,1.0],"s":[3.0,3.6,0.0],"z":0.0,"rot":0,"label":"Escalera","room":"CORR"},{"type":"kitchen_counter","c":[2.2,2.33],"s":[4.2,0.62,0.9],"z":0.0,"rot":0,"label":"","room":"D1"},{"type":"kitchen_counter","c":[0.33,3.6],"s":[0.62,2.2,0.9],"z":0.0,"rot":0,"label":"","room":"D1"},{"type":"fridge","c":[3.9,2.36],"s":[0.65,0.68,1.85],"z":0.0,"rot":0,"label":"","room":"D1"},{"type":"stove","c":[1.3,2.33],"s":[0.6,0.58,0.02],"z":0.9,"rot":0,"label":"","room":"D1"},{"type":"kitchen_sink","c":[2.6,2.33],"s":[0.8,0.45,0.02],"z":0.9,"rot":0,"label":"","room":"D1"},{"type":"dining_table","c":[2.4,5.9],"s":[1.4,0.9,0.75],"z":0.0,"rot":0,"label":"","room":"D1"},{"type":"chair","c":[1.95,5.25],"s":[0.45,0.45,0.9],"z":0.0,"rot":0,"label":"","room":"D1"},{"type":"chair","c":[1.95,6.55],"s":[0.45,0.45,0.9],"z":0.0,"rot":180,"label":"","room":"D1"},{"type":"chair","c":[2.85,5.25],"s":[0.45,0.45,0.9],"z":0.0,"rot":0,"label":"","room":"D1"},{"type":"chair","c":[2.85,6.55],"s":[0.45,0.45,0.9],"z":0.0,"rot":180,"label":"","room":"D1"},{"type":"sofa","c":[2.2,10.9],"s":[2.4,0.9,0.8],"z":0.0,"rot":180,"label":"","room":"D1"},{"type":"armchair","c":[0.75,9.0],"s":[0.85,0.85,0.8],"z":0.0,"rot":90,"label":"","room":"D1"},{"type":"rug","c":[2.2,9.6],"s":[2.6,1.8,0.01],"z":0.0,"rot":0,"label":"","room":"D1"},{"type":"coffee_table","c":[2.2,9.5],"s":[1.1,0.6,0.42],"z":0.0,"rot":0,"label":"","room":"D1"},{"type":"plant","c":[3.9,11.5],"s":[0.45,0.45,1.2],"z":0.0,"rot":0,"label":"","room":"D1"},{"type":"floor_lamp","c":[0.45,10.1],"s":[0.35,0.35,1.6],"z":0.0,"rot":0,"label":"","room":"D1"},{"type":"wall_cabinet","c":[2.0,2.18],"s":[3.6,0.35,0.7],"z":1.5,"rot":0,"label":"","room":"D1"},{"type":"tv_unit","c":[2.2,7.45],"s":[1.8,0.42,0.55],"z":0.0,"rot":0,"label":"","room":"D1"},{"type":"tv_screen","c":[2.2,7.4],"s":[1.2,0.06,0.7],"z":0.9,"rot":0,"label":"","room":"D1"},{"type":"bed_double","c":[5.75,10.95],"s":[1.6,2.0,0.55],"z":0.0,"rot":0,"label":"","room":"D1","head":"N"},{"type":"nightstand","c":[4.68,11.65],"s":[0.45,0.4,0.55],"z":0.0,"rot":0,"label":"","room":"D1"},{"type":"nightstand","c":[6.82,11.65],"s":[0.45,0.4,0.55],"z":0.0,"rot":0,"label":"","room":"D1"},{"type":"wardrobe","c":[8.28,10.6],"s":[0.6,2.0,2.2],"z":0.0,"rot":0,"label":"","room":"D1"},{"type":"rug","c":[5.75,9.55],"s":[2.2,1.1,0.01],"z":0.0,"rot":0,"label":"","room":"D1"},{"type":"plant","c":[7.3,11.6],"s":[0.4,0.4,1.0],"z":0.0,"rot":0,"label":"","room":"D1"},{"type":"toilet","c":[7.0,8.05],"s":[0.4,0.68,0.42],"z":0.0,"rot":0,"label":"","room":"D1","head":"N"},{"type":"grab_bar","c":[6.52,7.85],"s":[0.04,0.75,0.04],"z":0.75,"rot":0,"label":"","room":"D1"},{"type":"washbasin","c":[6.85,6.2],"s":[0.55,0.45,0.85],"z":0.0,"rot":0,"label":"","room":"D1"},{"type":"mirror","c":[6.85,5.66],"s":[0.6,0.02,0.8],"z":1.05,"rot":0,"label":"","room":"D1"},{"type":"shower_tray","c":[7.95,6.6],"s":[1.2,1.9,0.03],"z":0.0,"rot":0,"label":"","room":"D1"},{"type":"shower_curtain","c":[7.35,6.6],"s":[0.03,1.9,1.9],"z":0.1,"rot":0,"label":"","room":"D1"},{"type":"shower_seat","c":[8.35,6.6],"s":[0.4,0.45,0.48],"z":0.0,"rot":0,"label":"","room":"D1"},{"type":"shower_head","c":[8.5,6.3],"s":[0.08,0.08,0.05],"z":2.05,"rot":0,"label":"","room":"D1"},{"type":"towel_rail","c":[7.0,5.68],"s":[0.5,0.04,0.05],"z":1.1,"rot":0,"label":"","room":"D1"},{"type":"toilet","c":[6.9,2.45],"s":[0.4,0.68,0.42],"z":0.0,"rot":0,"label":"","room":"D1","head":"S"},{"type":"washbasin","c":[7.85,2.3],"s":[0.5,0.42,0.85],"z":0.0,"rot":0,"label":"","room":"D1"},{"type":"shower_tray","c":[8.15,3.75],"s":[1.1,1.3,0.03],"z":0.0,"rot":0,"label":"","room":"D1"},{"type":"shower_curtain","c":[7.6,3.75],"s":[0.03,1.3,1.9],"z":0.1,"rot":0,"label":"","room":"D1"},{"type":"bed_single","c":[9.8,10.6],"s":[1.0,2.0,0.55],"z":0.0,"rot":0,"label":"","room":"D1","head":"N"},{"type":"nightstand","c":[9.0,11.65],"s":[0.45,0.4,0.55],"z":0.0,"rot":0,"label":"","room":"D1"},{"type":"wardrobe","c":[10.6,6.6],"s":[0.6,1.6,2.2],"z":0.0,"rot":0,"label":"","room":"D1"},{"type":"desk","c":[9.8,8.0],"s":[1.1,0.55,0.75],"z":0.0,"rot":0,"label":"","room":"D1"},{"type":"shelf","c":[9.9,3.3],"s":[1.6,0.45,1.9],"z":0.0,"rot":0,"label":"","room":"D1"},{"type":"kitchen_counter","c":[12.8,2.33],"s":[3.4,0.62,0.9],"z":0.0,"rot":0,"label":"","room":"D2"},{"type":"fridge","c":[14.1,2.36],"s":[0.65,0.68,1.85],"z":0.0,"rot":0,"label":"","room":"D2"},{"type":"stove","c":[11.8,2.33],"s":[0.6,0.58,0.02],"z":0.9,"rot":0,"label":"","room":"D2"},{"type":"kitchen_sink","c":[13.0,2.33],"s":[0.8,0.45,0.02],"z":0.9,"rot":0,"label":"","room":"D2"},{"type":"dining_table","c":[12.8,5.9],"s":[1.1,0.8,0.75],"z":0.0,"rot":0,"label":"","room":"D2"},{"type":"chair","c":[12.5,5.3],"s":[0.45,0.45,0.9],"z":0.0,"rot":0,"label":"","room":"D2"},{"type":"chair","c":[12.5,6.5],"s":[0.45,0.45,0.9],"z":0.0,"rot":180,"label":"","room":"D2"},{"type":"chair","c":[13.1,5.3],"s":[0.45,0.45,0.9],"z":0.0,"rot":0,"label":"","room":"D2"},{"type":"chair","c":[13.1,6.5],"s":[0.45,0.45,0.9],"z":0.0,"rot":180,"label":"","room":"D2"},{"type":"sofa","c":[12.8,10.95],"s":[2.2,0.9,0.8],"z":0.0,"rot":180,"label":"","room":"D2"},{"type":"rug","c":[12.8,9.7],"s":[2.4,1.7,0.01],"z":0.0,"rot":0,"label":"","room":"D2"},{"type":"coffee_table","c":[12.8,9.6],"s":[1.0,0.55,0.42],"z":0.0,"rot":0,"label":"","room":"D2"},{"type":"armchair","c":[11.6,8.9],"s":[0.8,0.8,0.8],"z":0.0,"rot":90,"label":"","room":"D2"},{"type":"plant","c":[14.15,11.5],"s":[0.45,0.45,1.2],"z":0.0,"rot":0,"label":"","room":"D2"},{"type":"wall_cabinet","c":[12.6,2.18],"s":[2.8,0.35,0.7],"z":1.5,"rot":0,"label":"","room":"D2"},{"type":"tv_unit","c":[12.8,7.75],"s":[1.6,0.42,0.55],"z":0.0,"rot":0,"label":"","room":"D2"},{"type":"tv_screen","c":[12.8,7.7],"s":[1.1,0.06,0.65],"z":0.9,"rot":0,"label":"","room":"D2"},{"type":"bed_double","c":[15.95,10.95],"s":[1.6,2.0,0.55],"z":0.0,"rot":0,"label":"","room":"D2","head":"N"},{"type":"nightstand","c":[14.88,11.65],"s":[0.45,0.4,0.55],"z":0.0,"rot":0,"label":"","room":"D2"},{"type":"nightstand","c":[17.02,11.65],"s":[0.45,0.4,0.55],"z":0.0,"rot":0,"label":"","room":"D2"},{"type":"wardrobe","c":[18.55,8.6],"s":[0.6,2.0,2.2],"z":0.0,"rot":0,"label":"","room":"D2"},{"type":"rug","c":[15.95,9.55],"s":[2.2,1.1,0.01],"z":0.0,"rot":0,"label":"","room":"D2"},{"type":"toilet","c":[17.0,7.05],"s":[0.4,0.68,0.42],"z":0.0,"rot":0,"label":"","room":"D2","head":"N"},{"type":"grab_bar","c":[16.52,6.85],"s":[0.04,0.75,0.04],"z":0.75,"rot":0,"label":"","room":"D2"},{"type":"washbasin","c":[16.95,4.9],"s":[0.55,0.45,0.85],"z":0.0,"rot":0,"label":"","room":"D2"},{"type":"mirror","c":[16.95,4.46],"s":[0.6,0.02,0.8],"z":1.05,"rot":0,"label":"","room":"D2"},{"type":"shower_tray","c":[18.25,5.9],"s":[1.3,1.8,0.03],"z":0.0,"rot":0,"label":"","room":"D2"},{"type":"shower_curtain","c":[17.6,5.9],"s":[0.03,1.8,1.9],"z":0.1,"rot":0,"label":"","room":"D2"},{"type":"shower_seat","c":[18.7,5.9],"s":[0.4,0.45,0.48],"z":0.0,"rot":0,"label":"","room":"D2"},{"type":"shower_head","c":[18.85,5.5],"s":[0.08,0.08,0.05],"z":2.05,"rot":0,"label":"","room":"D2"},{"type":"shelf","c":[17.7,2.35],"s":[2.4,0.5,1.9],"z":0.0,"rot":0,"label":"","room":"D2"},{"type":"kitchen_counter","c":[21.2,2.33],"s":[4.2,0.62,0.9],"z":0.0,"rot":0,"label":"","room":"D3"},{"type":"kitchen_counter","c":[19.33,3.6],"s":[0.62,2.2,0.9],"z":0.0,"rot":0,"label":"","room":"D3"},{"type":"fridge","c":[22.9,2.36],"s":[0.65,0.68,1.85],"z":0.0,"rot":0,"label":"","room":"D3"},{"type":"stove","c":[20.3,2.33],"s":[0.6,0.58,0.02],"z":0.9,"rot":0,"label":"","room":"D3"},{"type":"kitchen_sink","c":[21.6,2.33],"s":[0.8,0.45,0.02],"z":0.9,"rot":0,"label":"","room":"D3"},{"type":"dining_table","c":[21.4,5.9],"s":[1.4,0.9,0.75],"z":0.0,"rot":0,"label":"","room":"D3"},{"type":"chair","c":[20.95,5.25],"s":[0.45,0.45,0.9],"z":0.0,"rot":0,"label":"","room":"D3"},{"type":"chair","c":[20.95,6.55],"s":[0.45,0.45,0.9],"z":0.0,"rot":180,"label":"","room":"D3"},{"type":"chair","c":[21.85,5.25],"s":[0.45,0.45,0.9],"z":0.0,"rot":0,"label":"","room":"D3"},{"type":"chair","c":[21.85,6.55],"s":[0.45,0.45,0.9],"z":0.0,"rot":180,"label":"","room":"D3"},{"type":"sofa","c":[21.2,10.9],"s":[2.4,0.9,0.8],"z":0.0,"rot":180,"label":"","room":"D3"},{"type":"armchair","c":[19.75,9.0],"s":[0.85,0.85,0.8],"z":0.0,"rot":90,"label":"","room":"D3"},{"type":"rug","c":[21.2,9.6],"s":[2.6,1.8,0.01],"z":0.0,"rot":0,"label":"","room":"D3"},{"type":"coffee_table","c":[21.2,9.5],"s":[1.1,0.6,0.42],"z":0.0,"rot":0,"label":"","room":"D3"},{"type":"plant","c":[22.9,11.5],"s":[0.45,0.45,1.2],"z":0.0,"rot":0,"label":"","room":"D3"},{"type":"floor_lamp","c":[19.45,10.1],"s":[0.35,0.35,1.6],"z":0.0,"rot":0,"label":"","room":"D3"},{"type":"wall_cabinet","c":[21.0,2.18],"s":[3.6,0.35,0.7],"z":1.5,"rot":0,"label":"","room":"D3"},{"type":"tv_unit","c":[21.2,7.45],"s":[1.8,0.42,0.55],"z":0.0,"rot":0,"label":"","room":"D3"},{"type":"tv_screen","c":[21.2,7.4],"s":[1.2,0.06,0.7],"z":0.9,"rot":0,"label":"","room":"D3"},{"type":"bed_double","c":[24.75,10.95],"s":[1.6,2.0,0.55],"z":0.0,"rot":0,"label":"","room":"D3","head":"N"},{"type":"nightstand","c":[23.68,11.65],"s":[0.45,0.4,0.55],"z":0.0,"rot":0,"label":"","room":"D3"},{"type":"nightstand","c":[25.82,11.65],"s":[0.45,0.4,0.55],"z":0.0,"rot":0,"label":"","room":"D3"},{"type":"wardrobe","c":[27.28,10.6],"s":[0.6,2.0,2.2],"z":0.0,"rot":0,"label":"","room":"D3"},{"type":"rug","c":[24.75,9.55],"s":[2.2,1.1,0.01],"z":0.0,"rot":0,"label":"","room":"D3"},{"type":"plant","c":[26.3,11.6],"s":[0.4,0.4,1.0],"z":0.0,"rot":0,"label":"","room":"D3"},{"type":"toilet","c":[26.0,8.05],"s":[0.4,0.68,0.42],"z":0.0,"rot":0,"label":"","room":"D3","head":"N"},{"type":"grab_bar","c":[25.52,7.85],"s":[0.04,0.75,0.04],"z":0.75,"rot":0,"label":"","room":"D3"},{"type":"washbasin","c":[25.85,6.2],"s":[0.55,0.45,0.85],"z":0.0,"rot":0,"label":"","room":"D3"},{"type":"mirror","c":[25.85,5.66],"s":[0.6,0.02,0.8],"z":1.05,"rot":0,"label":"","room":"D3"},{"type":"shower_tray","c":[26.95,6.6],"s":[1.2,1.9,0.03],"z":0.0,"rot":0,"label":"","room":"D3"},{"type":"shower_curtain","c":[26.35,6.6],"s":[0.03,1.9,1.9],"z":0.1,"rot":0,"label":"","room":"D3"},{"type":"shower_seat","c":[27.35,6.6],"s":[0.4,0.45,0.48],"z":0.0,"rot":0,"label":"","room":"D3"},{"type":"shower_head","c":[27.5,6.3],"s":[0.08,0.08,0.05],"z":2.05,"rot":0,"label":"","room":"D3"},{"type":"towel_rail","c":[26.0,5.68],"s":[0.5,0.04,0.05],"z":1.1,"rot":0,"label":"","room":"D3"},{"type":"toilet","c":[25.9,2.45],"s":[0.4,0.68,0.42],"z":0.0,"rot":0,"label":"","room":"D3","head":"S"},{"type":"washbasin","c":[26.85,2.3],"s":[0.5,0.42,0.85],"z":0.0,"rot":0,"label":"","room":"D3"},{"type":"shower_tray","c":[27.15,3.75],"s":[1.1,1.3,0.03],"z":0.0,"rot":0,"label":"","room":"D3"},{"type":"shower_curtain","c":[26.6,3.75],"s":[0.03,1.3,1.9],"z":0.1,"rot":0,"label":"","room":"D3"},{"type":"bed_single","c":[28.8,10.6],"s":[1.0,2.0,0.55],"z":0.0,"rot":0,"label":"","room":"D3","head":"N"},{"type":"nightstand","c":[28.0,11.65],"s":[0.45,0.4,0.55],"z":0.0,"rot":0,"label":"","room":"D3"},{"type":"wardrobe","c":[29.6,6.6],"s":[0.6,1.6,2.2],"z":0.0,"rot":0,"label":"","room":"D3"},{"type":"desk","c":[28.8,8.0],"s":[1.1,0.55,0.75],"z":0.0,"rot":0,"label":"","room":"D3"},{"type":"shelf","c":[28.9,3.3],"s":[1.6,0.45,1.9],"z":0.0,"rot":0,"label":"","room":"D3"},{"type":"kitchen_counter","c":[23.8,-0.33],"s":[3.4,0.62,0.9],"z":0.0,"rot":180,"label":"","room":"D4"},{"type":"fridge","c":[25.1,-0.36],"s":[0.65,0.68,1.85],"z":0.0,"rot":180,"label":"","room":"D4"},{"type":"stove","c":[22.8,-0.33],"s":[0.6,0.58,0.02],"z":0.9,"rot":180,"label":"","room":"D4"},{"type":"kitchen_sink","c":[24.0,-0.33],"s":[0.8,0.45,0.02],"z":0.9,"rot":180,"label":"","room":"D4"},{"type":"dining_table","c":[23.8,-3.9],"s":[1.1,0.8,0.75],"z":0.0,"rot":180,"label":"","room":"D4"},{"type":"chair","c":[23.5,-3.3],"s":[0.45,0.45,0.9],"z":0.0,"rot":180,"label":"","room":"D4"},{"type":"chair","c":[23.5,-4.5],"s":[0.45,0.45,0.9],"z":0.0,"rot":0,"label":"","room":"D4"},{"type":"chair","c":[24.1,-3.3],"s":[0.45,0.45,0.9],"z":0.0,"rot":180,"label":"","room":"D4"},{"type":"chair","c":[24.1,-4.5],"s":[0.45,0.45,0.9],"z":0.0,"rot":0,"label":"","room":"D4"},{"type":"sofa","c":[23.8,-8.95],"s":[2.2,0.9,0.8],"z":0.0,"rot":0,"label":"","room":"D4"},{"type":"rug","c":[23.8,-7.7],"s":[2.4,1.7,0.01],"z":0.0,"rot":180,"label":"","room":"D4"},{"type":"coffee_table","c":[23.8,-7.6],"s":[1.0,0.55,0.42],"z":0.0,"rot":180,"label":"","room":"D4"},{"type":"armchair","c":[22.6,-6.9],"s":[0.8,0.8,0.8],"z":0.0,"rot":90,"label":"","room":"D4"},{"type":"plant","c":[25.15,-9.5],"s":[0.45,0.45,1.2],"z":0.0,"rot":180,"label":"","room":"D4"},{"type":"wall_cabinet","c":[23.6,-0.18],"s":[2.8,0.35,0.7],"z":1.5,"rot":180,"label":"","room":"D4"},{"type":"tv_unit","c":[23.8,-5.75],"s":[1.6,0.42,0.55],"z":0.0,"rot":180,"label":"","room":"D4"},{"type":"tv_screen","c":[23.8,-5.7],"s":[1.1,0.06,0.65],"z":0.9,"rot":180,"label":"","room":"D4"},{"type":"bed_double","c":[26.95,-8.95],"s":[1.6,2.0,0.55],"z":0.0,"rot":180,"label":"","room":"D4","head":"S"},{"type":"nightstand","c":[25.88,-9.65],"s":[0.45,0.4,0.55],"z":0.0,"rot":180,"label":"","room":"D4"},{"type":"nightstand","c":[28.02,-9.65],"s":[0.45,0.4,0.55],"z":0.0,"rot":180,"label":"","room":"D4"},{"type":"wardrobe","c":[29.55,-6.6],"s":[0.6,2.0,2.2],"z":0.0,"rot":180,"label":"","room":"D4"},{"type":"rug","c":[26.95,-7.55],"s":[2.2,1.1,0.01],"z":0.0,"rot":180,"label":"","room":"D4"},{"type":"toilet","c":[28.0,-5.05],"s":[0.4,0.68,0.42],"z":0.0,"rot":180,"label":"","room":"D4","head":"S"},{"type":"grab_bar","c":[27.52,-4.85],"s":[0.04,0.75,0.04],"z":0.75,"rot":180,"label":"","room":"D4"},{"type":"washbasin","c":[27.95,-2.9],"s":[0.55,0.45,0.85],"z":0.0,"rot":180,"label":"","room":"D4"},{"type":"mirror","c":[27.95,-2.46],"s":[0.6,0.02,0.8],"z":1.05,"rot":180,"label":"","room":"D4"},{"type":"shower_tray","c":[29.25,-3.9],"s":[1.3,1.8,0.03],"z":0.0,"rot":180,"label":"","room":"D4"},{"type":"shower_curtain","c":[28.6,-3.9],"s":[0.03,1.8,1.9],"z":0.1,"rot":180,"label":"","room":"D4"},{"type":"shower_seat","c":[29.7,-3.9],"s":[0.4,0.45,0.48],"z":0.0,"rot":180,"label":"","room":"D4"},{"type":"shower_head","c":[29.85,-3.5],"s":[0.08,0.08,0.05],"z":2.05,"rot":180,"label":"","room":"D4"},{"type":"shelf","c":[28.7,-0.35],"s":[2.4,0.5,1.9],"z":0.0,"rot":180,"label":"","room":"D4"},{"type":"lift_car","c":[19.8,-1.2],"s":[1.3,1.9,0.0],"z":0.0,"rot":0,"label":"","room":"LIFT"},{"type":"kitchen_counter","c":[10.2,-0.33],"s":[4.2,0.62,0.9],"z":0.0,"rot":180,"label":"","room":"D5"},{"type":"kitchen_counter","c":[8.33,-1.6],"s":[0.62,2.2,0.9],"z":0.0,"rot":180,"label":"","room":"D5"},{"type":"fridge","c":[11.9,-0.36],"s":[0.65,0.68,1.85],"z":0.0,"rot":180,"label":"","room":"D5"},{"type":"stove","c":[9.3,-0.33],"s":[0.6,0.58,0.02],"z":0.9,"rot":180,"label":"","room":"D5"},{"type":"kitchen_sink","c":[10.6,-0.33],"s":[0.8,0.45,0.02],"z":0.9,"rot":180,"label":"","room":"D5"},{"type":"dining_table","c":[10.4,-3.9],"s":[1.4,0.9,0.75],"z":0.0,"rot":180,"label":"","room":"D5"},{"type":"chair","c":[9.95,-3.25],"s":[0.45,0.45,0.9],"z":0.0,"rot":180,"label":"","room":"D5"},{"type":"chair","c":[9.95,-4.55],"s":[0.45,0.45,0.9],"z":0.0,"rot":0,"label":"","room":"D5"},{"type":"chair","c":[10.85,-3.25],"s":[0.45,0.45,0.9],"z":0.0,"rot":180,"label":"","room":"D5"},{"type":"chair","c":[10.85,-4.55],"s":[0.45,0.45,0.9],"z":0.0,"rot":0,"label":"","room":"D5"},{"type":"sofa","c":[10.2,-8.9],"s":[2.4,0.9,0.8],"z":0.0,"rot":0,"label":"","room":"D5"},{"type":"armchair","c":[8.75,-7.0],"s":[0.85,0.85,0.8],"z":0.0,"rot":90,"label":"","room":"D5"},{"type":"rug","c":[10.2,-7.6],"s":[2.6,1.8,0.01],"z":0.0,"rot":180,"label":"","room":"D5"},{"type":"coffee_table","c":[10.2,-7.5],"s":[1.1,0.6,0.42],"z":0.0,"rot":180,"label":"","room":"D5"},{"type":"plant","c":[11.9,-9.5],"s":[0.45,0.45,1.2],"z":0.0,"rot":180,"label":"","room":"D5"},{"type":"floor_lamp","c":[8.45,-8.1],"s":[0.35,0.35,1.6],"z":0.0,"rot":180,"label":"","room":"D5"},{"type":"wall_cabinet","c":[10.0,-0.18],"s":[3.6,0.35,0.7],"z":1.5,"rot":180,"label":"","room":"D5"},{"type":"tv_unit","c":[10.2,-5.45],"s":[1.8,0.42,0.55],"z":0.0,"rot":180,"label":"","room":"D5"},{"type":"tv_screen","c":[10.2,-5.4],"s":[1.2,0.06,0.7],"z":0.9,"rot":180,"label":"","room":"D5"},{"type":"bed_double","c":[13.75,-8.95],"s":[1.6,2.0,0.55],"z":0.0,"rot":180,"label":"","room":"D5","head":"S"},{"type":"nightstand","c":[12.68,-9.65],"s":[0.45,0.4,0.55],"z":0.0,"rot":180,"label":"","room":"D5"},{"type":"nightstand","c":[14.82,-9.65],"s":[0.45,0.4,0.55],"z":0.0,"rot":180,"label":"","room":"D5"},{"type":"wardrobe","c":[16.28,-8.6],"s":[0.6,2.0,2.2],"z":0.0,"rot":180,"label":"","room":"D5"},{"type":"rug","c":[13.75,-7.55],"s":[2.2,1.1,0.01],"z":0.0,"rot":180,"label":"","room":"D5"},{"type":"plant","c":[15.3,-9.6],"s":[0.4,0.4,1.0],"z":0.0,"rot":180,"label":"","room":"D5"},{"type":"toilet","c":[15.0,-6.05],"s":[0.4,0.68,0.42],"z":0.0,"rot":180,"label":"","room":"D5","head":"S"},{"type":"grab_bar","c":[14.52,-5.85],"s":[0.04,0.75,0.04],"z":0.75,"rot":180,"label":"","room":"D5"},{"type":"washbasin","c":[14.85,-4.2],"s":[0.55,0.45,0.85],"z":0.0,"rot":180,"label":"","room":"D5"},{"type":"mirror","c":[14.85,-3.66],"s":[0.6,0.02,0.8],"z":1.05,"rot":180,"label":"","room":"D5"},{"type":"shower_tray","c":[15.95,-4.6],"s":[1.2,1.9,0.03],"z":0.0,"rot":180,"label":"","room":"D5"},{"type":"shower_curtain","c":[15.35,-4.6],"s":[0.03,1.9,1.9],"z":0.1,"rot":180,"label":"","room":"D5"},{"type":"shower_seat","c":[16.35,-4.6],"s":[0.4,0.45,0.48],"z":0.0,"rot":180,"label":"","room":"D5"},{"type":"shower_head","c":[16.5,-4.3],"s":[0.08,0.08,0.05],"z":2.05,"rot":180,"label":"","room":"D5"},{"type":"towel_rail","c":[15.0,-3.68],"s":[0.5,0.04,0.05],"z":1.1,"rot":180,"label":"","room":"D5"},{"type":"toilet","c":[14.9,-0.45],"s":[0.4,0.68,0.42],"z":0.0,"rot":180,"label":"","room":"D5","head":"N"},{"type":"washbasin","c":[15.85,-0.3],"s":[0.5,0.42,0.85],"z":0.0,"rot":180,"label":"","room":"D5"},{"type":"shower_tray","c":[16.15,-1.75],"s":[1.1,1.3,0.03],"z":0.0,"rot":180,"label":"","room":"D5"},{"type":"shower_curtain","c":[15.6,-1.75],"s":[0.03,1.3,1.9],"z":0.1,"rot":180,"label":"","room":"D5"},{"type":"bed_single","c":[17.8,-8.6],"s":[1.0,2.0,0.55],"z":0.0,"rot":180,"label":"","room":"D5","head":"S"},{"type":"nightstand","c":[17.0,-9.65],"s":[0.45,0.4,0.55],"z":0.0,"rot":180,"label":"","room":"D5"},{"type":"wardrobe","c":[18.6,-4.6],"s":[0.6,1.6,2.2],"z":0.0,"rot":180,"label":"","room":"D5"},{"type":"desk","c":[17.8,-6.0],"s":[1.1,0.55,0.75],"z":0.0,"rot":180,"label":"","room":"D5"},{"type":"shelf","c":[17.9,-1.3],"s":[1.6,0.45,1.9],"z":0.0,"rot":180,"label":"","room":"D5"},{"type":"kitchen_counter","c":[1.8,-0.33],"s":[3.4,0.62,0.9],"z":0.0,"rot":180,"label":"","room":"D6"},{"type":"fridge","c":[3.1,-0.36],"s":[0.65,0.68,1.85],"z":0.0,"rot":180,"label":"","room":"D6"},{"type":"stove","c":[0.8,-0.33],"s":[0.6,0.58,0.02],"z":0.9,"rot":180,"label":"","room":"D6"},{"type":"kitchen_sink","c":[2.0,-0.33],"s":[0.8,0.45,0.02],"z":0.9,"rot":180,"label":"","room":"D6"},{"type":"dining_table","c":[1.8,-3.9],"s":[1.1,0.8,0.75],"z":0.0,"rot":180,"label":"","room":"D6"},{"type":"chair","c":[1.5,-3.3],"s":[0.45,0.45,0.9],"z":0.0,"rot":180,"label":"","room":"D6"},{"type":"chair","c":[1.5,-4.5],"s":[0.45,0.45,0.9],"z":0.0,"rot":0,"label":"","room":"D6"},{"type":"chair","c":[2.1,-3.3],"s":[0.45,0.45,0.9],"z":0.0,"rot":180,"label":"","room":"D6"},{"type":"chair","c":[2.1,-4.5],"s":[0.45,0.45,0.9],"z":0.0,"rot":0,"label":"","room":"D6"},{"type":"sofa","c":[1.8,-8.95],"s":[2.2,0.9,0.8],"z":0.0,"rot":0,"label":"","room":"D6"},{"type":"rug","c":[1.8,-7.7],"s":[2.4,1.7,0.01],"z":0.0,"rot":180,"label":"","room":"D6"},{"type":"coffee_table","c":[1.8,-7.6],"s":[1.0,0.55,0.42],"z":0.0,"rot":180,"label":"","room":"D6"},{"type":"armchair","c":[0.6,-6.9],"s":[0.8,0.8,0.8],"z":0.0,"rot":90,"label":"","room":"D6"},{"type":"plant","c":[3.15,-9.5],"s":[0.45,0.45,1.2],"z":0.0,"rot":180,"label":"","room":"D6"},{"type":"wall_cabinet","c":[1.6,-0.18],"s":[2.8,0.35,0.7],"z":1.5,"rot":180,"label":"","room":"D6"},{"type":"tv_unit","c":[1.8,-5.75],"s":[1.6,0.42,0.55],"z":0.0,"rot":180,"label":"","room":"D6"},{"type":"tv_screen","c":[1.8,-5.7],"s":[1.1,0.06,0.65],"z":0.9,"rot":180,"label":"","room":"D6"},{"type":"bed_double","c":[4.95,-8.95],"s":[1.6,2.0,0.55],"z":0.0,"rot":180,"label":"","room":"D6","head":"S"},{"type":"nightstand","c":[3.88,-9.65],"s":[0.45,0.4,0.55],"z":0.0,"rot":180,"label":"","room":"D6"},{"type":"nightstand","c":[6.02,-9.65],"s":[0.45,0.4,0.55],"z":0.0,"rot":180,"label":"","room":"D6"},{"type":"wardrobe","c":[7.55,-6.6],"s":[0.6,2.0,2.2],"z":0.0,"rot":180,"label":"","room":"D6"},{"type":"rug","c":[4.95,-7.55],"s":[2.2,1.1,0.01],"z":0.0,"rot":180,"label":"","room":"D6"},{"type":"toilet","c":[6.0,-5.05],"s":[0.4,0.68,0.42],"z":0.0,"rot":180,"label":"","room":"D6","head":"S"},{"type":"grab_bar","c":[5.52,-4.85],"s":[0.04,0.75,0.04],"z":0.75,"rot":180,"label":"","room":"D6"},{"type":"washbasin","c":[5.95,-2.9],"s":[0.55,0.45,0.85],"z":0.0,"rot":180,"label":"","room":"D6"},{"type":"mirror","c":[5.95,-2.46],"s":[0.6,0.02,0.8],"z":1.05,"rot":180,"label":"","room":"D6"},{"type":"shower_tray","c":[7.25,-3.9],"s":[1.3,1.8,0.03],"z":0.0,"rot":180,"label":"","room":"D6"},{"type":"shower_curtain","c":[6.6,-3.9],"s":[0.03,1.8,1.9],"z":0.1,"rot":180,"label":"","room":"D6"},{"type":"shower_seat","c":[7.7,-3.9],"s":[0.4,0.45,0.48],"z":0.0,"rot":180,"label":"","room":"D6"},{"type":"shower_head","c":[7.85,-3.5],"s":[0.08,0.08,0.05],"z":2.05,"rot":180,"label":"","room":"D6"},{"type":"shelf","c":[6.7,-0.35],"s":[2.4,0.5,1.9],"z":0.0,"rot":180,"label":"","room":"D6"}],"devices":[{"type":"tablet","id":"D1-TAB","p":[0.15,8.6,1.3],"face":"E","label":"Tablet Android – llamada y voz (living)","room":"D1","apt":"D1"},{"type":"voice_call","id":"D1-VOZ","p":[5.75,11.85,1.2],"face":"S","label":"Llamada de enfermería con voz ACE82182451 (dormitorio)","room":"D1","apt":"D1","pear":[6.4,10.6],"code":"ACE82182451"},{"type":"pull_cord","id":"D1-TI","p":[6.46,8.05,1.85],"face":"E","label":"Tirador inodoro ACE40320303W","room":"D1","apt":"D1","code":"ACE40320303W"},{"type":"pull_cord","id":"D1-TD","p":[8.54,7.2,1.85],"face":"W","label":"Tirador ducha ACE40320303W","room":"D1","apt":"D1","code":"ACE40320303W"},{"type":"presence_opt","id":"D1-PR","p":[5.6,2.1,1.35],"face":"N","label":"Presencia / cancelación (opcional)","room":"D1","apt":"D1","code":"ACE80081001"},{"type":"lcom","id":"D1-LCOM","p":[5.4,3.2,2.55],"face":"D","label":"LCom ACE71610003 – concentrador del departamento","room":"D1","apt":"D1","code":"ACE71610003"},{"type":"tablet","id":"D2-TAB","p":[11.06,8.8,1.3],"face":"E","label":"Tablet Android – llamada y voz (living)","room":"D2","apt":"D2"},{"type":"voice_call","id":"D2-VOZ","p":[15.95,11.85,1.2],"face":"S","label":"Llamada de enfermería con voz ACE82182451 (dormitorio)","room":"D2","apt":"D2","pear":[16.6,10.6],"code":"ACE82182451"},{"type":"pull_cord","id":"D2-TI","p":[16.46,7.05,1.85],"face":"E","label":"Tirador inodoro ACE40320303W","room":"D2","apt":"D2","code":"ACE40320303W"},{"type":"pull_cord","id":"D2-TD","p":[18.94,6.3,1.85],"face":"W","label":"Tirador ducha ACE40320303W","room":"D2","apt":"D2","code":"ACE40320303W"},{"type":"presence_opt","id":"D2-PR","p":[15.75,2.1,1.35],"face":"N","label":"Presencia / cancelación (opcional)","room":"D2","apt":"D2","code":"ACE80081001"},{"type":"lcom","id":"D2-LCOM","p":[15.5,3.2,2.55],"face":"D","label":"LCom ACE71610003 – concentrador del departamento","room":"D2","apt":"D2","code":"ACE71610003"},{"type":"tablet","id":"D3-TAB","p":[19.06,8.6,1.3],"face":"E","label":"Tablet Android – llamada y voz (living)","room":"D3","apt":"D3"},{"type":"voice_call","id":"D3-VOZ","p":[24.75,11.85,1.2],"face":"S","label":"Llamada de enfermería con voz ACE82182451 (dormitorio)","room":"D3","apt":"D3","pear":[25.4,10.6],"code":"ACE82182451"},{"type":"pull_cord","id":"D3-TI","p":[25.46,8.05,1.85],"face":"E","label":"Tirador inodoro ACE40320303W","room":"D3","apt":"D3","code":"ACE40320303W"},{"type":"pull_cord","id":"D3-TD","p":[27.54,7.2,1.85],"face":"W","label":"Tirador ducha ACE40320303W","room":"D3","apt":"D3","code":"ACE40320303W"},{"type":"presence_opt","id":"D3-PR","p":[24.6,2.1,1.35],"face":"N","label":"Presencia / cancelación (opcional)","room":"D3","apt":"D3","code":"ACE80081001"},{"type":"lcom","id":"D3-LCOM","p":[24.4,3.2,2.55],"face":"D","label":"LCom ACE71610003 – concentrador del departamento","room":"D3","apt":"D3","code":"ACE71610003"},{"type":"tablet","id":"D4-TAB","p":[22.06,-6.8,1.3],"face":"E","label":"Tablet Android – llamada y voz (living)","room":"D4","apt":"D4"},{"type":"voice_call","id":"D4-VOZ","p":[26.95,-9.85,1.2],"face":"N","label":"Llamada de enfermería con voz ACE82182451 (dormitorio)","room":"D4","apt":"D4","pear":[27.6,-8.6],"code":"ACE82182451"},{"type":"pull_cord","id":"D4-TI","p":[27.46,-5.05,1.85],"face":"E","label":"Tirador inodoro ACE40320303W","room":"D4","apt":"D4","code":"ACE40320303W"},{"type":"pull_cord","id":"D4-TD","p":[29.85,-4.3,1.85],"face":"W","label":"Tirador ducha ACE40320303W","room":"D4","apt":"D4","code":"ACE40320303W"},{"type":"presence_opt","id":"D4-PR","p":[26.75,-0.1,1.35],"face":"S","label":"Presencia / cancelación (opcional)","room":"D4","apt":"D4","code":"ACE80081001"},{"type":"lcom","id":"D4-LCOM","p":[26.5,-1.2,2.55],"face":"D","label":"LCom ACE71610003 – concentrador del departamento","room":"D4","apt":"D4","code":"ACE71610003"},{"type":"tablet","id":"D5-TAB","p":[8.06,-6.6,1.3],"face":"E","label":"Tablet Android – llamada y voz (living)","room":"D5","apt":"D5"},{"type":"voice_call","id":"D5-VOZ","p":[13.75,-9.85,1.2],"face":"N","label":"Llamada de enfermería con voz ACE82182451 (dormitorio)","room":"D5","apt":"D5","pear":[14.4,-8.6],"code":"ACE82182451"},{"type":"pull_cord","id":"D5-TI","p":[14.46,-6.05,1.85],"face":"E","label":"Tirador inodoro ACE40320303W","room":"D5","apt":"D5","code":"ACE40320303W"},{"type":"pull_cord","id":"D5-TD","p":[16.54,-5.2,1.85],"face":"W","label":"Tirador ducha ACE40320303W","room":"D5","apt":"D5","code":"ACE40320303W"},{"type":"presence_opt","id":"D5-PR","p":[13.6,-0.1,1.35],"face":"S","label":"Presencia / cancelación (opcional)","room":"D5","apt":"D5","code":"ACE80081001"},{"type":"lcom","id":"D5-LCOM","p":[13.4,-1.2,2.55],"face":"D","label":"LCom ACE71610003 – concentrador del departamento","room":"D5","apt":"D5","code":"ACE71610003"},{"type":"tablet","id":"D6-TAB","p":[0.15,-6.8,1.3],"face":"E","label":"Tablet Android – llamada y voz (living)","room":"D6","apt":"D6"},{"type":"voice_call","id":"D6-VOZ","p":[4.95,-9.85,1.2],"face":"N","label":"Llamada de enfermería con voz ACE82182451 (dormitorio)","room":"D6","apt":"D6","pear":[5.6,-8.6],"code":"ACE82182451"},{"type":"pull_cord","id":"D6-TI","p":[5.46,-5.05,1.85],"face":"E","label":"Tirador inodoro ACE40320303W","room":"D6","apt":"D6","code":"ACE40320303W"},{"type":"pull_cord","id":"D6-TD","p":[7.94,-4.3,1.85],"face":"W","label":"Tirador ducha ACE40320303W","room":"D6","apt":"D6","code":"ACE40320303W"},{"type":"presence_opt","id":"D6-PR","p":[4.75,-0.1,1.35],"face":"S","label":"Presencia / cancelación (opcional)","room":"D6","apt":"D6","code":"ACE80081001"},{"type":"lcom","id":"D6-LCOM","p":[4.5,-1.2,2.55],"face":"D","label":"LCom ACE71610003 – concentrador del departamento","room":"D6","apt":"D6","code":"ACE71610003"},{"type":"rack","id":"RACK","p":[21.3,-2.0,0.0],"face":"N","label":"Gabinete de comunicaciones del piso","room":"COM","w":0.6,"dep":0.6,"hgt":1.6},{"type":"buscomm","id":"BC1","p":[21.3,-1.68,1.3],"face":"N","label":"Buscomm ACE70810000 – departamentos 1-3","room":"COM","code":"ACE70810000"},{"type":"buscomm","id":"BC2","p":[21.3,-1.68,1.18],"face":"N","label":"Buscomm ACE70810000 – departamentos 4-6","room":"COM","code":"ACE70810000"},{"type":"switch","id":"SW","p":[21.3,-1.68,1.0],"face":"N","label":"Switch PoE del piso ACEUCM6302","room":"COM","code":"ACEUCM6302"},{"type":"riser","id":"RISER","p":[21.8,-2.2,0.0],"face":"N","label":"Montante vertical Cat6A/Cat7 al piso inferior / superior","room":"COM","hgt":2.8}],"cables":[{"sys":"apt","spec":"Cat6 – radial","pts":[[0.15,8.6,1.3],[0.15,8.6,2.68],[5.4,8.6,2.68],[5.4,3.2,2.68],[5.4,3.2,2.55]],"label":"D1-TAB → D1-LCOM","frm":"D1-TAB","to":"D1-LCOM","len":12.16},{"sys":"apt","spec":"Cat6 – radial","pts":[[5.75,11.85,1.2],[5.75,11.85,2.68],[5.4,11.85,2.68],[5.4,3.2,2.68],[5.4,3.2,2.55]],"label":"D1-VOZ → D1-LCOM","frm":"D1-VOZ","to":"D1-LCOM","len":10.61},{"sys":"apt","spec":"Cat6 – radial","pts":[[6.46,8.05,1.85],[6.46,8.05,2.68],[5.4,8.05,2.68],[5.4,3.2,2.68],[5.4,3.2,2.55]],"label":"D1-TI → D1-LCOM","frm":"D1-TI","to":"D1-LCOM","len":6.87},{"sys":"apt","spec":"Cat6 – radial","pts":[[8.54,7.2,1.85],[8.54,7.2,2.68],[5.4,7.2,2.68],[5.4,3.2,2.68],[5.4,3.2,2.55]],"label":"D1-TD → D1-LCOM","frm":"D1-TD","to":"D1-LCOM","len":8.1},{"sys":"apt","spec":"Cat6 – radial (opcional)","pts":[[5.6,2.1,1.35],[5.6,2.1,2.68],[5.4,2.1,2.68],[5.4,3.2,2.68],[5.4,3.2,2.55]],"label":"D1-PR → D1-LCOM","frm":"D1-PR","to":"D1-LCOM","len":2.76},{"sys":"apt","spec":"Cat6 – radial","pts":[[11.06,8.8,1.3],[11.06,8.8,2.68],[15.5,8.8,2.68],[15.5,3.2,2.68],[15.5,3.2,2.55]],"label":"D2-TAB → D2-LCOM","frm":"D2-TAB","to":"D2-LCOM","len":11.55},{"sys":"apt","spec":"Cat6 – radial","pts":[[15.95,11.85,1.2],[15.95,11.85,2.68],[15.5,11.85,2.68],[15.5,3.2,2.68],[15.5,3.2,2.55]],"label":"D2-VOZ → D2-LCOM","frm":"D2-VOZ","to":"D2-LCOM","len":10.71},{"sys":"apt","spec":"Cat6 – radial","pts":[[16.46,7.05,1.85],[16.46,7.05,2.68],[15.5,7.05,2.68],[15.5,3.2,2.68],[15.5,3.2,2.55]],"label":"D2-TI → D2-LCOM","frm":"D2-TI","to":"D2-LCOM","len":5.77},{"sys":"apt","spec":"Cat6 – radial","pts":[[18.94,6.3,1.85],[18.94,6.3,2.68],[18.94,3.2,2.68],[15.5,3.2,2.68],[15.5,3.2,2.55]],"label":"D2-TD → D2-LCOM","frm":"D2-TD","to":"D2-LCOM","len":7.5},{"sys":"apt","spec":"Cat6 – radial (opcional)","pts":[[15.75,2.1,1.35],[15.75,2.1,2.68],[15.5,2.1,2.68],[15.5,3.2,2.68],[15.5,3.2,2.55]],"label":"D2-PR → D2-LCOM","frm":"D2-PR","to":"D2-LCOM","len":2.81},{"sys":"apt","spec":"Cat6 – radial","pts":[[19.06,8.6,1.3],[19.06,8.6,2.68],[24.4,8.6,2.68],[24.4,3.2,2.68],[24.4,3.2,2.55]],"label":"D3-TAB → D3-LCOM","frm":"D3-TAB","to":"D3-LCOM","len":12.25},{"sys":"apt","spec":"Cat6 – radial","pts":[[24.75,11.85,1.2],[24.75,11.85,2.68],[24.4,11.85,2.68],[24.4,3.2,2.68],[24.4,3.2,2.55]],"label":"D3-VOZ → D3-LCOM","frm":"D3-VOZ","to":"D3-LCOM","len":10.61},{"sys":"apt","spec":"Cat6 – radial","pts":[[25.46,8.05,1.85],[25.46,8.05,2.68],[24.4,8.05,2.68],[24.4,3.2,2.68],[24.4,3.2,2.55]],"label":"D3-TI → D3-LCOM","frm":"D3-TI","to":"D3-LCOM","len":6.87},{"sys":"apt","spec":"Cat6 – radial","pts":[[27.54,7.2,1.85],[27.54,7.2,2.68],[24.4,7.2,2.68],[24.4,3.2,2.68],[24.4,3.2,2.55]],"label":"D3-TD → D3-LCOM","frm":"D3-TD","to":"D3-LCOM","len":8.1},{"sys":"apt","spec":"Cat6 – radial (opcional)","pts":[[24.6,2.1,1.35],[24.6,2.1,2.68],[24.4,2.1,2.68],[24.4,3.2,2.68],[24.4,3.2,2.55]],"label":"D3-PR → D3-LCOM","frm":"D3-PR","to":"D3-LCOM","len":2.76},{"sys":"apt","spec":"Cat6 – radial","pts":[[22.06,-6.8,1.3],[22.06,-6.8,2.68],[26.5,-6.8,2.68],[26.5,-1.2,2.68],[26.5,-1.2,2.55]],"label":"D4-TAB → D4-LCOM","frm":"D4-TAB","to":"D4-LCOM","len":11.55},{"sys":"apt","spec":"Cat6 – radial","pts":[[26.95,-9.85,1.2],[26.95,-9.85,2.68],[26.5,-9.85,2.68],[26.5,-1.2,2.68],[26.5,-1.2,2.55]],"label":"D4-VOZ → D4-LCOM","frm":"D4-VOZ","to":"D4-LCOM","len":10.71},{"sys":"apt","spec":"Cat6 – radial","pts":[[27.46,-5.05,1.85],[27.46,-5.05,2.68],[26.5,-5.05,2.68],[26.5,-1.2,2.68],[26.5,-1.2,2.55]],"label":"D4-TI → D4-LCOM","frm":"D4-TI","to":"D4-LCOM","len":5.77},{"sys":"apt","spec":"Cat6 – radial","pts":[[29.85,-4.3,1.85],[29.85,-4.3,2.68],[29.85,-1.2,2.68],[26.5,-1.2,2.68],[26.5,-1.2,2.55]],"label":"D4-TD → D4-LCOM","frm":"D4-TD","to":"D4-LCOM","len":7.41},{"sys":"apt","spec":"Cat6 – radial (opcional)","pts":[[26.75,-0.1,1.35],[26.75,-0.1,2.68],[26.5,-0.1,2.68],[26.5,-1.2,2.68],[26.5,-1.2,2.55]],"label":"D4-PR → D4-LCOM","frm":"D4-PR","to":"D4-LCOM","len":2.81},{"sys":"apt","spec":"Cat6 – radial","pts":[[8.06,-6.6,1.3],[8.06,-6.6,2.68],[13.4,-6.6,2.68],[13.4,-1.2,2.68],[13.4,-1.2,2.55]],"label":"D5-TAB → D5-LCOM","frm":"D5-TAB","to":"D5-LCOM","len":12.25},{"sys":"apt","spec":"Cat6 – radial","pts":[[13.75,-9.85,1.2],[13.75,-9.85,2.68],[13.4,-9.85,2.68],[13.4,-1.2,2.68],[13.4,-1.2,2.55]],"label":"D5-VOZ → D5-LCOM","frm":"D5-VOZ","to":"D5-LCOM","len":10.61},{"sys":"apt","spec":"Cat6 – radial","pts":[[14.46,-6.05,1.85],[14.46,-6.05,2.68],[13.4,-6.05,2.68],[13.4,-1.2,2.68],[13.4,-1.2,2.55]],"label":"D5-TI → D5-LCOM","frm":"D5-TI","to":"D5-LCOM","len":6.87},{"sys":"apt","spec":"Cat6 – radial","pts":[[16.54,-5.2,1.85],[16.54,-5.2,2.68],[13.4,-5.2,2.68],[13.4,-1.2,2.68],[13.4,-1.2,2.55]],"label":"D5-TD → D5-LCOM","frm":"D5-TD","to":"D5-LCOM","len":8.1},{"sys":"apt","spec":"Cat6 – radial (opcional)","pts":[[13.6,-0.1,1.35],[13.6,-0.1,2.68],[13.4,-0.1,2.68],[13.4,-1.2,2.68],[13.4,-1.2,2.55]],"label":"D5-PR → D5-LCOM","frm":"D5-PR","to":"D5-LCOM","len":2.76},{"sys":"apt","spec":"Cat6 – radial","pts":[[0.15,-6.8,1.3],[0.15,-6.8,2.68],[4.5,-6.8,2.68],[4.5,-1.2,2.68],[4.5,-1.2,2.55]],"label":"D6-TAB → D6-LCOM","frm":"D6-TAB","to":"D6-LCOM","len":11.46},{"sys":"apt","spec":"Cat6 – radial","pts":[[4.95,-9.85,1.2],[4.95,-9.85,2.68],[4.5,-9.85,2.68],[4.5,-1.2,2.68],[4.5,-1.2,2.55]],"label":"D6-VOZ → D6-LCOM","frm":"D6-VOZ","to":"D6-LCOM","len":10.71},{"sys":"apt","spec":"Cat6 – radial","pts":[[5.46,-5.05,1.85],[5.46,-5.05,2.68],[4.5,-5.05,2.68],[4.5,-1.2,2.68],[4.5,-1.2,2.55]],"label":"D6-TI → D6-LCOM","frm":"D6-TI","to":"D6-LCOM","len":5.77},{"sys":"apt","spec":"Cat6 – radial","pts":[[7.94,-4.3,1.85],[7.94,-4.3,2.68],[7.94,-1.2,2.68],[4.5,-1.2,2.68],[4.5,-1.2,2.55]],"label":"D6-TD → D6-LCOM","frm":"D6-TD","to":"D6-LCOM","len":7.5},{"sys":"apt","spec":"Cat6 – radial (opcional)","pts":[[4.75,-0.1,1.35],[4.75,-0.1,2.68],[4.5,-0.1,2.68],[4.5,-1.2,2.68],[4.5,-1.2,2.55]],"label":"D6-PR → D6-LCOM","frm":"D6-PR","to":"D6-LCOM","len":2.81},{"sys":"chain","spec":"Cat6 / Cat7 – cadena LCom","pts":[[5.4,3.2,2.55],[5.4,3.2,2.68],[5.4,1.35,2.68],[15.5,1.35,2.68],[15.5,3.2,2.68],[15.5,3.2,2.55]],"label":"D1-LCOM → D2-LCOM","frm":"D1-LCOM","to":"D2-LCOM","len":14.06},{"sys":"chain","spec":"Cat6 / Cat7 – cadena LCom","pts":[[15.5,3.2,2.55],[15.5,3.2,2.68],[15.5,1.35,2.68],[24.4,1.35,2.68],[24.4,3.2,2.68],[24.4,3.2,2.55]],"label":"D2-LCOM → D3-LCOM","frm":"D2-LCOM","to":"D3-LCOM","len":12.86},{"sys":"chain","spec":"Cat6 / Cat7 – LCom → Buscomm","pts":[[24.4,3.2,2.55],[24.4,3.2,2.68],[24.4,1.35,2.68],[21.2,1.35,2.68],[21.2,-1.68,2.68],[21.2,-1.68,1.3],[21.3,-1.68,1.3]],"label":"D3-LCOM → BC1","frm":"D3-LCOM","to":"BC1","len":9.69},{"sys":"chain","spec":"Cat6 / Cat7 – cadena LCom","pts":[[26.5,-1.2,2.55],[26.5,-1.2,2.68],[26.5,0.65,2.68],[13.4,0.65,2.68],[13.4,-1.2,2.68],[13.4,-1.2,2.55]],"label":"D4-LCOM → D5-LCOM","frm":"D4-LCOM","to":"D5-LCOM","len":17.06},{"sys":"chain","spec":"Cat6 / Cat7 – cadena LCom","pts":[[13.4,-1.2,2.55],[13.4,-1.2,2.68],[13.4,0.65,2.68],[4.5,0.65,2.68],[4.5,-1.2,2.68],[4.5,-1.2,2.55]],"label":"D5-LCOM → D6-LCOM","frm":"D5-LCOM","to":"D6-LCOM","len":12.86},{"sys":"chain","spec":"Cat6 / Cat7 – LCom → Buscomm","pts":[[4.5,-1.2,2.55],[4.5,-1.2,2.68],[4.5,0.65,2.68],[21.4,0.65,2.68],[21.4,-1.68,2.68],[21.4,-1.68,1.18],[21.3,-1.68,1.18]],"label":"D6-LCOM → BC2","frm":"D6-LCOM","to":"BC2","len":22.81},{"sys":"net","spec":"Cat6A patch","pts":[[21.3,-1.68,1.3],[21.55,-1.68,1.3],[21.55,-1.68,1.0],[21.3,-1.68,1.0]],"label":"BC1 → Switch","frm":"BC1","to":"SW","len":0.8},{"sys":"net","spec":"Cat6A patch","pts":[[21.3,-1.68,1.18],[21.55,-1.68,1.18],[21.55,-1.68,1.0],[21.3,-1.68,1.0]],"label":"BC2 → Switch","frm":"BC2","to":"SW","len":0.68},{"sys":"net","spec":"Cat6A / Cat7 – montante entre pisos","pts":[[21.3,-1.68,1.0],[21.8,-1.68,1.0],[21.8,-2.2,1.0],[21.8,-2.2,0.0]],"label":"Switch → montante (piso inferior / servidor)","frm":"SW","to":"RISER","len":2.02},{"sys":"net","spec":"Cat6A / Cat7 – montante entre pisos","pts":[[21.8,-2.12,1.0],[21.8,-2.12,2.8]],"label":"Switch → montante (piso superior)","frm":"SW","to":"RISER","len":1.8}],"rooms":[{"code":"CORR","name":"Pasillo","poly":[[0,0],[30.0,0],[30.0,2.0],[0,2.0]],"kind":"corridor"},{"code":"D1","name":"Departamento 1","apt":"D1","typ":"A","poly":[[0.0,2.0],[11.0,2.0],[11.0,12.0],[0.0,12.0]],"kind":"apt","highlight":true},{"code":"D1-K","name":"Cocina","apt":"D1","typ":"A","poly":[[0.0,2.0],[4.4,2.0],[4.4,5.0],[0.0,5.0]],"kind":"kitchen"},{"code":"D1-L","name":"Living","apt":"D1","typ":"A","poly":[[0.0,5.0],[4.4,5.0],[4.4,12.0],[0.0,12.0]],"kind":"living"},{"code":"D1-H","name":"Hall","apt":"D1","typ":"A","poly":[[4.4,2.0],[6.4,2.0],[6.4,8.4],[4.4,8.4]],"kind":"hall"},{"code":"D1-GB","name":"Baño visitas","apt":"D1","typ":"A","poly":[[6.4,2.0],[8.8,2.0],[8.8,4.6],[6.4,4.6]],"kind":"bath"},{"code":"D1-ST","name":"Depósito","apt":"D1","typ":"A","poly":[[8.8,2.0],[11.0,2.0],[11.0,4.6],[8.8,4.6]],"kind":"store"},{"code":"D1-C","name":"Pasillo","apt":"D1","typ":"A","poly":[[6.4,4.6],[11.0,4.6],[11.0,5.6],[6.4,5.6]],"kind":"hall"},{"code":"D1-MB","name":"Baño principal","apt":"D1","typ":"A","poly":[[6.4,5.6],[8.6,5.6],[8.6,8.4],[6.4,8.4]],"kind":"bath"},{"code":"D1-D1","name":"Dormitorio principal","apt":"D1","typ":"A","poly":[[4.4,8.4],[8.6,8.4],[8.6,12.0],[4.4,12.0]],"kind":"bed"},{"code":"D1-D2","name":"Dormitorio 2","apt":"D1","typ":"A","poly":[[8.6,5.6],[11.0,5.6],[11.0,12.0],[8.6,12.0]],"kind":"bed"},{"code":"D2","name":"Departamento 2","apt":"D2","typ":"B","poly":[[11.0,2.0],[19.0,2.0],[19.0,12.0],[11.0,12.0]],"kind":"apt","highlight":true},{"code":"D2-K","name":"Cocina","apt":"D2","typ":"B","poly":[[11.0,2.0],[14.6,2.0],[14.6,5.0],[11.0,5.0]],"kind":"kitchen"},{"code":"D2-L","name":"Living","apt":"D2","typ":"B","poly":[[11.0,5.0],[14.6,5.0],[14.6,12.0],[11.0,12.0]],"kind":"living"},{"code":"D2-H","name":"Hall","apt":"D2","typ":"B","poly":[[14.6,2.0],[16.4,2.0],[16.4,7.4],[14.6,7.4]],"kind":"hall"},{"code":"D2-ST","name":"Depósito","apt":"D2","typ":"B","poly":[[16.4,2.0],[19.0,2.0],[19.0,4.4],[16.4,4.4]],"kind":"store"},{"code":"D2-MB","name":"Baño","apt":"D2","typ":"B","poly":[[16.4,4.4],[19.0,4.4],[19.0,7.4],[16.4,7.4]],"kind":"bath"},{"code":"D2-D1","name":"Dormitorio","apt":"D2","typ":"B","poly":[[14.6,7.4],[19.0,7.4],[19.0,12.0],[14.6,12.0]],"kind":"bed"},{"code":"D3","name":"Departamento 3","apt":"D3","typ":"A","poly":[[19.0,2.0],[30.0,2.0],[30.0,12.0],[19.0,12.0]],"kind":"apt","highlight":false},{"code":"D3-K","name":"Cocina","apt":"D3","typ":"A","poly":[[19.0,2.0],[23.4,2.0],[23.4,5.0],[19.0,5.0]],"kind":"kitchen"},{"code":"D3-L","name":"Living","apt":"D3","typ":"A","poly":[[19.0,5.0],[23.4,5.0],[23.4,12.0],[19.0,12.0]],"kind":"living"},{"code":"D3-H","name":"Hall","apt":"D3","typ":"A","poly":[[23.4,2.0],[25.4,2.0],[25.4,8.4],[23.4,8.4]],"kind":"hall"},{"code":"D3-GB","name":"Baño visitas","apt":"D3","typ":"A","poly":[[25.4,2.0],[27.8,2.0],[27.8,4.6],[25.4,4.6]],"kind":"bath"},{"code":"D3-ST","name":"Depósito","apt":"D3","typ":"A","poly":[[27.8,2.0],[30.0,2.0],[30.0,4.6],[27.8,4.6]],"kind":"store"},{"code":"D3-C","name":"Pasillo","apt":"D3","typ":"A","poly":[[25.4,4.6],[30.0,4.6],[30.0,5.6],[25.4,5.6]],"kind":"hall"},{"code":"D3-MB","name":"Baño principal","apt":"D3","typ":"A","poly":[[25.4,5.6],[27.6,5.6],[27.6,8.4],[25.4,8.4]],"kind":"bath"},{"code":"D3-D1","name":"Dormitorio principal","apt":"D3","typ":"A","poly":[[23.4,8.4],[27.6,8.4],[27.6,12.0],[23.4,12.0]],"kind":"bed"},{"code":"D3-D2","name":"Dormitorio 2","apt":"D3","typ":"A","poly":[[27.6,5.6],[30.0,5.6],[30.0,12.0],[27.6,12.0]],"kind":"bed"},{"code":"D4","name":"Departamento 4","apt":"D4","typ":"B","poly":[[22.0,-10.0],[30.0,-10.0],[30.0,0],[22.0,0]],"kind":"apt","highlight":false},{"code":"D4-K","name":"Cocina","apt":"D4","typ":"B","poly":[[22.0,-3.0],[25.6,-3.0],[25.6,0],[22.0,0]],"kind":"kitchen"},{"code":"D4-L","name":"Living","apt":"D4","typ":"B","poly":[[22.0,-10.0],[25.6,-10.0],[25.6,-3.0],[22.0,-3.0]],"kind":"living"},{"code":"D4-H","name":"Hall","apt":"D4","typ":"B","poly":[[25.6,-5.4],[27.4,-5.4],[27.4,0],[25.6,0]],"kind":"hall"},{"code":"D4-ST","name":"Depósito","apt":"D4","typ":"B","poly":[[27.4,-2.4],[30.0,-2.4],[30.0,0],[27.4,0]],"kind":"store"},{"code":"D4-MB","name":"Baño","apt":"D4","typ":"B","poly":[[27.4,-5.4],[30.0,-5.4],[30.0,-2.4],[27.4,-2.4]],"kind":"bath"},{"code":"D4-D1","name":"Dormitorio","apt":"D4","typ":"B","poly":[[25.6,-10.0],[30.0,-10.0],[30.0,-5.4],[25.6,-5.4]],"kind":"bed"},{"code":"LIFT","name":"Ascensor","poly":[[19.0,-2.4],[20.6,-2.4],[20.6,0],[19.0,0]],"kind":"core"},{"code":"COM","name":"Comunicaciones","poly":[[20.6,-2.4],[22.0,-2.4],[22.0,0],[20.6,0]],"kind":"comms"},{"code":"SHAFT","name":"Shafts / instalaciones","poly":[[19.0,-10.0],[22.0,-10.0],[22.0,-2.4],[19.0,-2.4]],"kind":"core"},{"code":"D5","name":"Departamento 5","apt":"D5","typ":"A","poly":[[8.0,-10.0],[19.0,-10.0],[19.0,0],[8.0,0]],"kind":"apt","highlight":false},{"code":"D5-K","name":"Cocina","apt":"D5","typ":"A","poly":[[8.0,-3.0],[12.4,-3.0],[12.4,0],[8.0,0]],"kind":"kitchen"},{"code":"D5-L","name":"Living","apt":"D5","typ":"A","poly":[[8.0,-10.0],[12.4,-10.0],[12.4,-3.0],[8.0,-3.0]],"kind":"living"},{"code":"D5-H","name":"Hall","apt":"D5","typ":"A","poly":[[12.4,-6.4],[14.4,-6.4],[14.4,0],[12.4,0]],"kind":"hall"},{"code":"D5-GB","name":"Baño visitas","apt":"D5","typ":"A","poly":[[14.4,-2.6],[16.8,-2.6],[16.8,0],[14.4,0]],"kind":"bath"},{"code":"D5-ST","name":"Depósito","apt":"D5","typ":"A","poly":[[16.8,-2.6],[19.0,-2.6],[19.0,0],[16.8,0]],"kind":"store"},{"code":"D5-C","name":"Pasillo","apt":"D5","typ":"A","poly":[[14.4,-3.6],[19.0,-3.6],[19.0,-2.6],[14.4,-2.6]],"kind":"hall"},{"code":"D5-MB","name":"Baño principal","apt":"D5","typ":"A","poly":[[14.4,-6.4],[16.6,-6.4],[16.6,-3.6],[14.4,-3.6]],"kind":"bath"},{"code":"D5-D1","name":"Dormitorio principal","apt":"D5","typ":"A","poly":[[12.4,-10.0],[16.6,-10.0],[16.6,-6.4],[12.4,-6.4]],"kind":"bed"},{"code":"D5-D2","name":"Dormitorio 2","apt":"D5","typ":"A","poly":[[16.6,-10.0],[19.0,-10.0],[19.0,-3.6],[16.6,-3.6]],"kind":"bed"},{"code":"D6","name":"Departamento 6","apt":"D6","typ":"B","poly":[[0.0,-10.0],[8.0,-10.0],[8.0,0],[0.0,0]],"kind":"apt","highlight":false},{"code":"D6-K","name":"Cocina","apt":"D6","typ":"B","poly":[[0.0,-3.0],[3.6,-3.0],[3.6,0],[0.0,0]],"kind":"kitchen"},{"code":"D6-L","name":"Living","apt":"D6","typ":"B","poly":[[0.0,-10.0],[3.6,-10.0],[3.6,-3.0],[0.0,-3.0]],"kind":"living"},{"code":"D6-H","name":"Hall","apt":"D6","typ":"B","poly":[[3.6,-5.4],[5.4,-5.4],[5.4,0],[3.6,0]],"kind":"hall"},{"code":"D6-ST","name":"Depósito","apt":"D6","typ":"B","poly":[[5.4,-2.4],[8.0,-2.4],[8.0,0],[5.4,0]],"kind":"store"},{"code":"D6-MB","name":"Baño","apt":"D6","typ":"B","poly":[[5.4,-5.4],[8.0,-5.4],[8.0,-2.4],[5.4,-2.4]],"kind":"bath"},{"code":"D6-D1","name":"Dormitorio","apt":"D6","typ":"B","poly":[[3.6,-10.0],[8.0,-10.0],[8.0,-5.4],[3.6,-5.4]],"kind":"bed"}],"labels":[{"text":"1","p":[5.0,1.45],"kind":"door"},{"text":"2","p":[15.15,1.45],"kind":"door"},{"text":"3","p":[24.0,1.45],"kind":"door"},{"text":"4","p":[26.15,0.55],"kind":"door"},{"text":"5","p":[13.0,0.55],"kind":"door"},{"text":"6","p":[4.15,0.55],"kind":"door"}],"systems":{"apt":{"color":"#1A9E4B","name_es":"Cat6 radial dentro del departamento → LCom","name_en":"Cat6 radial inside the apartment → LCom","name_he":"Cat6 רדיאלי בתוך הדירה ← LCom"},"chain":{"color":"#E07A12","name_es":"Cat6 / Cat7 cadena LCom → LCom → Buscomm","name_en":"Cat6 / Cat7 chain LCom → LCom → Buscomm","name_he":"Cat6 / Cat7 שרשרת LCom ← LCom ← Buscomm"},"net":{"color":"#D62839","name_es":"Cat6A / Cat7 red: Buscomm → switch → montante → servidor","name_en":"Cat6A / Cat7 network: Buscomm → switch → riser → server","name_he":"Cat6A / Cat7 רשת: Buscomm ← מתג ← עמוד ← שרת"}}}</script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+
+const M = JSON.parse(document.getElementById("model-data").textContent);
+const QS = new URLSearchParams(location.search);
+const CAPTURE = QS.has("capture");
+if (CAPTURE) document.body.classList.add("capture");
+const CLEAN = QS.has("clean");
+
+/* ------------------------------------------------------------------ i18n */
+const T = {
+ es:{title:"Migdalei Yam a Tijon · Departamentos tutelados",sub:"ACE BG · Advantecnia · Piso tipo 3D",eq:"Equipamiento",wi:"Cableado",view:"Vista",lights:"Tablet",
+  walk:"▶ Recorrido",stop:"■ Detener",labels:"Etiquetas",cut:"Muros bajos",
+  views:{iso:"Piso tipo",top:"Planta",corr:"Pasillo",living:"Living depto. 1",bed:"Dormitorio depto. 1",bath:"Baño principal depto. 1",typeB:"Departamento 2 (tipo B)",rack:"Sala de comunicaciones",building:"Edificio PB + 6 pisos"},
+  scen:{idle:"Tablet en reposo",call:"Llamada enviada",voice:"Conversación con enfermería"},
+  legEq:"Equipos ACE BG / Advantecnia",legWi:"Cableado – todo Cat6/Cat7 y PoE",hint:"Arrastrar: girar · Rueda: zoom · Clic: ficha del equipo",
+  eqL:[["#2B6CB0","chip","Tablet Android en el living (llamada y voz)"],["#E46F12","chip","Llamada con voz · ACE82182451 (dormitorio)"],["#D93025","chip","Tirador inodoro / ducha · ACE40320303W"],["#2E9F4F","chip","Presencia / cancelación junto a la puerta (opcional)"],["#6B7A90","chip","LCom · ACE71610003 (cielorraso del hall)"],["#9AA3AD","chip","Gabinete del piso: 2 Buscomm + switch PoE"]],
+  wiL:[["#1A9E4B","line","Cat6 radial: cada elemento → LCom del departamento"],["#E07A12","line","Cadena LCom → LCom → LCom → Buscomm"],["#D62839","line","Buscomm → switch → montante → servidor (PB)"]],
+  dt:{code:"Código ACE",id:"ID",room:"Local",h:"Altura",type:"Equipo",spec:"Cable",len:"Longitud",conn:"Conecta"},
+ },
+ en:{title:"Migdalei Yam a Tijon · Assisted living",sub:"ACE BG · Advantecnia · Typical floor 3D",eq:"Equipment",wi:"Wiring",view:"View",lights:"Tablet",
+  walk:"▶ Walkthrough",stop:"■ Stop",labels:"Labels",cut:"Low walls",
+  views:{iso:"Typical floor",top:"Plan",corr:"Corridor",living:"Living room apt. 1",bed:"Bedroom apt. 1",bath:"Main bathroom apt. 1",typeB:"Apartment 2 (type B)",rack:"Comms room",building:"Building GF + 6 floors"},
+  scen:{idle:"Tablet idle",call:"Call sent",voice:"Talking to the nurse"},
+  legEq:"ACE BG / Advantecnia devices",legWi:"Wiring – all Cat6/Cat7 and PoE",hint:"Drag: orbit · Wheel: zoom · Click: device card",
+  eqL:[["#2B6CB0","chip","Android tablet in the living room (call and voice)"],["#E46F12","chip","Voice call · ACE82182451 (bedroom)"],["#D93025","chip","Toilet / shower pull-cord · ACE40320303W"],["#2E9F4F","chip","Presence / cancel next to the door (optional)"],["#6B7A90","chip","LCom · ACE71610003 (hall ceiling)"],["#9AA3AD","chip","Floor rack: 2 Buscomm + PoE switch"]],
+  wiL:[["#1A9E4B","line","Cat6 radial: each device → apartment LCom"],["#E07A12","line","Chain LCom → LCom → LCom → Buscomm"],["#D62839","line","Buscomm → switch → riser → server (GF)"]],
+  dt:{code:"ACE code",id:"ID",room:"Room",h:"Height",type:"Device",spec:"Cable",len:"Length",conn:"Connects"},
+ },
+ he:{title:"מגדלי ים התיכון · דיור מוגן",sub:"ACE BG · Advantecnia · קומה טיפוסית בתלת-ממד",eq:"ציוד",wi:"חיווט",view:"תצוגה",lights:"טאבלט",
+  walk:"▶ סיור",stop:"■ עצור",labels:"תוויות",cut:"קירות נמוכים",
+  views:{iso:"קומה טיפוסית",top:"תוכנית",corr:"מסדרון",living:"סלון דירה 1",bed:"חדר שינה דירה 1",bath:"חדר רחצה דירה 1",typeB:"דירה 2 (סוג B)",rack:"חדר תקשורת",building:"בניין קרקע + 6 קומות"},
+  scen:{idle:"טאבלט במנוחה",call:"קריאה נשלחה",voice:"שיחה עם האחות"},
+  legEq:"התקני ACE BG / Advantecnia",legWi:"חיווט – Cat6/Cat7 ו-PoE בלבד",hint:"גרירה: סיבוב · גלגלת: זום · לחיצה: כרטיס התקן",
+  eqL:[["#2B6CB0","chip","טאבלט אנדרואיד בסלון (קריאה ודיבור)"],["#E46F12","chip","קריאה קולית · ACE82182451 (חדר שינה)"],["#D93025","chip","משיכת חבל אסלה / מקלחת · ACE40320303W"],["#2E9F4F","chip","נוכחות / ביטול ליד הדלת (אופציונלי)"],["#6B7A90","chip","LCom · ACE71610003 (תקרת המבואה)"],["#9AA3AD","chip","ארון קומה: 2 Buscomm + מתג PoE"]],
+  wiL:[["#1A9E4B","line","Cat6 רדיאלי: כל התקן ← LCom של הדירה"],["#E07A12","line","שרשרת LCom ← LCom ← LCom ← Buscomm"],["#D62839","line","Buscomm ← מתג ← עמוד ← שרת (קרקע)"]],
+  dt:{code:"קוד ACE",id:"מזהה",room:"חדר",h:"גובה",type:"התקן",spec:"כבל",len:"אורך",conn:"מחבר"},
+ }};
+let LANG = QS.get("lang") || "he"; if (!["es", "en", "he"].includes(LANG)) LANG = "es";
+const TYPE_NAME = {
+ es:{tablet:"Tablet Android",voice_call:"Llamada de enfermería con voz",pull_cord:"Tirador de baño",presence_opt:"Presencia / cancelación (opcional)",lcom:"LCom – concentrador",buscomm:"Buscomm",switch:"Switch PoE",rack:"Gabinete del piso",riser:"Montante"},
+ en:{tablet:"Android tablet",voice_call:"Voice nurse call",pull_cord:"Pull-cord",presence_opt:"Presence / cancel (optional)",lcom:"LCom – hub",buscomm:"Buscomm",switch:"PoE switch",rack:"Floor rack",riser:"Riser"},
+ he:{tablet:"טאבלט אנדרואיד",voice_call:"קריאת אחות קולית",pull_cord:"משיכת חבל",presence_opt:"נוכחות / ביטול (אופציונלי)",lcom:"LCom – מרכז",buscomm:"Buscomm",switch:"מתג PoE",rack:"ארון קומה",riser:"עמוד"}};
+
+
+/* ------------------------------------------------------------------ renderer */
+const stage = document.getElementById("stage");
+const renderer = new THREE.WebGLRenderer({ antialias: !QS.has("noaa"), preserveDrawingBuffer: CAPTURE });
+renderer.setPixelRatio(CAPTURE ? 1 : Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.98;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.setClearColor(0xffffff, 1);
+stage.appendChild(renderer.domElement);
+document.getElementById("loading").remove();
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xffffff);
+const camera = new THREE.PerspectiveCamera(50, 1, 0.05, 400);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = !CAPTURE; controls.dampingFactor = 0.08; controls.maxPolarAngle = Math.PI * 0.495;
+
+const pmrem = new THREE.PMREMGenerator(renderer); scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 0.4;
+scene.add(new THREE.HemisphereLight(0xffffff, 0xe6e9ed, 1.15));
+const sun = new THREE.DirectionalLight(0xffffff, 1.5);
+sun.position.set(4, 30, 14); sun.target.position.set(15, 0, -1);
+sun.castShadow = true; sun.shadow.mapSize.set(CAPTURE ? 2048 : 4096, CAPTURE ? 2048 : 4096);
+Object.assign(sun.shadow.camera, { left: -22, right: 22, top: 18, bottom: -18, near: 1, far: 80 });
+sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02;
+scene.add(sun, sun.target);
+const fill = new THREE.DirectionalLight(0xfff4e8, 0.45); fill.position.set(40, 12, -20); scene.add(fill);
+
+/* ------------------------------------------------------------------ helpers (modelo x,y,z → three x,z,-y) */
+const V = (x, y, z) => new THREE.Vector3(x, z, -y);
+const groups = { ceil: new THREE.Group(), doors: new THREE.Group(), win: new THREE.Group(), arch: new THREE.Group(), furn: new THREE.Group(), dev: new THREE.Group(), cable: new THREE.Group(), tray: new THREE.Group() };
+Object.values(groups).forEach(g => scene.add(g));
+const archMats = [], furnMats = [];
+const mats = {};
+function mat(color, o = {}) {
+  const key = color + JSON.stringify(o);
+  if (mats[key]) return mats[key];
+  const m = new THREE.MeshStandardMaterial({ color, roughness: o.r ?? 0.75, metalness: o.m ?? 0, emissive: o.e ?? 0x000000, emissiveIntensity: o.ei ?? 1,
+    transparent: !!o.t, opacity: o.t ?? 1, side: o.ds ? THREE.DoubleSide : THREE.FrontSide });
+  mats[key] = m; return m;
+}
+function archMat(c, o) { const m = mat(c, o).clone(); m.userData.base = m.opacity; m.userData.baseT = m.transparent; archMats.push(m); return m; }
+function furnMat(c, o) { const m = mat(c, o).clone(); m.userData.base = m.opacity; m.userData.baseT = m.transparent; furnMats.push(m); return m; }
+function box(parent, cx, cy, z0, sx, sy, sz, m, shadow = true) {
+  const g = new THREE.Mesh(new THREE.BoxGeometry(sx, sz, sy), m);
+  g.position.set(cx, z0 + sz / 2, -cy); g.castShadow = shadow; g.receiveShadow = true; parent.add(g); return g;
+}
+function lbox(parent, x, y, z, sx, sy, sz, m) { // caja local (en grupo): x derecha, y altura, z frente
+  const g = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), m); g.position.set(x, y, z); g.castShadow = true; g.receiveShadow = true; parent.add(g); return g;
+}
+function cyl(parent, r, h, m, seg = 20) { const g = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, seg), m); g.castShadow = true; parent.add(g); return g; }
+function rodBetween(parent, a, b, r, m) {
+  const d = new THREE.Vector3().subVectors(b, a); const L = d.length(); if (L < 1e-4) return;
+  const g = new THREE.Mesh(new THREE.CylinderGeometry(r, r, L, 10), m);
+  g.position.copy(a).addScaledVector(d, 0.5);
+  g.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()); g.castShadow = true; parent.add(g); return g;
+}
+const FACE_ROT = { N: Math.PI, S: 0, E: Math.PI / 2, W: -Math.PI / 2, D: 0 };
+
+/* ------------------------------------------------------------------ pisos */
+const FLOOR = { living: 0xE9DCC6, kitchen: 0xE7E2DA, bed: 0xDCCBB0, bath: 0xDDE9EB, hall: 0xE4DCCD, store: 0xE3E3E0, corridor: 0xD8DDE2, core: 0xD9DCE0, comms: 0xEFE3D6 };
+
+const floorMats = [];
+for (const r of M.rooms) {
+  if (r.kind === "apt") continue;
+  const xs = r.poly.map(p => p[0]), ys = r.poly.map(p => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const fm = mat(FLOOR[r.kind] ?? 0xeeeeee, { r: 0.85 }).clone(); floorMats.push(fm);
+  const f = box(groups.arch, (x0 + x1) / 2, (y0 + y1) / 2, -0.02, x1 - x0, y1 - y0, 0.02, fm, false);
+  f.receiveShadow = true;
+  const c = box(groups.ceil, (x0 + x1) / 2, (y0 + y1) / 2, M.meta.ceil, x1 - x0, y1 - y0, 0.02, mat(0xF6F6F4, { r: 0.95, ds: true }), false);
+  c.castShadow = false;
+  if (r.kind !== "corridor") { // luminaria
+    const L = box(groups.ceil, (x0 + x1) / 2, (y0 + y1) / 2 + (r.kind === "room" ? 0.6 : 0), M.meta.ceil - 0.012, 1.2, 0.6, 0.012, mat(0xFFFFFF, { e: 0xFFFFFF, ei: 0.9 }), false); L.castShadow = false;
+  }
+}
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.ShadowMaterial({ opacity: 0.08 }));
+ground.rotation.x = -Math.PI / 2; ground.position.y = -0.03; ground.receiveShadow = true; scene.add(ground);
+
+/* ------------------------------------------------------------------ muros */
+const wallMeshes = [];
+const WALL = archMat(0xFCFCFB, { r: 0.95 }), WALLX = archMat(0xEDEFF1, { r: 0.95 });
+function wallPieces(w) {
+  const [[x0, y0], [x1, y1]] = [w.a, w.b]; const t = w.t; const hz = y0 === y1;
+  let lo = (hz ? Math.min(x0, x1) : Math.min(y0, y1)) - t / 2, hi = (hz ? Math.max(x0, x1) : Math.max(y0, y1)) + t / 2;
+  const cuts = w.openings.map(o => [o.lo, o.hi]).sort((a, b) => a[0] - b[0]);
+  const out = []; let cur = lo;
+  for (const [a, b] of cuts) { if (a > cur) out.push([cur, a]); cur = Math.max(cur, b); }
+  if (cur < hi) out.push([cur, hi]); return out;
+}
+for (const w of M.walls) {
+  const hz = w.a[1] === w.b[1], t = w.t, H = w.h, ax = hz ? w.a[1] : w.a[0], m = w.ext ? WALLX : WALL;
+  const put = (lo, hi, z0, z1) => {
+    const g = hz ? box(groups.arch, (lo + hi) / 2, ax, z0, hi - lo, t, z1 - z0, m) : box(groups.arch, ax, (lo + hi) / 2, z0, t, hi - lo, z1 - z0, m);
+    g.userData.wall = { z0, z1 }; wallMeshes.push(g);
+  };
+  for (const [lo, hi] of wallPieces(w)) put(lo, hi, 0, H);
+  for (const o of w.openings) {
+    if (o.z1 < H) put(o.lo, o.hi, o.z1, H);
+    if (o.z0 > 0) put(o.lo, o.hi, 0, o.z0);
+  }
+}
+// ventanas
+const GLASS = archMat(0xA9D3EE, { r: 0.1, m: 0.1, t: 0.35 }), FRAME = archMat(0xC5CBD2, { r: 0.5, m: 0.3 });
+for (const w of M.windows) {
+  const H_ = w.horiz !== false; const B = (G, a, sa, z0, st, sz, m, sh) => H_ ? box(G, a, w.axis, z0, sa, st, sz, m, sh) : box(G, w.axis, a, z0, st, sa, sz, m, sh);
+  B(groups.win, (w.lo + w.hi) / 2, w.hi - w.lo, w.z0, 0.03, w.z1 - w.z0, GLASS, false);
+  for (const xx of [w.lo + 0.03, (w.lo + w.hi) / 2, w.hi - 0.03]) B(groups.win, xx, 0.05, w.z0, w.t + 0.02, w.z1 - w.z0, FRAME);
+  B(groups.arch, (w.lo + w.hi) / 2, w.hi - w.lo, w.z0 - 0.02, w.t + 0.08, 0.04, FRAME);
+}
+// puertas (hoja abierta ~75°)
+const LEAF = archMat(0xD8C7A8, { r: 0.6 }), DFRAME = archMat(0xB8BEC6, { r: 0.4, m: 0.2 }), HANDLE = archMat(0x9AA3AD, { r: 0.3, m: 0.8 });
+for (const d of M.doors) {
+  const leaves = d.leaves === 1 ? [[d.lo, d.hi, d.hinge]] : [[d.lo, (d.lo + d.hi) / 2, "lo"], [(d.lo + d.hi) / 2, d.hi, "hi"]];
+  for (const [l0, l1, hg] of leaves) {
+    const W = l1 - l0, hx = hg === "lo" ? l0 : l1, sg = hg === "lo" ? 1 : -1;
+    const piv = new THREE.Group(); groups.doors.add(piv);
+    const off = d.swing * d.t / 2;
+    if (d.horiz) piv.position.copy(V(hx, d.axis + off, 0)); else piv.position.copy(V(d.axis + off, hx, 0));
+    const leaf = new THREE.Mesh(new THREE.BoxGeometry(W - 0.02, d.h - 0.02, 0.045), LEAF); leaf.castShadow = true;
+    leaf.position.set(sg * W / 2, d.h / 2, 0); piv.add(leaf);
+    const hd = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.025, 0.07), HANDLE); hd.position.set(sg * (W - 0.1), 1.0, 0); piv.add(hd);
+    // ángulo: hoja abierta hacia el lado swing
+    const ang = 1.25;
+    if (d.horiz) piv.rotation.y = d.swing * sg * ang; else piv.rotation.y = Math.PI / 2 - d.swing * sg * ang;
+  }
+  // marco
+  const lo = d.lo, hi = d.hi;
+  const G = groups.doors;
+  if (d.horiz) { box(G, lo + 0.025, d.axis, 0, 0.05, d.t + 0.04, d.h, DFRAME); box(G, hi - 0.025, d.axis, 0, 0.05, d.t + 0.04, d.h, DFRAME); box(G, (lo + hi) / 2, d.axis, d.h - 0.05, hi - lo, d.t + 0.04, 0.05, DFRAME); }
+  else { box(G, d.axis, lo + 0.025, 0, d.t + 0.04, 0.05, d.h, DFRAME); box(G, d.axis, hi - 0.025, 0, d.t + 0.04, 0.05, d.h, DFRAME); }
+}
+
+// luminarias del pasillo y pasamanos hospitalarios
+for (let x = 2; x < Math.max(...M.walls.map(w => Math.max(w.a[0], w.b[0]))) - 0.5; x += 3) { const L = box(groups.ceil, x, 1.0, M.meta.ceil - 0.012, 1.2, 0.3, 0.012, mat(0xFFFFFF, { e: 0xFFFFFF, ei: 0.9 }), false); L.castShadow = false; }
+const RAIL = mat(0xC9B48F, { r: 0.5 });
+for (const w of M.walls) {
+  const hz = w.a[1] === w.b[1]; if (!hz) continue; const ax = w.a[1];
+  if (Math.abs(ax - M.meta.corridor_w) > 0.01 && Math.abs(ax) > 0.01) continue;
+  const side = ax > 1 ? -1 : 1; // hacia el pasillo
+  for (const [lo, hi] of wallPieces(w)) {
+    if (hi - lo < 0.8) continue;
+    const yy = ax + side * (w.t / 2 + 0.06);
+    rodBetween(groups.arch, V(lo + 0.15, yy, 0.9), V(hi - 0.15, yy, 0.9), 0.025, RAIL);
+    for (let x = lo + 0.3; x < hi - 0.2; x += 1.6) rodBetween(groups.arch, V(x, yy, 0.9), V(x, ax + side * w.t / 2, 0.9), 0.012, mat(0x9AA3AD, { m: 0.6, r: 0.3 }));
+  }
+}
+
+/* ------------------------------------------------------------------ texturas de pantallas Advantecnia */
+const SCEN = { idle: {}, call: {}, voice: {} };
+let scenario = "call";
+function drawScreen(ctx, W, H) {
+  const tr = { es: ["Mi hogar · Advantecnia", "LLAMAR A ENFERMERÍA", "Hablar", "Llamada enviada – la enfermera ya fue avisada", "En conversación con enfermería", "Todo en orden"],
+    en: ["My home · Advantecnia", "CALL THE NURSE", "Talk", "Call sent – the nurse has been notified", "Talking to the nurse", "All good"],
+    he: ["הבית שלי · Advantecnia", "קריאה לאחות", "דיבור", "הקריאה נשלחה – האחות קיבלה הודעה", "בשיחה עם האחות", "הכול תקין"] }[LANG];
+  ctx.fillStyle = "#F6F8FA"; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = "#1F6F8B"; ctx.fillRect(0, 0, W, H * 0.14);
+  ctx.fillStyle = "#fff"; ctx.font = `600 ${H * 0.065}px Arial`; ctx.textBaseline = "middle"; ctx.textAlign = "center";
+  ctx.fillText(tr[0], W / 2, H * 0.07);
+  const col = scenario === "idle" ? "#D93025" : scenario === "call" ? "#E46F12" : "#2E9F4F";
+  ctx.fillStyle = col; const bx = W * 0.12, by = H * 0.22, bw = W * 0.76, bh = H * 0.36;
+  ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, H * 0.04); ctx.fill();
+  ctx.fillStyle = "#fff"; ctx.font = `700 ${H * 0.085}px Arial`; ctx.fillText(tr[1], W / 2, by + bh / 2);
+  ctx.fillStyle = "#2E9F4F"; ctx.beginPath(); ctx.roundRect(W * 0.3, H * 0.64, W * 0.4, H * 0.13, H * 0.03); ctx.fill();
+  ctx.fillStyle = "#fff"; ctx.font = `600 ${H * 0.06}px Arial`; ctx.fillText(tr[2], W / 2, H * 0.705);
+  ctx.fillStyle = "#4A515B"; ctx.font = `${H * 0.045}px Arial`;
+  ctx.fillText(scenario === "idle" ? tr[5] : scenario === "call" ? tr[3] : tr[4], W / 2, H * 0.88);
+  ctx.textAlign = "left";
+}
+const screens = [];
+function screenTex(W, H) {
+  const c = document.createElement("canvas"); c.width = W; c.height = H;
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+  screens.push({ c, tex }); return tex;
+}
+function refreshScreens() { for (const s of screens) { drawScreen(s.c.getContext("2d"), s.c.width, s.c.height); s.tex.needsUpdate = true; } }
+
+
+/* ------------------------------------------------------------------ mobiliario */
+const R = {
+  wood: furnMat(0xC9A97E, { r: 0.55 }), woodD: furnMat(0x8C6A46, { r: 0.55 }), oak: furnMat(0xD8BE96, { r: 0.6 }),
+  fab: furnMat(0x8FA9B8, { r: 0.95 }), fab2: furnMat(0x6F8C9C, { r: 0.95 }), cushion: furnMat(0xE9D9BE, { r: 0.95 }),
+  linen: furnMat(0xF7F5F0, { r: 0.95 }), duvet: furnMat(0xB9C9D6, { r: 0.95 }), throw: furnMat(0xC98F6B, { r: 0.95 }),
+  rug: furnMat(0xE5D6BC, { r: 1.0 }), counter: furnMat(0xF1EEE8, { r: 0.35 }), cab: furnMat(0xE8E4DC, { r: 0.5 }),
+  steel: furnMat(0xC9CED4, { r: 0.25, m: 0.8 }), black: furnMat(0x26292E, { r: 0.4 }), leaf: furnMat(0x5E8F55, { r: 0.8 }),
+  pot: furnMat(0xB46E4C, { r: 0.7 }), lamp: furnMat(0xFFF1CF, { r: 0.6, e: 0xFFE2A8, ei: 0.5 }),
+  ceramic: furnMat(0xFFFFFF, { r: 0.2 }), chrome: furnMat(0xC9CED4, { r: 0.18, m: 0.9 }), grab: furnMat(0xC08A3E, { r: 0.35, m: 0.4 }),
+  tray: furnMat(0xF2F7FA, { r: 0.35 }), showerc: furnMat(0xBFDDEF, { r: 0.9, t: 0.6, ds: true }), mirror: furnMat(0xCFE6F3, { r: 0.08, m: 0.2 }),
+  stair: furnMat(0xE3E1DC, { r: 0.8 }), lift: furnMat(0xB7BEC6, { r: 0.35, m: 0.6 }) };
+function grp(cx, cy, rotDeg) { const g = new THREE.Group(); g.position.copy(V(cx, cy, 0)); g.rotation.y = (180 - (rotDeg || 0)) * Math.PI / 180; groups.furn.add(g); return g; }
+function wavyCurtain(parent, x0, y0, x1, y1, z0, h, amp, waves, mtl) {
+  const L = Math.hypot(x1 - x0, y1 - y0); const n = Math.max(24, Math.round(L * 30)); waves = waves ?? Math.max(3, L / 0.18);
+  const geo = new THREE.PlaneGeometry(L, h, n, 1); const pos = geo.attributes.position;
+  for (let i = 0; i < pos.count; i++) { const u = (pos.getX(i) + L / 2) / L; pos.setZ(i, amp * Math.sin(u * waves * Math.PI * 2)); }
+  geo.computeVertexNormals(); const m = new THREE.Mesh(geo, mtl); m.castShadow = true;
+  m.position.copy(V((x0 + x1) / 2, (y0 + y1) / 2, z0 + h / 2)); m.rotation.y = Math.atan2(-(y1 - y0), x1 - x0); parent.add(m); return m;
+}
+for (const it of M.items) {
+  const [cx, cy] = it.c, [sx, sy, sz] = it.s, z = it.z || 0, P = groups.furn, t = it.type, rot = it.rot || 0;
+  const W = (rot === 90 || rot === 270 || rot === -90) ? sy : sx, Dd = (rot === 90 || rot === 270 || rot === -90) ? sx : sy;
+  if (t === "rug") { const m = box(P, cx, cy, 0, sx, sy, 0.012, R.rug, false); m.receiveShadow = true; }
+  else if (t === "sofa") {
+    const g = grp(cx, cy, rot);
+    lbox(g, 0, 0.22, 0, W, 0.2, Dd, R.fab2); lbox(g, 0, 0.42, 0.06, W - 0.3, 0.14, Dd - 0.2, R.fab);
+    lbox(g, 0, 0.6, -Dd / 2 + 0.11, W - 0.1, 0.5, 0.2, R.fab);
+    for (const s of [-1, 1]) lbox(g, s * (W / 2 - 0.08), 0.45, 0, 0.16, 0.42, Dd, R.fab2);
+    for (const k of [-1, 0, 1]) lbox(g, k * (W - 0.4) / 3, 0.62, -Dd / 2 + 0.25, (W - 0.45) / 3 - 0.03, 0.35, 0.14, R.cushion);
+    for (const s of [-1, 1]) for (const q of [-1, 1]) lbox(g, s * (W / 2 - 0.08), 0.05, q * (Dd / 2 - 0.08), 0.05, 0.1, 0.05, R.woodD);
+  } else if (t === "armchair") {
+    const g = grp(cx, cy, rot);
+    lbox(g, 0, 0.25, 0, W, 0.22, Dd, R.fab2); lbox(g, 0, 0.42, 0.05, W - 0.22, 0.12, Dd - 0.15, R.cushion);
+    lbox(g, 0, 0.62, -Dd / 2 + 0.09, W - 0.05, 0.5, 0.16, R.fab);
+    for (const s of [-1, 1]) lbox(g, s * (W / 2 - 0.06), 0.45, 0, 0.12, 0.36, Dd, R.fab);
+  } else if (t === "coffee_table") {
+    const top = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.04, 40), R.oak); top.scale.set(sx, 1, sy); top.position.copy(V(cx, cy, sz - 0.02)); top.castShadow = true; P.add(top);
+    for (const [dx, dy] of [[-0.3, -0.15], [0.3, -0.15], [-0.3, 0.15], [0.3, 0.15]]) rodBetween(P, V(cx + dx * sx, cy + dy * sy * 1.6, 0), V(cx + dx * sx, cy + dy * sy * 1.6, sz - 0.04), 0.02, R.woodD);
+  } else if (t === "dining_table" || t === "desk") {
+    box(P, cx, cy, sz - 0.04, sx, sy, 0.04, R.oak);
+    for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) box(P, cx + dx * (sx / 2 - 0.06), cy + dy * (sy / 2 - 0.06), 0, 0.05, 0.05, sz - 0.04, R.woodD);
+  } else if (t === "chair") {
+    const g = grp(cx, cy, rot);
+    lbox(g, 0, 0.45, 0, W * 0.9, 0.05, Dd * 0.9, R.oak); lbox(g, 0, 0.5, 0.02, W * 0.8, 0.04, Dd * 0.75, R.cushion);
+    lbox(g, 0, 0.72, -Dd * 0.42, W * 0.9, 0.42, 0.04, R.oak);
+    for (const a of [-1, 1]) for (const b of [-1, 1]) lbox(g, a * W * 0.38, 0.22, b * Dd * 0.38, 0.035, 0.44, 0.035, R.woodD);
+  } else if (t === "tv_unit" || t === "nightstand") {
+    box(P, cx, cy, 0.08, sx, sy, sz - 0.08, R.oak);
+    box(P, cx, cy, 0, sx - 0.06, sy - 0.06, 0.08, R.woodD);
+    if (t === "nightstand") { const l = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.1, 0.22, 16), R.lamp); l.position.copy(V(cx, cy, sz + 0.25)); P.add(l); rodBetween(P, V(cx, cy, sz), V(cx, cy, sz + 0.14), 0.01, R.steel); }
+  } else if (t === "tv_screen") {
+    box(P, cx, cy, z, sx, sy, sz, R.black);
+  } else if (t === "wardrobe" || t === "shelf") {
+    box(P, cx, cy, 0, sx, sy, sz, t === "shelf" ? R.oak : R.wood);
+    const along = sx > sy; const n = Math.max(2, Math.round((along ? sx : sy) / 0.5));
+    for (let k = 1; k < n; k++) { const f = -0.5 + k / n; if (along) box(P, cx + f * sx, cy, 0.05, 0.01, sy + 0.01, sz - 0.1, R.woodD, false); else box(P, cx, cy + f * sy, 0.05, sx + 0.01, 0.01, sz - 0.1, R.woodD, false); }
+  } else if (t === "bed_double" || t === "bed_single") {
+    const g = new THREE.Group(); g.position.copy(V(cx, cy, 0)); g.rotation.y = it.head === "S" ? Math.PI : 0; P.add(g);
+    const Wb = sx, L = sy; // cabecera hacia local -z (= norte)
+    lbox(g, 0, 0.17, 0, Wb + 0.06, 0.22, L + 0.04, R.oak);
+    lbox(g, 0, 0.36, 0.02, Wb, 0.18, L - 0.02, R.linen);
+    lbox(g, 0, 0.47, 0.25, Wb + 0.04, 0.05, L * 0.62, R.duvet);
+    lbox(g, 0, 0.48, L / 2 - 0.35, Wb + 0.05, 0.05, 0.38, R.throw);
+    const np = t === "bed_double" ? 2 : 1;
+    for (let k = 0; k < np; k++) lbox(g, (k - (np - 1) / 2) * (Wb / np), 0.53, -L / 2 + 0.28, Wb / np - 0.14, 0.13, 0.36, R.linen);
+    lbox(g, 0, 0.62, -L / 2 - 0.04, Wb + 0.2, 1.0, 0.1, R.fab);          // cabecero tapizado
+    for (const s of [-1, 1]) lbox(g, s * (Wb / 2 - 0.05), 0.04, L / 2 - 0.05, 0.05, 0.08, 0.05, R.woodD);
+  } else if (t === "kitchen_counter") {
+    box(P, cx, cy, 0.1, sx, sy, sz - 0.14, R.cab); box(P, cx, cy, sz - 0.04, sx + 0.02, sy + 0.02, 0.04, R.counter);
+    box(P, cx, cy, 0, sx - 0.05, sy - 0.08, 0.1, R.black);
+  } else if (t === "wall_cabinet") {
+    box(P, cx, cy, z, sx, sy, sz, R.cab);
+  } else if (t === "fridge") {
+    box(P, cx, cy, 0, sx, sy, sz, furnMat(0xEDEFF1, { r: 0.3, m: 0.3 })); box(P, cx, cy, 1.15, sx + 0.005, sy + 0.005, 0.01, R.black, false);
+  } else if (t === "stove") {
+    box(P, cx, cy, z, sx, sy, 0.015, R.black); for (const [dx, dy] of [[-0.14, -0.12], [0.14, -0.12], [-0.14, 0.12], [0.14, 0.12]]) { const r_ = new THREE.Mesh(new THREE.TorusGeometry(0.07, 0.008, 6, 24), R.steel); r_.rotation.x = Math.PI / 2; r_.position.copy(V(cx + dx, cy + dy, z + 0.02)); P.add(r_); }
+  } else if (t === "kitchen_sink") {
+    box(P, cx, cy, z - 0.01, sx, sy, 0.02, R.steel);
+    rodBetween(P, V(cx, cy + 0.2 * Math.sign(1 - cy), z), V(cx, cy + 0.2 * Math.sign(1 - cy), z + 0.3), 0.015, R.chrome);
+  } else if (t === "plant") {
+    const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.14, 0.38, 20), R.pot); pot.position.copy(V(cx, cy, 0.19)); pot.castShadow = true; P.add(pot);
+    for (let k = 0; k < 7; k++) { const s = new THREE.Mesh(new THREE.SphereGeometry(0.17, 12, 10), R.leaf); s.scale.set(1, 1.4, 1); s.position.copy(V(cx + 0.12 * Math.cos(k), cy + 0.12 * Math.sin(k * 1.7), 0.6 + (k % 3) * 0.18)); s.castShadow = true; P.add(s); }
+  } else if (t === "floor_lamp") {
+    rodBetween(P, V(cx, cy, 0.02), V(cx, cy, 1.45), 0.012, R.steel); const b = cyl(P, 0.15, 0.03, R.black); b.position.copy(V(cx, cy, 0.015));
+    const sh = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.2, 0.28, 24, 1, true), R.lamp); sh.position.copy(V(cx, cy, 1.5)); P.add(sh);
+  } else if (t === "stairs") {
+    for (let k = 0; k < 12; k++) box(P, cx - sx / 2 + (k + 0.5) * sx / 12, cy, 0, sx / 12, sy, 0.17 * (k + 1) * 0.5, R.stair);
+  } else if (t === "lift_car") {
+    box(P, cx, cy, 0, sx, sy, 2.3, R.lift);
+  } else if (t === "toilet") {
+    const g = new THREE.Group(); g.position.copy(V(cx, cy, 0)); g.rotation.y = it.head === "S" ? Math.PI : 0; P.add(g);
+    const ped = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.16, 0.38, 24), R.ceramic); ped.position.set(0, 0.19, 0.05); ped.castShadow = true; g.add(ped);
+    const bowl = new THREE.Mesh(new THREE.SphereGeometry(0.2, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), R.ceramic); bowl.scale.set(0.95, 0.35, 1.3); bowl.position.set(0, 0.38, 0.08); g.add(bowl);
+    const seat = new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.03, 10, 24), furnMat(0xF4F6F8, { r: 0.4 })); seat.rotation.x = Math.PI / 2; seat.scale.set(1, 1.3, 1); seat.position.set(0, 0.45, 0.1); g.add(seat);
+    lbox(g, 0, 0.62, -0.25, sx, 0.4, 0.18, R.ceramic);
+  } else if (t === "washbasin") {
+    box(P, cx, cy, 0.1, sx, sy, 0.62, R.oak); box(P, cx, cy, 0.72, sx + 0.02, sy + 0.02, 0.13, R.ceramic);
+    const b = new THREE.Mesh(new THREE.CylinderGeometry(Math.min(sx, sy) * 0.33, Math.min(sx, sy) * 0.22, 0.08, 24), furnMat(0xDDE4EA, { r: 0.2 })); b.position.copy(V(cx, cy, 0.83)); P.add(b);
+  } else if (t === "mirror") { box(P, cx, cy, z, sx, sy, sz, R.mirror, false);
+  } else if (t === "shower_tray") { box(P, cx, cy, 0, sx, sy, 0.04, R.tray);
+  } else if (t === "shower_curtain") { { const L = Math.max(sx, sy), v = sy >= sx, a0 = -L / 2, a1 = -L / 2 + 0.38 * L; if (v) wavyCurtain(P, cx, cy + a0, cx, cy + a1, z, sz, 0.05, 9, R.showerc); else wavyCurtain(P, cx + a0, cy, cx + a1, cy, z, sz, 0.05, 9, R.showerc);
+      rodBetween(P, v ? V(cx, cy - L / 2, z + sz + 0.03) : V(cx - L / 2, cy, z + sz + 0.03), v ? V(cx, cy + L / 2, z + sz + 0.03) : V(cx + L / 2, cy, z + sz + 0.03), 0.012, R.chrome); }
+  } else if (t === "shower_seat") { box(P, cx, cy, 0.46, sx, sy, 0.04, furnMat(0xF5F7F9, { r: 0.5 }));
+  } else if (t === "shower_head") { rodBetween(P, V(cx, cy, 1.0), V(cx, cy, z + 0.05), 0.012, R.chrome); const h = cyl(P, 0.07, 0.03, R.chrome); h.position.copy(V(cx, cy, z));
+  } else if (t === "grab_bar") { const v = sx < sy; rodBetween(P, v ? V(cx, cy - sy / 2, z) : V(cx - sx / 2, cy, z), v ? V(cx, cy + sy / 2, z) : V(cx + sx / 2, cy, z), 0.018, R.grab);
+  } else if (t === "towel_rail") { const v = sx < sy; rodBetween(P, v ? V(cx, cy - sy / 2, z) : V(cx - sx / 2, cy, z), v ? V(cx, cy + sy / 2, z) : V(cx + sx / 2, cy, z), 0.01, R.chrome); }
+}
+
+
+/* ------------------------------------------------------------------ dispositivos */
+const D = {
+  panel: mat(0xF4F4F2, { r: 0.5 }), adv: mat(0xE46F12, { r: 0.45 }), red: mat(0xE53935, { r: 0.4 }), green: mat(0x2E9F4F, { r: 0.45 }),
+  dark: mat(0x3D4450, { r: 0.5 }), black: mat(0x1D2330, { r: 0.3 }), white: mat(0xFFFFFF, { r: 0.4 }), o2: mat(0xFFFFFF, { r: 0.3 }),
+  air: mat(0x2A2A2A, { r: 0.3 }), vac: mat(0xF2C200, { r: 0.35 }), sock: mat(0xF7F9FB, { r: 0.4 }), rj: mat(0xB9C0C8, { r: 0.4 }),
+  lamp: mat(0xFFF6D6, { e: 0xFFE7A0, ei: 0.6 }), pear: mat(0xF4EEE6, { r: 0.5 }), cord: mat(0x7A6E62, { r: 0.6 }), cordR: mat(0xC0392B, { r: 0.6 }),
+  rack: mat(0x5B636E, { r: 0.45, m: 0.2 }), rackGlass: mat(0xDCE7F0, { r: 0.05, t: 0.12 }), led: mat(0x34D058, { e: 0x34D058, ei: 1.2 }),
+};
+const pickables = [], tagAnchors = [], lpMeshes = {};
+const LP_COL = { call: 0xE53935, pres: 0x2E9F4F, blue: 0x1E6BD6 };
+function pickable(obj, info) { obj.traverse(o => { if (o.isMesh) { o.userData.info = info; pickables.push(o); } }); }
+for (const d of M.devices) {
+  const [x, y, z] = d.p; const g = new THREE.Group(); g.position.copy(V(x, y, 0)); g.rotation.y = FACE_ROT[d.face]; groups.dev.add(g);
+  const t = d.type;
+  if (t === "tablet") {
+    const tex = screenTex(800, 520);
+    lbox(g, 0, z, 0.012, 0.36, 0.25, 0.02, D.black);
+    const pl = new THREE.Mesh(new THREE.PlaneGeometry(0.33, 0.22), new THREE.MeshBasicMaterial({ map: tex, toneMapped: false })); pl.position.set(0, z, 0.023); g.add(pl);
+  } else if (t === "voice_call") {
+    lbox(g, 0, z, 0.012, 0.13, 0.13, 0.024, D.white);
+    lbox(g, -0.03, z + 0.02, 0.026, 0.035, 0.035, 0.006, mat(0xD93025)); lbox(g, 0.0, z + 0.02, 0.026, 0.035, 0.035, 0.006, mat(0x2E9F4F)); lbox(g, -0.015, z - 0.025, 0.026, 0.035, 0.035, 0.006, mat(0x1E6BD6));
+    const spk = cyl(g, 0.03, 0.01, mat(0x9AA3AD), 20); spk.rotation.x = Math.PI / 2; spk.position.set(0.035, z - 0.01, 0.027);
+    if (d.pear) {
+      const [px, py] = d.pear; const fx = d.face === "E" ? 1 : d.face === "W" ? -1 : 0, fy = d.face === "N" ? 1 : d.face === "S" ? -1 : 0;
+      const a = V(x + fx * 0.03, y + fy * 0.03, z - 0.06), pe = V(px, py, 0.6);
+      const curve = new THREE.CatmullRomCurve3([a, V(x + fx * 0.08, y + fy * 0.08, 0.8), V((x + px) / 2, (y + py) / 2, 0.55), pe]);
+      groups.dev.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 40, 0.006, 6), mat(0xB9BEC4)));
+      const pear = new THREE.Mesh(new THREE.SphereGeometry(0.03, 16, 12), mat(0xEEF0F2)); pear.scale.set(1, 1.9, 1); pear.position.copy(pe).add(new THREE.Vector3(0, 0.03, 0)); groups.dev.add(pear);
+    }
+  } else if (t === "pull_cord") {
+    lbox(g, 0, z, 0.012, 0.086, 0.086, 0.024, D.white);
+    const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.006, 3), D.red); tr.rotation.x = Math.PI / 2; tr.rotation.y = Math.PI / 2; tr.position.set(0, z + 0.005, 0.027); g.add(tr);
+    rodBetween(g, new THREE.Vector3(0, z - 0.045, 0.04), new THREE.Vector3(0, 0.22, 0.04), 0.004, D.cordR);
+    const tri = new THREE.Mesh(new THREE.TorusGeometry(0.03, 0.007, 8, 3), D.cordR); tri.position.set(0, 0.19, 0.04); g.add(tri);
+  } else if (t === "presence_opt") {
+    lbox(g, 0, z, 0.012, 0.086, 0.086, 0.024, D.white); lbox(g, 0, z, 0.028, 0.068, 0.068, 0.008, mat(0x3BAA4F, { r: 0.4 }));
+  } else if (t === "lcom") {
+    lbox(g, 0, z - 0.04, 0, 0.16, 0.08, 0.11, D.white); lbox(g, 0, z - 0.04, -0.03, 0.155, 0.075, 0.03, mat(0x7E8FA6, { r: 0.5 }));
+    for (const s of [-1, 1]) lbox(g, s * 0.05, z - 0.083, 0, 0.035, 0.01, 0.08, mat(0x2E9F4F, { r: 0.5 }));
+  } else if (t === "rack") {
+    const H = d.hgt, Wr = d.w, Dp = d.dep;
+    lbox(g, 0, H / 2 + 0.6, -Dp / 2 + 0.01, Wr, H, 0.02, D.rack); lbox(g, 0, H + 0.58, 0, Wr, 0.04, Dp, D.rackGlass); lbox(g, 0, 0.64, 0, Wr, 0.08, Dp, D.rack);
+    for (const s of [-1, 1]) { lbox(g, s * (Wr / 2 - 0.01), H / 2 + 0.6, 0, 0.02, H, Dp, D.rackGlass); for (const q of [-1, 1]) lbox(g, s * (Wr / 2 - 0.02), H / 2 + 0.6, q * (Dp / 2 - 0.02), 0.04, H, 0.04, D.rack); }
+    for (let k = 0; k < 6; k++) lbox(g, 0, 1.55 + k * 0.1, Dp / 2 - 0.12, Wr - 0.1, 0.05, 0.2, mat(0x2B2F36, { r: 0.4 }));
+  } else if (t === "buscomm") {
+    lbox(g, 0, z, 0.0, 0.48, 0.07, 0.25, mat(0xF2F4F6)); for (const s of [-0.15, 0, 0.15]) lbox(g, s, z, 0.13, 0.08, 0.03, 0.01, mat(0x2E9F4F));
+  } else if (t === "switch") {
+    lbox(g, 0, z, 0.0, 0.48, 0.045, 0.28, mat(0xC9CED4, { r: 0.4, m: 0.3 })); for (let k = 0; k < 12; k++) lbox(g, -0.18 + k * 0.033, z, 0.141, 0.012, 0.01, 0.006, D.led);
+  } else if (t === "riser") {
+    rodBetween(g, new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, d.hgt, 0), 0.05, mat(0xD62839, { t: 0.5 }));
+  }
+  pickable(g, d);
+  if (["tablet", "voice_call", "lcom", "rack"].includes(t) && d.apt !== undefined ? ["D1", "D2"].includes(d.apt) : t === "rack")
+    tagAnchors.push({ pos: V(x, y, (t === "lcom" ? z : z + 0.35)), text: ({ tablet: "TAB", voice_call: "VOZ", lcom: "LCom", rack: "GAB" })[t], cls: "dev", type: t });
+}
+refreshScreens();
+// ------- edificio: planta baja + 6 pisos (vista "Edificio"), desplazado al este del piso tipo
+const BLD = new THREE.Group(); scene.add(BLD); BLD.visible = false;
+{
+  const OX = 46, hf = 4.6; /* vista explotada */ const slabM = mat(0xEEF0F2, { r: 0.9 }), glass = mat(0xCFE3EF, { r: 0.1, t: 0.1 }).clone(); glass.depthWrite = false;
+  const aptA = mat(0xE9D2AE, { r: 0.85 }), aptB = mat(0xC9DCEA, { r: 0.85 }), corrM = mat(0xD3D8DE, { r: 0.85 }), coreM = mat(0xC9CED4, { r: 0.8 });
+  const chainM = mat(0xE07A12, { e: 0x5A3005, ei: 0.6 }), netM = mat(0xD62839, { e: 0x5A0B14, ei: 0.6 }), swM = mat(0x5B636E, { r: 0.5 });
+  const APTS = [[0, 11, 1, aptA], [11, 19, 1, aptB], [19, 30, 1, aptA], [0, 8, -1, aptB], [8, 19, -1, aptA], [22, 30, -1, aptB]];
+  for (let f = 0; f <= 6; f++) {
+    const z0 = f * hf;
+    box(BLD, OX + 15, 1, z0, 30.6, 22.6, 0.22, slabM).receiveShadow = true;
+    for (const [cx_, cy_] of [[0.2, -9.8], [29.8, -9.8], [0.2, 11.8], [29.8, 11.8]]) if (f < 6) box(BLD, OX + cx_, cy_, z0 + 0.22, 0.25, 0.25, hf - 0.22, mat(0xD5D9DE));
+    if (f === 0) {
+      box(BLD, OX + 15, 1, 0.22, 28, 2, 0.02, corrM, false);
+      box(BLD, OX + 4, -5, 0.22, 3.2, 1.0, 1.05, mat(0xC9A97E));                  // mostrador de recepción
+      box(BLD, OX + 4, -5.4, 1.27, 0.25, 0.2, 0.08, mat(0x3A3F47));                // teléfono ACE52190200
+      box(BLD, OX + 21.3, -2.0, 0.22, 0.6, 0.6, 1.8, mat(0xD62839, { r: 0.5 }));  // gabinete PB con servidor
+      tagAnchors.push({ pos: V(OX + 21.3, -2.0, 2.4), text: "Servidor ACE51010103", cls: "room", code: "SRV", bld: true });
+    } else {
+      for (const [a, b, sd, m] of APTS) { const y0 = sd > 0 ? 2.1 : -10, y1 = sd > 0 ? 12 : -0.1; box(BLD, OX + (a + b) / 2, (y0 + y1) / 2, z0 + 0.22, b - a - 0.15, y1 - y0, 0.6, m); }
+      box(BLD, OX + 15, 1, z0 + 0.22, 30, 2, 0.02, corrM, false);
+      box(BLD, OX + 20.5, -1.5, z0 + 0.22, 3, 3, 1.0, coreM);
+      box(BLD, OX + 21.3, -2.0, z0 + 0.22, 0.6, 0.6, 1.6, swM);                   // gabinete de piso: 2 Buscomm + switch
+      // cadenas LCom → Buscomm (naranja) a nivel del cielorraso
+      for (const [yy, xs] of [[1.35, [5.4, 15.5, 24.4]], [0.65, [4.5, 13.4, 26.5]]]) {
+        const zc = z0 + 1.3; rodBetween(BLD, V(OX + Math.min(...xs), yy, zc), V(OX + 21.3, yy, zc), 0.07, chainM);
+        rodBetween(BLD, V(OX + Math.max(...xs), yy, zc), V(OX + 21.3, yy, zc), 0.07, chainM);
+        for (const x of xs) { const s_ = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 10), mat(0x6B7A90)); s_.position.copy(V(OX + x, yy, zc)); BLD.add(s_); }
+        rodBetween(BLD, V(OX + 21.3, yy, zc), V(OX + 21.3, -2.0, z0 + 1.3), 0.07, chainM);
+      }
+    }
+    tagAnchors.push({ pos: V(OX - 1.2, -10, z0 + 0.6), text: f === 0 ? "PB" : `P${f}`, cls: "room", code: "BLD" + f, bld: true });
+  }
+  rodBetween(BLD, V(OX + 21.75, -2.2, 0.3), V(OX + 21.75, -2.2, 6 * hf + 1.9), 0.12, netM);  // montante de red
+  tagAnchors.push({ pos: V(OX + 4, -5, 1.9), text: "Recepción · enfermería", cls: "room", code: "RECEP", bld: true });
+}
+
+
+/* ------------------------------------------------------------------ cables y bandeja */
+const CM = { apt: mat(0x1A9E4B, { r: 0.4, e: 0x0B4A23, ei: 0.5 }), chain: mat(0xE07A12, { r: 0.4, e: 0x5A3005, ei: 0.5 }), net: mat(0xD62839, { r: 0.4, e: 0x5A0B14, ei: 0.5 }) };
+const CR = { apt: 0.016, chain: 0.03, net: 0.034 };
+for (const c of M.cables) {
+  const pts = c.pts.map(p => V(...p)); const grp_ = new THREE.Group(); groups.cable.add(grp_);
+  const dashed = c.spec.includes("opcional");
+  for (let i = 0; i < pts.length - 1; i++) {
+    if (dashed) { const a = pts[i], b = pts[i + 1], L = a.distanceTo(b), n = Math.max(1, Math.floor(L / 0.12)); for (let k = 0; k < n; k++) { const t0 = k / n, t1 = Math.min(1, t0 + 0.7 / n); rodBetween(grp_, a.clone().lerp(b, t0), a.clone().lerp(b, t1), CR[c.sys], CM[c.sys]); } }
+    else rodBetween(grp_, pts[i], pts[i + 1], CR[c.sys], CM[c.sys]);
+    const j = new THREE.Mesh(new THREE.SphereGeometry(CR[c.sys] * 1.05, 10, 8), CM[c.sys]); j.position.copy(pts[i]); grp_.add(j);
+  }
+  for (const e of [pts[0], pts[pts.length - 1]]) { const s = new THREE.Mesh(new THREE.SphereGeometry(CR[c.sys] * 2.2, 12, 10), CM[c.sys]); s.position.copy(e); grp_.add(s); }
+  pickable(grp_, { cable: c });
+}
+const TRAY = mat(0xB9C0C8, { r: 0.5, m: 0.5, t: 0.55 });
+const XE = M.meta.x_end;
+box(groups.tray, XE / 2, 1.0, M.meta.tray - 0.05, XE - 1.0, 1.1, 0.012, TRAY, false);
+for (const s of [0.45, 1.55]) box(groups.tray, XE / 2, s, M.meta.tray - 0.05, XE - 1.0, 0.012, 0.07, TRAY, false);
+
+
+/* ------------------------------------------------------------------ etiquetas */
+for (const r of M.rooms) {
+  if (r.kind === "corridor" || r.kind === "hall" || r.kind === "store") continue;
+  const xs = r.poly.map(p => p[0]), ys = r.poly.map(p => p[1]);
+  const cx = (Math.min(...xs) + Math.max(...xs)) / 2, cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+  if (r.kind === "apt") { const north = Math.min(...ys) > 0; tagAnchors.push({ pos: V(cx, north ? Math.max(...ys) - 1 : Math.min(...ys) + 1, 3.2), text: `${r.name} · ${r.typ}`, cls: "room apt", code: r.code, apt: true }); continue; }
+  tagAnchors.push({ pos: V(cx, cy, 2.9), text: r.name, cls: "room", code: r.code, sub: true });
+}
+const tagLayer = document.getElementById("tags");
+for (const a of tagAnchors) { const el = document.createElement("div"); el.className = "tag " + a.cls; el.textContent = a.text; tagLayer.appendChild(el); a.el = el; }
+const RN = {
+  en: { "Ascensor": "Lift", "Baño": "Bathroom", "Baño principal": "Main bathroom", "Baño visitas": "Guest bathroom", "Cocina": "Kitchen", "Comunicaciones": "Comms room", "Depósito": "Storage", "Dormitorio": "Bedroom", "Dormitorio 2": "Bedroom 2", "Dormitorio principal": "Main bedroom", "Hall": "Hall", "Living": "Living room", "Pasillo": "Corridor", "Shafts / instalaciones": "Shafts", "PB": "GF", "Recepción · enfermería": "Reception · nurse desk", "Departamento": "Apartment", "Servidor ACE51010103": "Server ACE51010103" },
+  he: { "Ascensor": "מעלית", "Baño": "חדר רחצה", "Baño principal": "חדר רחצה ראשי", "Baño visitas": "שירותי אורחים", "Cocina": "מטבח", "Comunicaciones": "חדר תקשורת", "Depósito": "מחסן", "Dormitorio": "חדר שינה", "Dormitorio 2": "חדר שינה 2", "Dormitorio principal": "חדר שינה ראשי", "Hall": "מבואה", "Living": "סלון", "Pasillo": "מסדרון", "Shafts / instalaciones": "פירים", "PB": "קרקע", "Recepción · enfermería": "קבלה · עמדת אחות", "Departamento": "דירה", "Servidor ACE51010103": "שרת ACE51010103" } };
+const ROOM_NAMES = { en: {}, he: {} };
+for (const a of tagAnchors) if (a.cls.startsWith("room")) for (const L of ["en", "he"]) {
+  let t = RN[L][a.text]; if (!t) { const m = a.text.match(/^Departamento (\d+) · (\w)$/); t = m ? `${RN[L].Departamento} ${m[1]} · ${m[2]}` : a.text.replace(/^P(\d)$/, L === "en" ? "F$1" : "קומה $1"); }
+  ROOM_NAMES[L][a.code] = t; }
+let showTags = true;
+const _v = new THREE.Vector3();
+const occ = new THREE.Raycaster();
+function occluded(pos) {
+  const dir = pos.clone().sub(camera.position); const L = dir.length(); occ.set(camera.position, dir.normalize()); occ.far = L - 0.3;
+  return occ.intersectObjects(wallMeshes.filter(m => m.visible), false).length > 0;
+}
+function placeTags() {
+  if (CLEAN) { for (const a of tagAnchors) a.el.hidden = true; return; }
+  const w = renderer.domElement.clientWidth, h = renderer.domElement.clientHeight;
+  for (const a of tagAnchors) {
+    let vis = showTags && (BLD.visible ? !!a.bld : !a.bld) && (a.cls.startsWith("room") || wiring || a.type === "rack" || a.type === "tablet");
+    const dist = camera.position.distanceTo(a.pos);
+    if (a.sub && dist > 14) vis = false;
+    if (a.apt && dist < 8) vis = false;
+    _v.copy(a.pos).project(camera);
+    if (!vis || _v.z > 1 || _v.z < -1 || Math.abs(_v.x) > 1.05 || Math.abs(_v.y) > 1.05 || (a.cls === "dev" && dist > 26 && !a.bld) || (a.cls === "room" && dist < 2.0)) { a.el.hidden = true; continue; }
+    if (!a.bld && occluded(a.pos)) { a.el.hidden = true; continue; }
+    a.el.hidden = false; a.el.style.left = ((_v.x + 1) / 2 * w) + "px"; a.el.style.top = ((1 - _v.y) / 2 * h) + "px";
+  }
+}
+
+
+/* ------------------------------------------------------------------ modos */
+let wiring = false, lowWalls = false;
+function setOpacity(list, op) { for (const m of list) { m.transparent = op < 1 || m.userData.baseT; m.opacity = Math.min(op, m.userData.base); m.depthWrite = op >= 1 ? true : !m.transparent ? true : op > 0.6; m.needsUpdate = true; } }
+function applyMode() {
+  renderer.shadowMap.needsUpdate = true;
+  groups.cable.visible = groups.tray.visible = wiring && !BLD.visible;
+  setOpacity(furnMats, wiring ? 0.28 : 1); setOpacity(archMats.filter(m => m !== GLASS), wiring ? 0.55 : 1);
+  document.getElementById("m-eq").setAttribute("aria-pressed", String(!wiring)); document.getElementById("m-wi").setAttribute("aria-pressed", String(wiring));
+  renderLegend();
+}
+function applyWalls() {
+  renderer.shadowMap.needsUpdate = true;
+  for (const m of wallMeshes) {
+    const { z0, z1 } = m.userData.wall; const top = lowWalls ? Math.min(z1, 1.1) : z1;
+    if (top <= z0) { m.visible = false; continue; } m.visible = true;
+    m.scale.y = (top - z0) / (z1 - z0); m.position.y = z0 + (top - z0) / 2;
+  }
+  groups.doors.visible = groups.win.visible = !lowWalls && !BLD.visible;
+  document.getElementById("cut").setAttribute("aria-pressed", String(lowWalls));
+}
+function applyScenario() {
+  const s = SCEN[scenario];
+  for (const [id, o] of Object.entries(lpMeshes)) {
+    const st = s[id]; const c = st ? LP_COL[st] : null;
+    o.mat.color.setHex(c ?? 0xE9ECEF); o.mat.emissive.setHex(c ?? 0x000000); o.light.color.setHex(c ?? 0xffffff); o.light.intensity = c ? 1.6 : 0;
+  }
+  refreshScreens();
+}
+
+/* ------------------------------------------------------------------ vistas y recorrido */
+const VIEWS = {
+  iso: [[12, -24, 26], [15, 1, 0]], top: [[15, 1, 40], [15, 1.1, 0]], corr: [[29.4, 1.0, 1.65], [8, 1.0, 1.4]],
+  living: [[3.9, 11.4, 1.7], [0.3, 8.0, 1.0]], bed: [[7.6, 9.5, 1.75], [5.2, 11.6, 0.8]], bath: [[9.9, 9.9, 4.6], [7.5, 6.3, 0.4]],
+  typeB: [[15, -2.5, 10.5], [15, 7.2, 0.3]], rack: [[24.6, 2.6, 4.2], [21.3, -1.7, 0.9]], building: [[30, -42, 26], [61, 1, 13]], aptw: [[5.5, -4.5, 12.5], [5.5, 7.2, 0.3]] };
+function showBld(b) { BLD.visible = b; for (const k of ["arch", "furn", "dev"]) groups[k].visible = !b; groups.cable.visible = groups.tray.visible = wiring && !b; groups.doors.visible = groups.win.visible = !b && !lowWalls; if (b) groups.ceil.visible = false; renderer.shadowMap.needsUpdate = true; }
+function setView(k) { const [p, t] = VIEWS[k]; lowWalls = ["iso", "top", "typeB", "bath", "rack"].includes(k) || wiring; applyWalls(); showBld(k === "building"); camera.position.copy(V(...p)); controls.target.copy(V(...t)); controls.update(); }
+const KEYS = [ // [t, pos, target, modo, escenario, rótulo]
+  [0, [12, -24, 26], [15, 1, 0], "eq", "idle", "Migdalei Yam a Tijon – piso tipo con 6 departamentos"],
+  [7, [11.5, -6, 16], [6, 7, 0], "eq", "idle", "Departamentos 1 (tipo A) y 2 (tipo B)"],
+  [13, [5.0, 0.6, 1.65], [5.3, 4.5, 1.4], "eq", "idle", "Entrada al departamento 1"],
+  [17, [5.0, 3.7, 1.6], [5.6, 2.1, 1.35], "eq", "idle", "Presencia / cancelación junto a la puerta (opcional)"],
+  [21, [4.2, 6.8, 1.65], [0.6, 9.5, 1.0], "eq", "idle", "Living con cocina integrada"],
+  [26, [1.7, 9.7, 1.5], [0.15, 8.6, 1.3], "eq", "call", "Tablet Android: llamada y voz con enfermería"],
+  [31, [3.4, 7.4, 1.65], [5.05, 8.2, 1.5], "eq", "call", ""],
+  [33, [5.05, 7.4, 1.65], [5.05, 9.8, 1.5], "eq", "voice", ""],
+  [35, [5.05, 9.1, 1.65], [7.0, 9.5, 1.4], "eq", "voice", ""],
+  [37, [7.6, 9.5, 1.75], [5.2, 11.6, 0.9], "eq", "voice", "Dormitorio principal: llamada con voz ACE82182451"],
+  [42, [8.05, 9.2, 1.65], [8.05, 7.6, 1.4], "eq", "voice", ""],
+  [44, [8.05, 7.9, 1.65], [7.0, 7.7, 1.2], "eq", "voice", "Baño en suite: tiradores en inodoro y ducha"],
+  [48, [7.9, 8.0, 1.7], [8.5, 6.6, 1.5], "eq", "voice", ""],
+  [51, [8.05, 7.9, 1.65], [7.0, 9.6, 1.5], "eq", "voice", ""],
+  [52.5, [8.05, 9.2, 1.65], [5.0, 9.45, 1.5], "eq", "idle", ""],
+  [54.5, [5.05, 9.3, 1.65], [5.05, 6.0, 1.5], "eq", "idle", ""],
+  [56, [5.05, 7.4, 1.65], [5.3, 5.0, 1.5], "eq", "idle", ""],
+  [57.5, [5.3, 5.1, 1.65], [7.4, 5.1, 1.5], "eq", "idle", ""],
+  [59, [7.4, 5.2, 1.65], [7.4, 3.0, 1.2], "eq", "idle", "Baño de visitas con ducha"],
+  [63, [15, -2.5, 10.5], [15, 7.2, 0.3], "eq", "idle", "Departamento 2 – tipo B: un dormitorio y un baño"],
+  [69, [24.6, 2.6, 4.2], [21.3, -1.7, 0.9], "eq", "idle", "Sala de comunicaciones: 2 Buscomm + switch PoE"],
+  [74, [24.6, 2.6, 4.2], [21.3, -1.7, 0.9], "wi", "idle", "Modo cableado – todo Cat6/Cat7 y PoE"],
+  [79, [5.5, -4.5, 12.5], [5.5, 7.2, 0.3], "wi", "idle", "Radial: cada elemento al LCom del departamento"],
+  [87, [15, -20, 18], [15, 1, 1], "wi", "idle", "Cadena LCom → LCom → LCom → Buscomm"],
+  [94, [30, -42, 26], [61, 1, 13], "bld", "idle", "Switches encadenados por el montante hasta el servidor de PB"],
+  [101, [44, -38, 22], [61, 1, 13], "bld", "idle", ""] ];
+
+const DUR = KEYS[KEYS.length - 1][0];
+const ease = u => u * u * u * (u * (u * 6 - 15) + 10);
+function poseAt(t) {
+  t = Math.max(0, Math.min(DUR, t));
+  let i = 0; while (i < KEYS.length - 2 && KEYS[i + 1][0] <= t) i++;
+  const a = KEYS[i], b = KEYS[i + 1]; const u = ease((t - a[0]) / Math.max(1e-6, b[0] - a[0]));
+  const p = V(...a[1]).lerp(V(...b[1]), u), q = V(...a[2]).lerp(V(...b[2]), u);
+  const lab = a[5];
+  return { p, q, mode: a[3], scen: a[4], lab };
+}
+let playing = false, playT = 0, lastTs = 0;
+const tl = document.getElementById("tl");
+function applyPose(t) {
+  const s = poseAt(t);
+  camera.position.copy(s.p); controls.target.copy(s.q); camera.lookAt(s.q);
+  const w = s.mode === "wi"; if (w !== wiring) { wiring = w; applyMode(); }
+  const b = s.mode === "bld"; if (b !== BLD.visible) showBld(b);
+  const lw = w || s.p.y > 3; if (lw !== lowWalls) { lowWalls = lw; applyWalls(); }
+  if (s.scen !== scenario) { scenario = s.scen; applyScenario(); }
+  tl.hidden = !s.lab || CLEAN; tl.innerHTML = s.lab ? `${trCap(s.lab)}<small>${fmt(t)} / ${fmt(DUR)}</small>` : "";
+}
+const CAPS = {"Migdalei Yam a Tijon – piso tipo con 6 departamentos": {"en": "Migdalei Yam a Tijon – typical floor with 6 apartments", "he": "מגדלי ים התיכון – קומה טיפוסית עם 6 דירות"}, "Departamentos 1 (tipo A) y 2 (tipo B)": {"en": "Apartments 1 (type A) and 2 (type B)", "he": "דירות 1 (סוג A) ו-2 (סוג B)"}, "Entrada al departamento 1": {"en": "Entrance to apartment 1", "he": "כניסה לדירה 1"}, "Presencia / cancelación junto a la puerta (opcional)": {"en": "Presence / cancel next to the door (optional)", "he": "נוכחות / ביטול ליד הדלת (אופציונלי)"}, "Living con cocina integrada": {"en": "Living room with open kitchen", "he": "סלון עם מטבח פתוח"}, "Tablet Android: llamada y voz con enfermería": {"en": "Android tablet: call and voice with the nurse", "he": "טאבלט אנדרואיד: קריאה ודיבור עם האחות"}, "Dormitorio principal: llamada con voz ACE82182451": {"en": "Main bedroom: voice call ACE82182451", "he": "חדר שינה ראשי: קריאה קולית ACE82182451"}, "Baño en suite: tiradores en inodoro y ducha": {"en": "En-suite bathroom: pull-cords at toilet and shower", "he": "חדר רחצה צמוד: משיכות חבל באסלה ובמקלחת"}, "Baño de visitas con ducha": {"en": "Guest bathroom with shower", "he": "שירותי אורחים עם מקלחת"}, "Departamento 2 – tipo B: un dormitorio y un baño": {"en": "Apartment 2 – type B: one bedroom and one bathroom", "he": "דירה 2 – סוג B: חדר שינה אחד וחדר רחצה אחד"}, "Sala de comunicaciones: 2 Buscomm + switch PoE": {"en": "Comms room: 2 Buscomm + PoE switch", "he": "חדר תקשורת: 2 Buscomm + מתג PoE"}, "Modo cableado – todo Cat6/Cat7 y PoE": {"en": "Wiring mode – all Cat6/Cat7 and PoE", "he": "מצב חיווט – Cat6/Cat7 ו-PoE בלבד"}, "Radial: cada elemento al LCom del departamento": {"en": "Radial: each device to the apartment LCom", "he": "רדיאלי: כל התקן ל-LCom של הדירה"}, "Cadena LCom → LCom → LCom → Buscomm": {"en": "Chain LCom → LCom → LCom → Buscomm", "he": "שרשרת LCom ← LCom ← LCom ← Buscomm"}, "Switches encadenados por el montante hasta el servidor de PB": {"en": "Switches chained up the riser to the ground-floor server", "he": "מתגים בשרשרת לאורך העמוד עד השרת בקומת הקרקע"}, "1 por departamento": {"en": "1 per apartment", "he": "1 לכל דירה"}, "1 por piso + PB": {"en": "1 per floor + GF", "he": "1 לכל קומה + קרקע"}, "1.  Departamento 1 – tipo A, aprox. 110 m².": {"en": "1.  Apartment 1 – type A, approx. 110 m².", "he": "1.  דירה 1 – סוג A, כ-110 מ\"ר."}, "1.  Departamento 2 – tipo B, aprox. 80 m².": {"en": "1.  Apartment 2 – type B, approx. 80 m².", "he": "1.  דירה 2 – סוג B, כ-80 מ\"ר."}, "1.  Planta baja: recepción con el puesto de\nenfermería (teléfono ACE52190200) y el\ngabinete principal con el servidor.": {"en": "1.  Ground floor: reception with the nurse\ndesk (phone ACE52190200) and the main\nrack with the server.", "he": "1.  קומת קרקע: קבלה עם עמדת האחות\n(טלפון ACE52190200) והארון הראשי\nעם השרת."}, "2 por departamento": {"en": "2 per apartment", "he": "2 לכל דירה"}, "2 por piso (3 LCom c/u)": {"en": "2 per floor (3 LCom each)", "he": "2 לכל קומה (3 LCom לכל אחד)"}, "2 × Buscomm · Switch PoE": {"en": "2 × Buscomm · PoE switch", "he": "2 × Buscomm · מתג PoE"}, "2.  Cada departamento tiene un LCom en el\ncielorraso del hall: todos sus elementos\nllegan en radial con Cat6.": {"en": "2.  Each apartment has one LCom in the\nhall ceiling: all its devices reach it\nradially with Cat6.", "he": "2.  בכל דירה LCom בתקרת המבואה:\nכל ההתקנים מגיעים אליו\nבחיווט רדיאלי Cat6."}, "2.  Living con cocina integrada, un\ndormitorio y un baño con ducha.": {"en": "2.  Living room with open kitchen, one\nbedroom and one bathroom with shower.", "he": "2.  סלון עם מטבח פתוח, חדר שינה\nאחד וחדר רחצה עם מקלחת."}, "2.  Living con cocina integrada; baño de\nvisitas con ducha al lado del living.": {"en": "2.  Living room with open kitchen; guest\nbathroom with shower next to the living.", "he": "2.  סלון עם מטבח פתוח; שירותי\nאורחים עם מקלחת ליד הסלון."}, "2.  Tipo A: living + cocina abierta, dormitorio\nprincipal con baño en suite (ducha +\ninodoro), dormitorio 2, baño de visitas\ncon ducha, hall y depósito.": {"en": "2.  Type A: living + open kitchen, main\nbedroom with en-suite (shower +\ntoilet), bedroom 2, guest bathroom\nwith shower, hall and storage.", "he": "2.  סוג A: סלון + מטבח פתוח, חדר שינה\nראשי עם חדר רחצה צמוד (מקלחת +\nאסלה), חדר שינה 2, שירותי אורחים\nעם מקלחת, מבואה ומחסן."}, "237 m por piso": {"en": "237 m per floor", "he": "237 מ' לקומה"}, "3.  Dormitorio principal con baño en suite\n(ducha + inodoro) y dormitorio 2.": {"en": "3.  Main bedroom with en-suite bathroom\n(shower + toilet) and bedroom 2.", "he": "3.  חדר שינה ראשי עם חדר רחצה צמוד\n(מקלחת + אסלה) וחדר שינה 2."}, "3.  En cada piso: 2 Buscomm (3 LCom cada\nuna) y un switch PoE en el gabinete.": {"en": "3.  On each floor: 2 Buscomm (3 LCom\neach) and one PoE switch in the rack.", "he": "3.  בכל קומה: 2 Buscomm (3 LCom\nלכל אחד) ומתג PoE בארון."}, "3.  Llamada: tablet Android en el living,\nllamada con voz en el dormitorio,\ntiradores en inodoro y ducha.": {"en": "3.  Call: Android tablet in the living room,\nvoice call in the bedroom,\npull-cords at toilet and shower.", "he": "3.  קריאה: טאבלט אנדרואיד בסלון,\nקריאה קולית בחדר השינה,\nמשיכות חבל באסלה ובמקלחת."}, "3.  Los LCom se encadenan de a 3 hasta una\nBuscomm: norte 1-2-3 → Buscomm 1,\nsur 4-5-6 → Buscomm 2.": {"en": "3.  LComs are chained in threes to one\nBuscomm: north 1-2-3 → Buscomm 1,\nsouth 4-5-6 → Buscomm 2.", "he": "3.  ה-LCom משורשרים בשלשות ל-Buscomm:\nצפון 1-2-3 ← Buscomm 1,\nדרום 4-5-6 ← Buscomm 2."}, "3.  Tipo B: living + cocina abierta, un\ndormitorio y un baño con ducha.": {"en": "3.  Type B: living + open kitchen, one\nbedroom and one bathroom with shower.", "he": "3.  סוג B: סלון + מטבח פתוח, חדר\nשינה אחד וחדר רחצה עם מקלחת."}, "4.  Las 2 Buscomm y el switch PoE están en el\ngabinete de la sala de comunicaciones del\npiso, junto al ascensor.": {"en": "4.  The 2 Buscomm and the PoE switch are in\nthe rack of the floor comms room,\nnext to the lift.", "he": "4.  2 ה-Buscomm ומתג ה-PoE נמצאים\nבארון חדר התקשורת של הקומה,\nליד המעלית."}, "4.  Llamada: tablet Android en el living,\nllamada con voz en el dormitorio\nprincipal, tiradores en inodoro y\nducha del baño principal.": {"en": "4.  Call: Android tablet in the living room,\nvoice call in the main bedroom,\npull-cords at the toilet and\nshower of the main bathroom.", "he": "4.  קריאה: טאבלט אנדרואיד בסלון,\nקריאה קולית בחדר השינה הראשי,\nמשיכות חבל באסלה ובמקלחת\nשל חדר הרחצה הראשי."}, "4.  Los switches se encadenan piso a piso por\nel montante Cat6A / Cat7 hasta el\nservidor de PB.": {"en": "4.  Switches are chained floor to floor up\nthe Cat6A / Cat7 riser to the\nground-floor server.", "he": "4.  המתגים משורשרים מקומה לקומה\nבעמוד Cat6A / Cat7 עד\nהשרת בקומת הקרקע."}, "4.  Por departamento: tablet Android en el\nliving, llamada con voz en el dormitorio\nprincipal y 2 tiradores (inodoro y ducha)\nen el baño principal.": {"en": "4.  Per apartment: Android tablet in the\nliving room, voice call in the main\nbedroom and 2 pull-cords (toilet and\nshower) in the main bathroom.", "he": "4.  בכל דירה: טאבלט אנדרואיד בסלון,\nקריאה קולית בחדר השינה הראשי\nו-2 משיכות חבל (אסלה ומקלחת)\nבחדר הרחצה הראשי."}, "4.  Pulsador de presencia / cancelación\njunto a la puerta: opcional (punteado).": {"en": "4.  Presence / cancel button next to\nthe door: optional (dashed).", "he": "4.  לחצן נוכחות / ביטול ליד\nהדלת: אופציונלי (מקווקו)."}, "5.  Los switches de los 6 pisos se encadenan\npor el montante hasta el servidor de PB.\nEsquema vertical en lámina 05.": {"en": "5.  The switches of the 6 floors are chained\nup the riser to the ground-floor server.\nVertical diagram on sheet 05.", "he": "5.  המתגים של 6 הקומות משורשרים\nבעמוד עד השרת בקומת הקרקע.\nתרשים אנכי בגיליון 05."}, "5.  Pulsador de presencia / cancelación\njunto a la puerta: opcional (punteado).": {"en": "5.  Presence / cancel button next to\nthe door: optional (dashed).", "he": "5.  לחצן נוכחות / ביטול ליד\nהדלת: אופציונלי (מקווקו)."}, "5.  Pulsador de presencia / cancelación junto\na la puerta de entrada: opcional.": {"en": "5.  Presence / cancel button next to the\nentrance door: optional.", "he": "5.  לחצן נוכחות / ביטול ליד\nדלת הכניסה: אופציונלי."}, "5.  Todo el sistema es PoE.": {"en": "5.  The whole system is PoE.", "he": "5.  כל המערכת PoE."}, "5.  Todo en Cat6 radial al LCom del hall;\nel LCom sigue la cadena hacia la\nBuscomm del piso. Todo PoE.": {"en": "5.  All Cat6 radial to the hall LCom;\nthe LCom continues the chain to the\nfloor Buscomm. All PoE.", "he": "5.  הכול Cat6 רדיאלי ל-LCom במבואה;\nה-LCom ממשיך בשרשרת אל\nה-Buscomm של הקומה. הכול PoE."}, "6.  Las llamadas llegan por voz o como\nalarma al puesto de enfermería.": {"en": "6.  Calls reach the nurse desk as voice\nor as an alarm.", "he": "6.  הקריאות מגיעות לעמדת האחות\nבקול או כהתראה."}, "6.  Sala de comunicaciones del piso junto al\nascensor; escalera en el extremo oeste.": {"en": "6.  Floor comms room next to the lift;\nstairs at the west end.", "he": "6.  חדר תקשורת הקומה ליד המעלית;\nמדרגות בקצה המערבי."}, "6.  Todo el sistema es PoE: no requiere\ncircuitos eléctricos en los departamentos.": {"en": "6.  The whole system is PoE: no power\ncircuits needed in the apartments.", "he": "6.  כל המערכת PoE: אין צורך\nבמעגלי חשמל בדירות."}, "6.  Todo en Cat6 radial al LCom del hall;\nel LCom sigue la cadena hacia la\nBuscomm del piso. Todo PoE.": {"en": "6.  All Cat6 radial to the hall LCom;\nthe LCom continues the chain to the\nfloor Buscomm. All PoE.", "he": "6.  הכול Cat6 רדיאלי ל-LCom במבואה;\nה-LCom ממשיך בשרשרת אל\nה-Buscomm של הקומה. הכול PoE."}, "7.  Cantidades de anteproyecto: validar\ncon Advantecnia y en obra.": {"en": "7.  Preliminary quantities: validate\nwith Advantecnia and on site.", "he": "7.  כמויות ראשוניות: לאמת\nמול Advantecnia ובאתר."}, "7.  Mobiliario de vivienda (no hospitalario).": {"en": "7.  Residential furniture (not hospital).", "he": "7.  ריהוט ביתי (לא בית-חולים)."}, "7.  Sin luz de pasillo. La llamada llega por\nvoz / alarma al puesto de enfermería\nde la recepción (PB).": {"en": "7.  No corridor light. The call reaches the\nnurse desk at reception (GF) as\nvoice / alarm.", "he": "7.  ללא מנורת מסדרון. הקריאה מגיעה\nבקול / התראה לעמדת האחות\nבקבלה (קרקע)."}, "89 m por piso": {"en": "89 m per floor", "he": "89 מ' לקומה"}, "A · EQUIPAMIENTO  ·  1:45": {"en": "A · EQUIPMENT  ·  1:45", "he": "A · ציוד  ·  1:45"}, "A · EQUIPAMIENTO  ·  1:50": {"en": "A · EQUIPMENT  ·  1:50", "he": "A · ציוד  ·  1:50"}, "A · ESQUEMA VERTICAL DEL EDIFICIO (PB + 6 PISOS)": {"en": "A · BUILDING VERTICAL DIAGRAM (GF + 6 FLOORS)", "he": "A · תרשים אנכי של הבניין (קרקע + 6 קומות)"}, "ACEUCM6302 (por piso)": {"en": "ACEUCM6302 (per floor)", "he": "ACEUCM6302 (לכל קומה)"}, "Ascensor": {"en": "Lift", "he": "מעלית"}, "B · CABLEADO  ·  1:45": {"en": "B · WIRING  ·  1:45", "he": "B · חיווט  ·  1:45"}, "B · CABLEADO  ·  1:50": {"en": "B · WIRING  ·  1:50", "he": "B · חיווט  ·  1:50"}, "B · Edificio PB + 6 pisos – montante": {"en": "B · Building GF + 6 floors – riser", "he": "B · בניין קרקע + 6 קומות – עמוד"}, "B · Living con tablet Android": {"en": "B · Living room with Android tablet", "he": "B · סלון עם טאבלט אנדרואיד"}, "B · TOPOLOGÍA POR DEPARTAMENTO Y POR PISO": {"en": "B · TOPOLOGY PER APARTMENT AND PER FLOOR", "he": "B · טופולוגיה לפי דירה ולפי קומה"}, "Baño": {"en": "Bathroom", "he": "חדר רחצה"}, "Baño principal": {"en": "Main bathroom", "he": "חדר רחצה ראשי"}, "Baño visitas": {"en": "Guest bathroom", "he": "שירותי אורחים"}, "Baño – tirador ducha": {"en": "Bathroom – shower pull-cord", "he": "חדר רחצה – משיכת חבל מקלחת"}, "Baño – tirador inodoro": {"en": "Bathroom – toilet pull-cord", "he": "חדר רחצה – משיכת חבל אסלה"}, "C · ALTURAS DE MONTAJE (alzado esquemático)": {"en": "C · MOUNTING HEIGHTS (schematic elevation)", "he": "C · גובהי התקנה (חזית סכמטית)"}, "C · Departamento tipo A – radial al LCom": {"en": "C · Type A apartment – radial to the LCom", "he": "C · דירה סוג A – רדיאלי ל-LCom"}, "C · Dormitorio principal – llamada con voz": {"en": "C · Main bedroom – voice call", "he": "C · חדר שינה ראשי – קריאה קולית"}, "C · LISTA DE MATERIALES – EDIFICIO COMPLETO (36 departamentos)": {"en": "C · BILL OF MATERIALS – WHOLE BUILDING (36 apartments)", "he": "C · רשימת חומרים – כל הבניין (36 דירות)"}, "CABLEADO – TODO Cat6 / Cat7 Y PoE (sin electricidad para el sistema)": {"en": "WIRING – ALL Cat6 / Cat7 AND PoE (no mains power for the system)", "he": "חיווט – הכול Cat6 / Cat7 ו-PoE (ללא חשמל למערכת)"}, "CABLES (piso tipo × 6, + 15 % de reserva)": {"en": "CABLES (typical floor × 6, + 15 % spare)", "he": "כבלים (קומה טיפוסית × 6, + 15% רזרבה)"}, "Cat6 / Cat7 cadena LCom → Buscomm (naranja)": {"en": "Cat6 / Cat7 chain LCom → Buscomm (orange)", "he": "Cat6 / Cat7 שרשרת LCom ← Buscomm (כתום)"}, "Cat6 / Cat7 en cadena: LCom → LCom → LCom → Buscomm (3 por Buscomm)": {"en": "Cat6 / Cat7 chain: LCom → LCom → LCom → Buscomm (3 per Buscomm)", "he": "Cat6 / Cat7 בשרשרת: LCom ← LCom ← LCom ← Buscomm (3 לכל Buscomm)"}, "Cat6 al pulsador opcional de presencia / cancelación": {"en": "Cat6 to the optional presence / cancel button", "he": "Cat6 ללחצן נוכחות / ביטול אופציונלי"}, "Cat6 radial dentro de los departamentos (verde)": {"en": "Cat6 radial inside the apartments (green)", "he": "Cat6 רדיאלי בתוך הדירות (ירוק)"}, "Cat6 radial: cada elemento del departamento → su LCom": {"en": "Cat6 radial: each apartment device → its LCom", "he": "Cat6 רדיאלי: כל התקן בדירה ← ה-LCom שלה"}, "Cat6A / Cat7 gabinete + montante 7 niveles (rojo)": {"en": "Cat6A / Cat7 rack + riser, 7 levels (red)", "he": "Cat6A / Cat7 ארון + עמוד 7 מפלסים (אדום)"}, "Cat6A / Cat7 red: Buscomm → switch del piso → montante → servidor (PB)": {"en": "Cat6A / Cat7 network: Buscomm → floor switch → riser → server (GF)", "he": "Cat6A / Cat7 רשת: Buscomm ← מתג קומה ← עמוד ← שרת (קרקע)"}, "Cocina": {"en": "Kitchen", "he": "מטבח"}, "Comunicaciones": {"en": "Comms room", "he": "חדר תקשורת"}, "Concentrador de departamento – ACE71610003": {"en": "Apartment hub – ACE71610003", "he": "מרכז דירה – ACE71610003"}, "D · Baño principal – tiradores inodoro y ducha": {"en": "D · Main bathroom – toilet and shower pull-cords", "he": "D · חדר רחצה ראשי – משיכות חבל באסלה ובמקלחת"}, "DEPARTAMENTO TIPO A – DETALLE": {"en": "TYPE A APARTMENT – DETAIL", "he": "דירה סוג A – פרט"}, "DEPARTAMENTO TIPO B – DETALLE": {"en": "TYPE B APARTMENT – DETAIL", "he": "דירה סוג B – פרט"}, "Depósito": {"en": "Storage", "he": "מחסן"}, "Dormitorio": {"en": "Bedroom", "he": "חדר שינה"}, "Dormitorio 2": {"en": "Bedroom 2", "he": "חדר שינה 2"}, "Dormitorio principal": {"en": "Main bedroom", "he": "חדר שינה ראשי"}, "Dormitorio – llamada con voz": {"en": "Bedroom – voice call", "he": "חדר שינה – קריאה קולית"}, "E · Departamento tipo B": {"en": "E · Type B apartment", "he": "E · דירה סוג B"}, "EN CADA DEPARTAMENTO (× 36)": {"en": "IN EACH APARTMENT (× 36)", "he": "בכל דירה (× 36)"}, "ESQUEMA VERTICAL, TOPOLOGÍA Y MATERIALES": {"en": "VERTICAL DIAGRAM, TOPOLOGY AND MATERIALS", "he": "תרשים אנכי, טופולוגיה וחומרים"}, "Entrada – presencia (opc.)": {"en": "Entrance – presence (opt.)", "he": "כניסה – נוכחות (אופ')"}, "F · Sala de comunicaciones del piso": {"en": "F · Floor comms room", "he": "F · חדר תקשורת הקומה"}, "GAB": {"en": "RACK", "he": "ארון"}, "GAB · 2× Buscomm · Switch": {"en": "RACK · 2× Buscomm · Switch", "he": "ארון · 2× Buscomm · מתג"}, "Hall": {"en": "Hall", "he": "מבואה"}, "Hall – LCom (cielorraso)": {"en": "Hall – LCom (ceiling)", "he": "מבואה – LCom (תקרה)"}, "LCom ACE71610003 · concentrador del departamento (cielorraso del hall)": {"en": "LCom ACE71610003 · apartment hub (hall ceiling)", "he": "LCom ACE71610003 · מרכז הדירה (תקרת המבואה)"}, "Living": {"en": "Living room", "he": "סלון"}, "Living – tablet": {"en": "Living room – tablet", "he": "סלון – טאבלט"}, "Llamada con voz ACE82182451": {"en": "Voice call ACE82182451", "he": "קריאה קולית ACE82182451"}, "Llamada de enfermería con voz – ACE82182451": {"en": "Voice nurse call – ACE82182451", "he": "קריאת אחות קולית – ACE82182451"}, "MIGDALEI YAM A TIJON · DEPARTAMENTOS TUTELADOS": {"en": "MIGDALEI YAM A TIJON · ASSISTED LIVING", "he": "מגדלי ים התיכון · דיור מוגן"}, "Montante\nCat6A / Cat7\n(switches\nencadenados)": {"en": "Riser\nCat6A / Cat7\n(chained\nswitches)", "he": "עמוד\nCat6A / Cat7\n(מתגים\nמשורשרים)"}, "PB": {"en": "GF", "he": "קרקע"}, "PISO TIPO – CABLEADO": {"en": "TYPICAL FLOOR – WIRING", "he": "קומה טיפוסית – חיווט"}, "PISO TIPO – EQUIPAMIENTO": {"en": "TYPICAL FLOOR – EQUIPMENT", "he": "קומה טיפוסית – ציוד"}, "POR PISO (× 6) Y PLANTA BAJA": {"en": "PER FLOOR (× 6) AND GROUND FLOOR", "he": "לכל קומה (× 6) וקומת קרקע"}, "PR opc.": {"en": "PR opt.", "he": "PR אופ'"}, "Pasillo": {"en": "Corridor", "he": "מסדרון"}, "Puesto de enfermería": {"en": "Nurse desk", "he": "עמדת אחות"}, "Recepción – puesto de enfermería": {"en": "Reception – nurse desk", "he": "קבלה – עמדת אחות"}, "S/E": {"en": "NTS", "he": "ללא קנ\"מ"}, "Shafts / instalaciones": {"en": "Shafts / services", "he": "פירים / מערכות"}, "Sistema de llamada de enfermería – PB + 6 pisos · 36 departamentos": {"en": "Nurse call system – GF + 6 floors · 36 apartments", "he": "מערכת קריאת אחות – קרקע + 6 קומות · 36 דירות"}, "Switch PoE ACEUCM6302": {"en": "PoE switch ACEUCM6302", "he": "מתג PoE ACEUCM6302"}, "Switch PoE – ACEUCM6302": {"en": "PoE switch – ACEUCM6302", "he": "מתג PoE – ACEUCM6302"}, "TAB · Tablet Android en el living – llamada y voz": {"en": "TAB · Android tablet in the living room – call and voice", "he": "TAB · טאבלט אנדרואיד בסלון – קריאה ודיבור"}, "TI / TD · Tirador inodoro / ducha ACE40320303W (baño principal, h 1,85 m)": {"en": "TI / TD · Toilet / shower pull-cord ACE40320303W (main bathroom, h 1.85 m)", "he": "TI / TD · משיכת חבל אסלה / מקלחת ACE40320303W (חדר רחצה ראשי, גובה 1.85 מ')"}, "Tablet Android (living)": {"en": "Android tablet (living room)", "he": "טאבלט אנדרואיד (סלון)"}, "Tablet Android de pared (living) – llamada y voz": {"en": "Wall-mounted Android tablet (living) – call and voice", "he": "טאבלט אנדרואיד על הקיר (סלון) – קריאה ודיבור"}, "Tirador baño / ducha – ACE40320303W": {"en": "Toilet / shower pull-cord – ACE40320303W", "he": "משיכת חבל אסלה / מקלחת – ACE40320303W"}, "Tirador ducha ACE40320303W": {"en": "Shower pull-cord ACE40320303W", "he": "משיכת חבל מקלחת ACE40320303W"}, "Tirador inodoro ACE40320303W": {"en": "Toilet pull-cord ACE40320303W", "he": "משיכת חבל אסלה ACE40320303W"}, "VISTAS 3D – CABLEADO Y EDIFICIO": {"en": "3D VIEWS – WIRING AND BUILDING", "he": "מבטים תלת-ממדיים – חיווט ובניין"}, "VISTAS 3D – EQUIPAMIENTO": {"en": "3D VIEWS – EQUIPMENT", "he": "מבטים תלת-ממדיים – ציוד"}, "VOZ": {"en": "VOICE", "he": "קול"}, "VOZ · Llamada de enfermería con voz ACE82182451 (dormitorio principal)": {"en": "VOICE · Voice nurse call ACE82182451 (main bedroom)", "he": "קול · קריאת אחות קולית ACE82182451 (חדר שינה ראשי)"}, "cadena de\n3 LCom": {"en": "chain of\n3 LCom", "he": "שרשרת של\n3 LCom"}, "dormitorio principal": {"en": "main bedroom", "he": "חדר שינה ראשי"}, "incluye montante": {"en": "includes riser", "he": "כולל עמוד"}, "montante\nentre pisos": {"en": "riser\nbetween floors", "he": "עמוד\nבין קומות"}, "opcional": {"en": "optional", "he": "אופציונלי"}, "radial Cat6 – 1 LCom por departamento": {"en": "Cat6 radial – 1 LCom per apartment", "he": "Cat6 רדיאלי – LCom אחד לכל דירה"}, "recepción PB": {"en": "GF reception", "he": "קבלה בקרקע"}, "◀ cadenas LCom → Buscomm (gabinete del piso) ▶": {"en": "◀ LCom → Buscomm chains (floor rack) ▶", "he": "◀ שרשראות LCom ← Buscomm (ארון הקומה) ▶"}, "P1": {"en": "F1", "he": "ק1"}, "P2": {"en": "F2", "he": "ק2"}, "P3": {"en": "F3", "he": "ק3"}, "P4": {"en": "F4", "he": "ק4"}, "P5": {"en": "F5", "he": "ק5"}, "P6": {"en": "F6", "he": "ק6"}, "Losa": {"en": "Slab", "he": "תקרה"}, "Teléfono de escritorio": {"en": "Desk phone", "he": "טלפון שולחני"}, "Servidor": {"en": "Server", "he": "שרת"}, "Muro exterior": {"en": "Exterior wall", "he": "קיר חיצוני"}, "Tabique": {"en": "Partition", "he": "מחיצה"}, "Ventana": {"en": "Window", "he": "חלון"}, "Puerta": {"en": "Door", "he": "דלת"}, "Tablet Android – llamada y voz (living)": {"en": "Android tablet – call and voice (living room)", "he": "טאבלט אנדרואיד – קריאה ודיבור (סלון)"}, "Llamada de enfermería con voz ACE82182451 (dormitorio)": {"en": "Voice nurse call ACE82182451 (bedroom)", "he": "קריאת אחות קולית ACE82182451 (חדר שינה)"}, "Presencia / cancelación (opcional)": {"en": "Presence / cancel (optional)", "he": "נוכחות / ביטול (אופציונלי)"}, "LCom ACE71610003 – concentrador del departamento": {"en": "LCom ACE71610003 – apartment hub", "he": "LCom ACE71610003 – מרכז הדירה"}, "Gabinete de comunicaciones del piso": {"en": "Floor comms rack", "he": "ארון תקשורת קומתי"}, "Buscomm ACE70810000 – departamentos 1-3": {"en": "Buscomm ACE70810000 – apartments 1-3", "he": "Buscomm ACE70810000 – דירות 1-3"}, "Buscomm ACE70810000 – departamentos 4-6": {"en": "Buscomm ACE70810000 – apartments 4-6", "he": "Buscomm ACE70810000 – דירות 4-6"}, "Switch PoE del piso ACEUCM6302": {"en": "Floor PoE switch ACEUCM6302", "he": "מתג PoE קומתי ACEUCM6302"}, "Montante vertical Cat6A/Cat7 al piso inferior / superior": {"en": "Cat6A/Cat7 vertical riser to the floor below / above", "he": "עמוד אנכי Cat6A/Cat7 לקומה מתחת / מעל"}, "Departamento 1": {"en": "Apartment 1", "he": "דירה 1"}, "Departamento 2": {"en": "Apartment 2", "he": "דירה 2"}, "Departamento 3": {"en": "Apartment 3", "he": "דירה 3"}, "Departamento 4": {"en": "Apartment 4", "he": "דירה 4"}, "Departamento 5": {"en": "Apartment 5", "he": "דירה 5"}, "Departamento 6": {"en": "Apartment 6", "he": "דירה 6"}, "3 LCom por Buscomm (norte 1-2-3, sur 4-5-6)": {"en": "3 LCom per Buscomm (north 1-2-3, south 4-5-6)", "he": "3 LCom לכל Buscomm (צפון 1-2-3, דרום 4-5-6)"}, "7 láminas A1: piso tipo, departamentos A y B, esquema vertical, materiales y vistas 3D": {"en": "7 A1 sheets: typical floor, apartments A and B, vertical diagram, materials and 3D views", "he": "7 גיליונות A1: קומה טיפוסית, דירות A ו-B, תרשים אנכי, חומרים ומבטים תלת-ממדיים"}, "Baño en suite con tirador en inodoro y en ducha (1,85 m)": {"en": "En-suite bathroom with pull-cord at toilet and shower (1.85 m)", "he": "חדר רחצה צמוד עם משיכת חבל באסלה ובמקלחת (1.85 מ')"}, "Baño principal y departamento tipo B": {"en": "Main bathroom and type B apartment", "he": "חדר רחצה ראשי ודירה סוג B"}, "Buscomm · ACE70810000": {"en": "Buscomm · ACE70810000", "he": "Buscomm · ACE70810000"}, "Buscomm → switch PoE del piso": {"en": "Buscomm → floor PoE switch", "he": "Buscomm ← מתג PoE קומתי"}, "Buscomm → switch → montante → servidor": {"en": "Buscomm → switch → riser → server", "he": "Buscomm ← מתג ← עמוד ← שרת"}, "Cable (6 pisos + 15 %)": {"en": "Cable (6 floors + 15 %)", "he": "כבל (6 קומות + 15%)"}, "Cableado en 3D – todo Cat6 / Cat7 y PoE": {"en": "3D wiring – all Cat6 / Cat7 and PoE", "he": "חיווט בתלת-ממד – הכול Cat6 / Cat7 ו-PoE"}, "Cada elemento del departamento a su LCom": {"en": "Each apartment device to its LCom", "he": "כל התקן בדירה ל-LCom שלה"}, "Cada piso: 3 departamentos tipo A y 3 tipo B intercalados, sala de comunicaciones junto al ascensor": {"en": "Each floor: 3 type A and 3 type B apartments mixed, comms room next to the lift", "he": "בכל קומה: 3 דירות סוג A ו-3 סוג B לסירוגין, חדר תקשורת ליד המעלית"}, "Cantidades de anteproyecto: validar con Advantecnia y en obra.": {"en": "Preliminary quantities: validate with Advantecnia and on site.", "he": "כמויות ראשוניות: לאמת מול Advantecnia ובאתר."}, "Cat6 / Cat7 cadena LCom (naranja)": {"en": "Cat6 / Cat7 LCom chain (orange)", "he": "Cat6 / Cat7 שרשרת LCom (כתום)"}, "Cat6 / Cat7 en cadena": {"en": "Cat6 / Cat7 chained", "he": "Cat6 / Cat7 בשרשרת"}, "Cat6 radial": {"en": "Cat6 radial", "he": "Cat6 רדיאלי"}, "Cat6 radial (verde)": {"en": "Cat6 radial (green)", "he": "Cat6 רדיאלי (ירוק)"}, "Cat6 radial hasta el LCom del departamento": {"en": "Cat6 radial to the apartment LCom", "he": "Cat6 רדיאלי עד ה-LCom של הדירה"}, "Cat6A / Cat7 red": {"en": "Cat6A / Cat7 network", "he": "Cat6A / Cat7 רשת"}, "Cat6A / Cat7 red + montante (rojo)": {"en": "Cat6A / Cat7 network + riser (red)", "he": "Cat6A / Cat7 רשת + עמוד (אדום)"}, "Departamento tipo A: living y dormitorio": {"en": "Type A apartment: living room and bedroom", "he": "דירה סוג A: סלון וחדר שינה"}, "Departamentos tutelados · Planta baja + 6 pisos · 36 departamentos": {"en": "Assisted living · Ground floor + 6 floors · 36 apartments", "he": "דיור מוגן · קומת קרקע + 6 קומות · 36 דירות"}, "El residente llama desde la tablet, la pared o el tirador": {"en": "The resident calls from the tablet, the wall unit or the pull-cord", "he": "הדייר קורא מהטאבלט, מהיחידה שעל הקיר או ממשיכת החבל"}, "En cada piso: 2 Buscomm ACE70810000 y un switch PoE ACEUCM6302. Los switches se encadenan por el montante hasta el servidor ACE51010103 de la planta baja, junto al puesto de enfermería de la recepción (teléfono ACE52190200).": {"en": "On each floor: 2 Buscomm ACE70810000 and one PoE switch ACEUCM6302. The switches are chained up the riser to the ground-floor server ACE51010103, next to the nurse desk at reception (phone ACE52190200).", "he": "בכל קומה: 2 Buscomm ACE70810000 ומתג PoE ACEUCM6302. המתגים משורשרים לאורך העמוד עד השרת ACE51010103 בקומת הקרקע, ליד עמדת האחות בקבלה (טלפון ACE52190200)."}, "LCom ACE71610003 en el cielorraso del hall: concentra todo el departamento": {"en": "LCom ACE71610003 in the hall ceiling: hub for the whole apartment", "he": "LCom ACE71610003 בתקרת המבואה: מרכז לכל הדירה"}, "LCom · ACE71610003": {"en": "LCom · ACE71610003", "he": "LCom · ACE71610003"}, "LCom → LCom → LCom → Buscomm (cadena)": {"en": "LCom → LCom → LCom → Buscomm (chain)", "he": "LCom ← LCom ← LCom ← Buscomm (שרשרת)"}, "Lista de materiales – edificio completo": {"en": "Bill of materials – whole building", "he": "רשימת חומרים – כל הבניין"}, "Living con cocina integrada y baño de visitas con ducha": {"en": "Living room with open kitchen and guest bathroom with shower", "he": "סלון עם מטבח פתוח ושירותי אורחים עם מקלחת"}, "Llamada con voz · ACE82182451": {"en": "Voice call · ACE82182451", "he": "קריאה קולית · ACE82182451"}, "Llamada de voz o alarma en el puesto de enfermería": {"en": "Voice call or alarm at the nurse desk", "he": "קריאה קולית או התראה בעמדת האחות"}, "Migdalei Yam a Tijon": {"en": "Migdalei Yam a Tijon", "he": "מגדלי ים התיכון"}, "Modelo BIM del edificio (PB + 6 pisos) para Revit": {"en": "BIM model of the building (GF + 6 floors) for Revit", "he": "מודל BIM של הבניין (קרקע + 6 קומות) עבור Revit"}, "Muebles de vivienda, tablet en el living, llamada con voz en el dormitorio, tiradores en el baño principal": {"en": "Residential furniture, tablet in the living room, voice call in the bedroom, pull-cords in the main bathroom", "he": "ריהוט ביתי, טאבלט בסלון, קריאה קולית בחדר השינה, משיכות חבל בחדר הרחצה הראשי"}, "Naranja · cadena LCom": {"en": "Orange · LCom chain", "he": "כתום · שרשרת LCom"}, "Plano CAD del piso tipo con capas por sistema; se abre en AutoCAD y se guarda como DWG": {"en": "CAD drawing of the typical floor with layers per system; opens in AutoCAD and saves as DWG", "he": "שרטוט CAD של הקומה הטיפוסית עם שכבות לפי מערכת; נפתח ב-AutoCAD ונשמר כ-DWG"}, "Pulsador de presencia / cancelación junto a la puerta de entrada (opcional)": {"en": "Presence / cancel button next to the entrance door (optional)", "he": "לחצן נוכחות / ביטול ליד דלת הכניסה (אופציונלי)"}, "Recorridos sobre cielorraso; bajadas embutidas en muro.": {"en": "Runs above the ceiling; drops concealed in the walls.", "he": "תוואים מעל התקרה; ירידות סמויות בקירות."}, "Rojo · red y montante": {"en": "Red · network and riser", "he": "אדום · רשת ועמוד"}, "Sala de comunicaciones y edificio": {"en": "Comms room and building", "he": "חדר תקשורת ובניין"}, "Sin electricidad": {"en": "No mains power", "he": "ללא חשמל"}, "Sistema de llamada de enfermería ACE BG · Advantecnia — planos 2D, 3D y cableado": {"en": "ACE BG · Advantecnia nurse call system — 2D and 3D plans and wiring", "he": "מערכת קריאת אחות ACE BG · Advantecnia — תוכניות דו-ממד, תלת-ממד וחיווט"}, "Switch PoE · ACEUCM6302": {"en": "PoE switch · ACEUCM6302", "he": "מתג PoE · ACEUCM6302"}, "Switches por el montante → servidor PB": {"en": "Switches up the riser → GF server", "he": "מתגים לאורך העמוד ← שרת בקרקע"}, "Tablet Android en la pared del living (1,30 m): llamada y conversación con enfermería": {"en": "Android tablet on the living-room wall (1.30 m): call and talk with the nurse", "he": "טאבלט אנדרואיד על קיר הסלון (1.30 מ'): קריאה ושיחה עם האחות"}, "Tipo B: living con cocina, un dormitorio y un baño con ducha; mismos dispositivos que el tipo A.": {"en": "Type B: living room with kitchen, one bedroom and one bathroom with shower; same devices as type A.", "he": "סוג B: סלון עם מטבח, חדר שינה אחד וחדר רחצה עם מקלחת; אותם התקנים כמו בסוג A."}, "Tirador baño / ducha · ACE40320303W": {"en": "Toilet / shower pull-cord · ACE40320303W", "he": "משיכת חבל אסלה / מקלחת · ACE40320303W"}, "Tiradores ACE40320303W en inodoro y ducha a 1,85 m, cordón hasta 0,20 m del piso.": {"en": "Pull-cords ACE40320303W at toilet and shower at 1.85 m, cord down to 0.20 m above the floor.", "he": "משיכות חבל ACE40320303W באסלה ובמקלחת בגובה 1.85 מ', החבל עד 0.20 מ' מהרצפה."}, "Todo PoE: no hay circuitos de 230 V para el sistema": {"en": "All PoE: no 230 V circuits for the system", "he": "הכול PoE: אין מעגלי 230V למערכת"}, "Topología: del departamento al puesto de enfermería": {"en": "Topology: from the apartment to the nurse desk", "he": "טופולוגיה: מהדירה לעמדת האחות"}, "Verde · Cat6 radial": {"en": "Green · Cat6 radial", "he": "ירוק · Cat6 רדיאלי"}, "Video del recorrido: departamento, sala de comunicaciones y edificio": {"en": "Walkthrough video: apartment, comms room and building", "he": "סרטון סיור: דירה, חדר תקשורת ובניין"}, "Visor web: equipamiento / cableado, recorrido y modo Caminar por pasillos y departamentos": {"en": "Web viewer: equipment / wiring, tour and Walk mode through corridors and apartments", "he": "מציג אינטרנטי: ציוד / חיווט, סיור ומצב הליכה במסדרונות ובדירות"}, "departamentos (6 por piso)": {"en": "apartments (6 per floor)", "he": "דירות (6 בכל קומה)"}, "llamadas con voz ACE82182451": {"en": "voice calls ACE82182451", "he": "קריאות קוליות ACE82182451"}, "tablets Android con llamada y voz": {"en": "Android tablets with call and voice", "he": "טאבלטים אנדרואיד עם קריאה ודיבור"}, "tiradores en inodoro y ducha": {"en": "pull-cords at toilets and showers", "he": "משיכות חבל באסלות ובמקלחות"}, "Servidor ACE51010103 · Teléfono ACE52190200": {"en": "Server ACE51010103 · Phone ACE52190200", "he": "שרת ACE51010103 · טלפון ACE52190200"}, "Piso tipo – equipamiento": {"en": "Typical floor – equipment", "he": "קומה טיפוסית – ציוד"}, "Piso tipo – cableado": {"en": "Typical floor – wiring", "he": "קומה טיפוסית – חיווט"}};
+const trCap = s => (LANG === "es" || !s) ? s : ((CAPS[s] && CAPS[s][LANG]) || s);
+const fmt = t => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
+function setPlaying(v) { playing = v; const b = document.getElementById("walk"); b.setAttribute("aria-pressed", String(v)); b.textContent = v ? T[LANG].stop : T[LANG].walk; controls.enabled = !v; if (!v) tl.hidden = true; else { playT = 0; lastTs = performance.now(); } }
+
+/* ------------------------------------------------------------------ UI */
+const $ = id => document.getElementById(id);
+function renderLegend() {
+  const L = T[LANG]; const rows = wiring ? L.wiL : L.eqL;
+  $("legend").innerHTML = `<h3>${wiring ? L.legWi : L.legEq}</h3><ul>` + rows.map(([c, k, txt]) =>
+    `<li>${k === "line" ? `<span class="sw" style="background:${c}"></span>` : k === "dash" ? `<span class="sw dash"></span>` : k === "tri" ? `<span class="tri"></span>` : `<span class="chip" style="background:${c}"></span>`}<span>${txt}</span></li>`).join("") +
+    `</ul><div class="hint">${L.hint}</div>`;
+}
+function renderUI() {
+  const L = T[LANG]; document.documentElement.lang = LANG; document.documentElement.dir = LANG === "he" ? "rtl" : "ltr";
+  $("t-title").textContent = L.title; $("t-sub").textContent = L.sub; $("m-eq").textContent = L.eq; $("m-wi").textContent = L.wi;
+  $("t-view").textContent = L.view; $("t-lights").textContent = L.lights; $("lbl").textContent = L.labels; $("cut").textContent = L.cut;
+  $("walk").textContent = playing ? L.stop : L.walk;
+  const v = $("view").value || "iso"; $("view").innerHTML = Object.entries(L.views).map(([k, t]) => `<option value="${k}">${t}</option>`).join(""); $("view").value = v;
+  $("scen").innerHTML = Object.entries(L.scen).map(([k, t]) => `<option value="${k}">${t}</option>`).join(""); $("scen").value = scenario;
+  document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === LANG)));
+  for (const a of tagAnchors) if (a.cls.startsWith("room")) a.el.textContent = LANG === "es" ? a.text : (ROOM_NAMES[LANG][a.code] || a.text);
+  renderLegend();
+}
+$("m-eq").onclick = () => { wiring = false; applyMode(); };
+$("m-wi").onclick = () => { wiring = true; applyMode(); };
+$("view").onchange = e => { setPlaying(false); if (fp) setFp(false); setView(e.target.value); };
+$("scen").onchange = e => { scenario = e.target.value; applyScenario(); };
+$("walk").onclick = () => { if (fp) setFp(false); setPlaying(!playing); };
+$("lbl").onclick = () => { showTags = !showTags; $("lbl").setAttribute("aria-pressed", String(showTags)); };
+$("cut").onclick = () => { lowWalls = !lowWalls; applyWalls(); };
+document.querySelectorAll("[data-lang]").forEach(b => b.onclick = () => { LANG = b.dataset.lang; renderUI(); fpUI(); docsUI(); });
+$("info-x").onclick = () => { $("info").hidden = true; };
+// selección
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(); let downAt = null;
+renderer.domElement.addEventListener("pointerdown", e => downAt = [e.clientX, e.clientY]);
+renderer.domElement.addEventListener("pointerup", e => {
+  if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 5) return;
+  const r = renderer.domElement.getBoundingClientRect(); mouse.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
+  ray.setFromCamera(mouse, camera);
+  const hits = ray.intersectObjects(pickables.filter(o => { let p = o; while (p) { if (!p.visible) return false; p = p.parent; } return true; }), false);
+  if (!hits.length) return; const info = hits[0].object.userData.info; const L = T[LANG];
+  if (info.cable) {
+    const c = info.cable; $("i-title").textContent = M.systems[c.sys]["name_" + (LANG === "en" ? "en" : LANG === "he" ? "he" : "es")];
+    $("i-dl").innerHTML = `<dt>${L.dt.spec}</dt><dd>${c.spec}</dd><dt>${L.dt.conn}</dt><dd>${c.label}</dd><dt>${L.dt.len}</dt><dd>${c.len.toFixed(1)} m</dd>`;
+  } else {
+    $("i-title").textContent = TYPE_NAME[LANG][info.type] || info.type;
+    $("i-dl").innerHTML = `<dt>${L.dt.id}</dt><dd>${info.id}</dd><dt>${L.dt.room}</dt><dd>${info.room}</dd><dt>${L.dt.h}</dt><dd>${info.p[2].toFixed(2)} m</dd><dt>${L.dt.type}</dt><dd>${info.label}</dd>` + (info.code ? `<dt>${L.dt.code}</dt><dd>${info.code}</dd>` : "");
+  }
+  $("info").style.borderTopColor = info.cable ? M.systems[info.cable.sys].color : "var(--accent)"; $("info").hidden = false;
+});
+["pointerdown", "wheel"].forEach(ev => renderer.domElement.addEventListener(ev, () => { if (playing) setPlaying(false); }, { passive: true }));
+
+/* ------------------------------------------------------------------ modo caminar (primera persona) */
+const FPT = { es: { on: "🚶 Caminar", off: "✕ Salir de caminar", go: "Ir a…", hint: "Flechas / W A S D: caminar · Arrastrar: mirar · Botones: caminar y girar" },
+  en: { on: "🚶 Walk", off: "✕ Exit walk", go: "Go to…", hint: "Arrows / W A S D: walk · Drag: look around · Buttons: walk and turn" },
+  he: { on: "🚶 הליכה", off: "✕ יציאה מהליכה", go: "עבור אל…", hint: "חיצים / W A S D: הליכה · גרירה: הסתכלות · כפתורים: הליכה וסיבוב" } };
+let fp = false, yaw = 0, pitch = 0, lastFpTs = 0; const keys = {}; const EYE = 1.6;
+const fpRay = new THREE.Raycaster();
+function fpLook() { const d = new THREE.Vector3(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch)); camera.lookAt(camera.position.clone().add(d)); }
+function fpFrom(pos, look) { camera.position.copy(pos); const d = look.clone().sub(pos); yaw = Math.atan2(d.x, d.z); pitch = Math.max(-1.2, Math.min(1.2, Math.atan2(d.y, Math.hypot(d.x, d.z)))); fpLook(); }
+function setFp(on) {
+  fp = on; if (on && playing) setPlaying(false);
+  document.body.classList.toggle("fpmode", on); $("pad").hidden = !on; $("fp").setAttribute("aria-pressed", String(on)); $("fp").textContent = on ? FPT[LANG].off : FPT[LANG].on;
+  renderer.domElement.classList.toggle("fpcur", on); controls.enabled = !on;
+  if (on) {
+    if (typeof showBld === "function") showBld(false);
+    lowWalls = false; applyWalls();
+    const [p, t] = VIEWS.corr;
+    if (camera.position.y > 2.4 || camera.position.y < 0.5) fpFrom(V(p[0], p[1], EYE), V(t[0], t[1], EYE));
+    else { camera.position.y = EYE; fpFrom(camera.position.clone(), controls.target.clone().setY(EYE)); }
+  } else { const d = new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw)); controls.target.copy(camera.position.clone().addScaledVector(d, 1.5)); controls.update(); }
+}
+function blocked(pos, dir, dist) {
+  for (const h of [0.45, 1.2]) {
+    fpRay.set(new THREE.Vector3(pos.x, h, pos.z), dir); fpRay.far = dist + 0.3;
+    if (fpRay.intersectObjects(wallMeshes.filter(m => m.visible), false).length) return true;
+  }
+  return false;
+}
+function fpStep(dt) {
+  const turn = (keys.L ? 1 : 0) - (keys.R ? 1 : 0), mv = (keys.F ? 1 : 0) - (keys.B ? 1 : 0), side = (keys.SL ? 1 : 0) - (keys.SR ? 1 : 0);
+  yaw += turn * 1.6 * dt;
+  const fwd = new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw)), lft = new THREE.Vector3(fwd.z, 0, -fwd.x);
+  const step = fwd.multiplyScalar(mv).add(lft.multiplyScalar(side));
+  if (step.lengthSq() > 0) {
+    step.normalize(); const d = 1.5 * dt;
+    if (!blocked(camera.position, step, d)) camera.position.addScaledVector(step, d);
+    else for (const [ax, comp] of [[new THREE.Vector3(Math.sign(step.x), 0, 0), Math.abs(step.x)], [new THREE.Vector3(0, 0, Math.sign(step.z)), Math.abs(step.z)]])
+      if (comp > 0.05 && !blocked(camera.position, ax, d * comp)) { camera.position.addScaledVector(ax, d * comp); break; }
+  }
+  camera.position.y = EYE; fpLook();
+}
+const KMAP = { ArrowUp: "F", KeyW: "F", ArrowDown: "B", KeyS: "B", ArrowLeft: "L", ArrowRight: "R", KeyA: "SL", KeyD: "SR", KeyQ: "L", KeyE: "R" };
+addEventListener("keydown", e => { if (!fp || e.target.tagName === "SELECT") return; const k = KMAP[e.code]; if (k) { keys[k] = true; e.preventDefault(); } });
+addEventListener("keyup", e => { const k = KMAP[e.code]; if (k) keys[k] = false; });
+addEventListener("blur", () => { for (const k in keys) keys[k] = false; });
+document.querySelectorAll("#pad button").forEach(b => {
+  const k = b.dataset.k;
+  b.addEventListener("pointerdown", e => { keys[k] = true; b.setPointerCapture(e.pointerId); e.preventDefault(); });
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach(ev => b.addEventListener(ev, () => { keys[k] = false; }));
+});
+let lookAt0 = null;
+renderer.domElement.addEventListener("pointerdown", e => { if (fp) lookAt0 = [e.clientX, e.clientY]; });
+addEventListener("pointermove", e => {
+  if (!fp || !lookAt0) return;
+  yaw -= (e.clientX - lookAt0[0]) * 0.005; pitch = Math.max(-1.2, Math.min(1.2, pitch - (e.clientY - lookAt0[1]) * 0.005));
+  lookAt0 = [e.clientX, e.clientY]; fpLook();
+});
+addEventListener("pointerup", () => { lookAt0 = null; });
+// "Ir a…": parado frente al equipo, mirándolo
+const GOTO = M.devices.filter(d => !["riser", "switch", "buscomm", "light_switch", "elec_panel"].includes(d.type));
+const FDIR = { N: [0, 1], S: [0, -1], E: [1, 0], W: [-1, 0] };
+function gotoDev(d) {
+  if (!fp) setFp(true);
+  const [x, y, z] = d.p; let [fx, fy] = FDIR[d.face] || [0, 0];
+  let dist = d.type === "rack" ? 1.6 : d.type === "headwall" ? 2.2 : 1.3;
+  if (!fx && !fy) { fx = 0; fy = -1; dist = 1.1; }
+  fpFrom(V(x + fx * dist, y + fy * dist, EYE), V(x, y, d.type === "rack" ? 1.2 : z)); showInfo(d);
+}
+function showInfo(info) {
+  const L = T[LANG]; $("i-title").textContent = TYPE_NAME[LANG][info.type] || info.type;
+  $("i-dl").innerHTML = `<dt>${L.dt.id}</dt><dd>${info.id}</dd><dt>${L.dt.room}</dt><dd>${info.room}</dd><dt>${L.dt.h}</dt><dd>${info.p[2].toFixed(2)} m</dd><dt>${L.dt.type}</dt><dd>${info.label}</dd>` + (info.code ? `<dt>${L.dt.code}</dt><dd>${info.code}</dd>` : "");
+  $("info").style.borderTopColor = "var(--accent)"; $("info").hidden = false;
+}
+function fpUI() {
+  $("fp").textContent = fp ? FPT[LANG].off : FPT[LANG].on; $("fphint").textContent = FPT[LANG].hint;
+  $("goto").innerHTML = `<option value="">${FPT[LANG].go}</option>` + GOTO.map((d, i) => `<option value="${i}">${d.id} · ${TYPE_NAME[LANG][d.type] || d.type}</option>`).join("");
+}
+$("fp").onclick = () => setFp(!fp);
+$("goto").onchange = e => { const v = e.target.value; if (v !== "") gotoDev(GOTO[+v]); e.target.value = ""; e.target.blur(); };
+fpUI();
+/* ------------------------------------------------------------------ documentos del proyecto */
+const DOCS = JSON.parse(document.getElementById("docs-data").textContent || "[]");
+const DT = { es: { btn: "📄 Documentos", t: "Documentos del proyecto", pdf: ["Planos 2D", "Láminas A1 en PDF"], pptx: ["Presentación", "PowerPoint"], mp4: ["Video del recorrido", "MP4"], dxf: ["Plano CAD", "DXF – en AutoCAD guardar como DWG"], ifc: ["Modelo BIM", "IFC – abrir en Revit"], md: ["Léeme", "Instrucciones"] },
+  en: { btn: "📄 Documents", t: "Project documents", pdf: ["2D plans", "A1 sheets, PDF"], pptx: ["Presentation", "PowerPoint"], mp4: ["Walkthrough video", "MP4"], dxf: ["CAD drawing", "DXF – save as DWG in AutoCAD"], ifc: ["BIM model", "IFC – open in Revit"], md: ["Read me", "Instructions"] },
+  he: { btn: "📄 מסמכים", t: "מסמכי הפרויקט", pdf: ["תוכניות דו-ממד", "גיליונות A1, PDF"], pptx: ["מצגת", "PowerPoint"], mp4: ["סרטון סיור", "MP4"], dxf: ["שרטוט CAD", "DXF – לשמור כ-DWG ב-AutoCAD"], ifc: ["מודל BIM", "IFC – לפתוח ב-Revit"], md: ["קרא אותי", "הוראות"] } };
+function docsUI() {
+  const L = DT[LANG]; $("docs").hidden = !DOCS.length; $("docs").textContent = L.btn; $("doc-t").textContent = L.t;
+  $("doc-list").innerHTML = DOCS.map(d => { const k = d.f.split(".").pop().toLowerCase(); const [a, b] = L[k] || [d.f, ""];
+    return `<li><a href="#" data-i="${DOCS.indexOf(d)}"><b>${k.toUpperCase()}</b><span>${a}<small>${b} · ${d.mb} MB</small></span></a></li>`; }).join("");
+  $("doc-list").querySelectorAll("a").forEach(a => a.onclick = e => { e.preventDefault(); openDoc(DOCS[+a.dataset.i]); });
+}
+async function openDoc(d) {
+  const k = d.f.split(".").pop().toLowerCase(), box = $("dv-body"); $("docview").hidden = false; $("dv-t").textContent = (DT[LANG][k] || [d.f])[0];
+  if (k === "mp4") box.innerHTML = `<video src="${d.f}" controls playsinline autoplay style="width:100%;max-height:78vh;background:#fff"></video>`;
+  else if (k === "pdf") box.innerHTML = `<iframe src="${d.f}" title="PDF" style="width:100%;height:78vh;border:0"></iframe>`;
+  else { const t = await (await fetch(d.f)).text(); box.innerHTML = `<pre style="white-space:pre-wrap;font:14px/1.5 var(--display);max-height:78vh;overflow:auto;margin:0" dir="auto"></pre>`; box.firstChild.textContent = t; }
+}
+$("docs").onclick = () => { $("docpanel").hidden = !$("docpanel").hidden; };
+$("doc-x").onclick = () => { $("docpanel").hidden = true; };
+$("dv-x").onclick = () => { $("docview").hidden = true; $("dv-body").innerHTML = ""; };
+docsUI();
+
+function resize() { const w = stage.clientWidth, h = stage.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+addEventListener("resize", resize); resize();
+applyMode(); applyWalls(); applyScenario(); renderUI(); setView("iso");
+if (location.hash === "#cableado") { wiring = true; applyMode(); }
+
+function updateCeil() { groups.ceil.visible = !BLD.visible && !wiring && !lowWalls && camera.position.y < M.meta.ceil - 0.05; }
+function frame(ts) {
+  if (playing) { playT += (ts - lastTs) / 1000; lastTs = ts; if (playT >= DUR) setPlaying(false); else applyPose(playT); }
+  else if (fp) fpStep(Math.min(0.05, (ts - (lastFpTs || ts)) / 1000));
+  else controls.update();
+  lastFpTs = ts;
+  updateCeil(); renderer.render(scene, camera); placeTags();
+  requestAnimationFrame(frame);
+}
+if (!CAPTURE) requestAnimationFrame(frame);
+// API para captura de video / imágenes
+window.__DUR = DUR;
+if (CAPTURE) renderer.shadowMap.autoUpdate = false;
+window.__render = (t) => { applyPose(t); updateCeil(); renderer.render(scene, camera); placeTags(); return true; };
+window.__still = (view, mode, scen, cut) => { tl.hidden = true; wiring = mode === "wi"; applyMode(); scenario = scen || "call"; applyScenario(); lowWalls = !!cut; applyWalls(); setView(view); camera.lookAt(controls.target); updateCeil(); renderer.shadowMap.needsUpdate = true; renderer.render(scene, camera); placeTags(); return true; };
+window.__ready = true;
+</script>

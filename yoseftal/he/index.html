@@ -1,0 +1,897 @@
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>מחלקה קריאת אחות 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: lienzo 3D a pantalla completa; barra de control flotante arriba, leyenda abajo-izquierda, ficha del dispositivo abajo-derecha. Look único claro (fondo blanco, preferencia del cliente). */
+:root{
+  --bg:#FFFFFF; --panel:#FFFFFF; --ink:#1F2630; --muted:#6B7480; --line:#DDE1E6; --soft:#F3F5F7;
+  --accent:#D9620B; --bus:#1A9E4B; --net:#D62839; --pwr:#1F66D1;
+  --display:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:var(--display);}
+body{overflow:hidden}
+#stage{position:fixed;inset:0;background:var(--bg)}
+#stage canvas{display:block;width:100%;height:100%;outline:none}
+.bar{position:fixed;left:16px;right:16px;top:calc(12px + env(safe-area-inset-top,0px));display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;
+  background:var(--panel);border:1px solid var(--line);padding:8px 12px;box-shadow:0 2px 10px rgba(30,40,55,.06);z-index:5}
+.brand{display:flex;flex-direction:column;gap:1px;margin-right:6px;min-width:0}
+.brand b{font-size:17px;font-weight:700;letter-spacing:.01em;line-height:1.1}
+.brand span{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.grp{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.grp label.cap{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-right:2px}
+button,select{font-family:var(--display);font-size:14px;font-weight:600;color:var(--ink);background:var(--soft);border:1px solid var(--line);padding:5px 10px;cursor:pointer;border-radius:3px}
+button:hover{border-color:#B9C0C8}
+button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+button.play{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.play[aria-pressed="true"]{background:#fff;color:var(--accent)}
+.seg{display:flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:#fff}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.seg button+button{border-left:1px solid var(--line)}
+.legend{position:fixed;left:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--panel);border:1px solid var(--line);padding:10px 12px;max-width:min(360px,calc(100% - 32px));z-index:4}
+.legend h3{margin:0 0 6px;font-size:12px;font-family:var(--mono);font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.legend ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.legend li{display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:center;font-size:13.5px;line-height:1.2}
+.sw{height:6px;border-radius:3px}
+.sw.dash{background:repeating-linear-gradient(90deg,var(--bus) 0 6px,transparent 6px 9px)!important}
+.chip{width:14px;height:14px;border:1px solid rgba(0,0,0,.25);justify-self:center}
+.tri{width:14px;height:14px;justify-self:center;border:1px solid rgba(0,0,0,.25);background:linear-gradient(90deg,#E53935 0 33%,#2E9F4F 33% 66%,#1E6BD6 66%)}
+.info{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--accent);padding:10px 14px;width:min(320px,calc(100% - 32px));z-index:4}
+.info h4{margin:0 0 4px;font-size:16px}
+.info dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:13px}
+.info dt{font-family:var(--mono);font-size:10.5px;color:var(--muted);text-transform:uppercase;padding-top:2px}
+.info dd{margin:0}
+.info .x{position:absolute;right:6px;top:4px;background:none;border:0;font-size:18px;color:var(--muted);padding:2px 6px}
+.hint{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:6px}
+.tag{position:absolute;transform:translate(-50%,-100%);font-size:12px;font-weight:600;white-space:nowrap;pointer-events:none;color:var(--ink);background:rgba(255,255,255,.92);border:1px solid var(--line);padding:1px 6px;z-index:3}
+.tag.room{font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-color:transparent;background:rgba(255,255,255,.75)}
+.tag.dev{font-family:var(--mono);font-size:10.5px;font-weight:500;border-color:#E8C9AE;color:#8A3E05}
+#tags{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:2}
+.timeline{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--panel);border:1px solid var(--line);padding:6px 12px;font-size:14px;font-weight:600;z-index:4;max-width:calc(100% - 32px);text-align:center}
+.timeline small{display:block;font-family:var(--mono);font-size:10px;color:var(--muted);font-weight:400}
+.loading{position:fixed;inset:0;display:grid;place-items:center;font-family:var(--mono);color:var(--muted);font-size:13px;z-index:1}
+[dir="rtl"] .legend li{direction:rtl}
+.pad{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:repeat(3,56px);grid-template-rows:56px 56px auto;gap:6px;z-index:6}
+.pad button{font-size:22px;padding:0;border-radius:8px;background:#fff;box-shadow:0 2px 8px rgba(30,40,55,.12);touch-action:none;user-select:none}
+.pad[hidden]{display:none}
+.pad button.b{grid-column:2}
+.pad button:active{background:var(--accent);color:#fff}
+.fphint{grid-column:1/4;font-family:var(--mono);font-size:10.5px;color:var(--muted);background:#fff;border:1px solid var(--line);padding:4px 6px;text-align:center}
+body.fpmode .legend{display:none}
+.docpanel{position:fixed;right:16px;top:120px;width:min(380px,calc(100% - 32px));background:#fff;border:1px solid var(--line);border-top:3px solid var(--accent);padding:12px 14px;z-index:7;box-shadow:0 6px 24px rgba(30,40,55,.12)}
+.docview{position:fixed;inset:0;background:rgba(240,242,245,.85);z-index:9;display:grid;place-items:center;padding:16px}
+.docview[hidden]{display:none}
+.dv-in{position:relative;background:#fff;border:1px solid var(--line);border-top:3px solid var(--accent);padding:12px 14px;width:min(1100px,100%)}
+.dv-in h4{margin:0 0 8px;font-size:17px}
+.dv-in .x{position:absolute;right:6px;top:4px;background:none;border:0;font-size:22px;color:var(--muted);padding:2px 8px}
+.docpanel h4{margin:0 0 8px;font-size:17px}
+.docpanel ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.docpanel a{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:center;text-decoration:none;color:var(--ink);border:1px solid var(--line);padding:8px 10px;border-radius:4px}
+.docpanel a:hover{border-color:var(--accent)}
+.docpanel b{font-family:var(--mono);font-size:11px;color:#fff;background:var(--accent);text-align:center;padding:3px 0;border-radius:3px}
+.docpanel small{display:block;color:var(--muted);font-size:12px}
+.docpanel .x{position:absolute;right:6px;top:4px;background:none;border:0;font-size:18px;color:var(--muted);padding:2px 6px}
+body.fpmode .info{bottom:auto;top:96px}
+#stage canvas.fpcur{cursor:grab}
+body.capture .bar,body.capture .legend,body.capture .info,body.capture .pad,body.capture .docpanel,body.capture .docview{display:none!important}
+@media (max-width:720px){.legend{display:none}.bar{gap:6px}.brand span{display:none}button,select{font-size:13px;padding:4px 8px}}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+
+<div id="stage"><div class="loading" id="loading">Cargando modelo 3D…</div></div>
+<div id="tags"></div>
+
+<div class="bar" role="toolbar" aria-label="Controles">
+  <div class="brand"><b id="t-title">Pabellón · Llamada de enfermería</b><span id="t-sub">ACE BG · Advantecnia · Modelo 3D</span></div>
+  <div class="grp"><div class="seg" role="group">
+    <button id="m-eq" aria-pressed="true"></button><button id="m-wi" aria-pressed="false"></button></div></div>
+  <div class="grp"><label class="cap" for="view" id="t-view"></label>
+    <select id="view"></select></div>
+  <div class="grp"><label class="cap" for="scen" id="t-lights"></label>
+    <select id="scen"></select></div>
+  <div class="grp">
+    <button id="walk" class="play" aria-pressed="false"></button>
+    <button id="lbl" aria-pressed="true"></button>
+    <button id="cut" aria-pressed="false"></button>
+    <button id="fp" class="play" aria-pressed="false"></button>
+    <select id="goto" aria-label="Ir a"></select>
+    <button id="docs" hidden></button>
+  </div>
+  <div class="grp" style="margin-left:auto"><div class="seg" role="group" aria-label="Idioma">
+    <button data-lang="es" aria-pressed="true">ES</button><button data-lang="en" aria-pressed="false">EN</button><button data-lang="he" aria-pressed="false">עב</button></div></div>
+</div>
+
+<div class="legend" id="legend"></div>
+<div class="info" id="info" hidden><button class="x" id="info-x" aria-label="Cerrar">×</button><h4 id="i-title"></h4><dl id="i-dl"></dl></div>
+<div class="timeline" id="tl" hidden></div>
+<div class="docpanel" id="docpanel" hidden><button class="x" id="doc-x" aria-label="Cerrar">×</button><h4 id="doc-t"></h4><ul id="doc-list"></ul></div>
+<div class="docview" id="docview" hidden><div class="dv-in"><button class="x" id="dv-x" aria-label="Cerrar">×</button><h4 id="dv-t"></h4><div id="dv-body"></div></div></div>
+<script type="application/json" id="docs-data">[{"f": "plans_2D_HE.pdf", "mb": 2.4}, {"f": "walkthrough_HE.mp4", "mb": 13.5}, {"f": "README_HE.md", "mb": 0.0}]</script>
+<div class="pad" id="pad" hidden><button data-k="L" aria-label="Girar izquierda">⟲</button><button data-k="F" aria-label="Adelante">▲</button><button data-k="R" aria-label="Girar derecha">⟳</button><button data-k="B" aria-label="Atrás" class="b">▼</button><div class="fphint" id="fphint"></div></div>
+
+<script type="application/json" id="model-data">{"meta":{"project":"Pabellón de internación – Sistema de llamada de enfermería","client":"ACE BG · Advantecnia","units":"m","wall_h":2.8,"ceil":2.5,"tray":2.6,"rack":{"smarthub":[0.53,1.2,1.55],"switch":[0.53,1.2,1.35],"server":[0.53,1.2,0.9],"psu":[0.53,1.2,1.75],"ups":[0.53,1.2,0.3]}},"walls":[{"a":[28.4,2.4],"b":[0.0,2.4],"t":0.15,"h":2.8,"ext":false,"openings":[{"lo":26.7,"hi":27.9,"z0":0.0,"z1":2.2,"kind":"door"},{"lo":20.7,"hi":21.9,"z0":0.0,"z1":2.2,"kind":"door"},{"lo":12.45,"hi":13.45,"z0":0.0,"z1":2.2,"kind":"door"},{"lo":10.3,"hi":11.5,"z0":0.0,"z1":2.2,"kind":"door"},{"lo":4.3,"hi":5.5,"z0":0.0,"z1":2.2,"kind":"door"}]},{"a":[28.4,10.8],"b":[0.0,10.8],"t":0.25,"h":2.8,"ext":true,"openings":[{"lo":24.2,"hi":26.6,"z0":0.9,"z1":2.2,"kind":"window"},{"lo":18.2,"hi":20.6,"z0":0.9,"z1":2.2,"kind":"window"},{"lo":13.0,"hi":15.4,"z0":0.9,"z1":2.2,"kind":"window"},{"lo":7.8,"hi":10.2,"z0":0.9,"z1":2.2,"kind":"window"},{"lo":1.8,"hi":4.2,"z0":0.9,"z1":2.2,"kind":"window"}]},{"a":[28.4,0.0],"b":[0.0,0.0],"t":0.15,"h":2.8,"ext":false,"openings":[{"lo":21.3,"hi":22.4,"z0":0.0,"z1":2.2,"kind":"door"},{"lo":15.2,"hi":16.15,"z0":0.0,"z1":2.2,"kind":"door"},{"lo":12.3,"hi":14.85,"z0":1.0,"z1":2.1,"kind":"window"}]},{"a":[28.4,-5.4],"b":[28.4,10.8],"t":0.25,"h":2.8,"ext":true,"openings":[{"lo":0.3,"hi":2.1,"z0":0.0,"z1":2.2,"kind":"door"}]},{"a":[0.0,0.0],"b":[0.0,10.8],"t":0.25,"h":2.8,"ext":true,"openings":[]},{"a":[22.4,2.4],"b":[22.4,10.8],"t":0.15,"h":2.8,"ext":false,"openings":[]},{"a":[16.4,2.4],"b":[16.4,10.8],"t":0.15,"h":2.8,"ext":false,"openings":[]},{"a":[12.0,2.4],"b":[12.0,10.8],"t":0.15,"h":2.8,"ext":false,"openings":[]},{"a":[6.0,2.4],"b":[6.0,10.8],"t":0.15,"h":2.8,"ext":false,"openings":[]},{"a":[28.4,-5.4],"b":[20.4,-5.4],"t":0.2,"h":2.8,"ext":true,"openings":[]},{"a":[20.4,-5.4],"b":[20.4,0.0],"t":0.15,"h":2.8,"ext":false,"openings":[]},{"a":[28.4,-1.5],"b":[20.4,-1.5],"t":0.12,"h":2.8,"ext":false,"openings":[{"lo":21.45,"hi":22.3,"z0":0.0,"z1":2.2,"kind":"door"},{"lo":23.8,"hi":24.7,"z0":0.0,"z1":2.2,"kind":"door"},{"lo":25.6,"hi":26.7,"z0":0.0,"z1":2.2,"kind":"door"}]},{"a":[22.9,-5.4],"b":[22.9,-1.5],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[25.2,-5.4],"b":[25.2,-1.5],"t":0.12,"h":2.8,"ext":false,"openings":[]},{"a":[16.4,-3.0],"b":[16.4,0],"t":0.15,"h":2.8,"ext":false,"openings":[]},{"a":[12.0,-3.0],"b":[12.0,0],"t":0.15,"h":2.8,"ext":false,"openings":[]},{"a":[16.4,-3.0],"b":[12.0,-3.0],"t":0.15,"h":2.8,"ext":false,"openings":[]}],"doors":[{"horiz":false,"axis":28.4,"lo":0.3,"hi":2.1,"hinge":"lo","swing":-1,"label":"Acceso al servicio","leaves":2,"t":0.25,"h":2.2},{"horiz":true,"axis":2.4,"lo":26.7,"hi":27.9,"hinge":"hi","swing":1,"label":"P1","leaves":1,"t":0.15,"h":2.2},{"horiz":true,"axis":2.4,"lo":20.7,"hi":21.9,"hinge":"hi","swing":1,"label":"P2","leaves":1,"t":0.15,"h":2.2},{"horiz":true,"axis":2.4,"lo":12.45,"hi":13.45,"hinge":"lo","swing":1,"label":"P3","leaves":1,"t":0.15,"h":2.2},{"horiz":true,"axis":2.4,"lo":10.3,"hi":11.5,"hinge":"hi","swing":1,"label":"P4","leaves":1,"t":0.15,"h":2.2},{"horiz":true,"axis":2.4,"lo":4.3,"hi":5.5,"hinge":"hi","swing":1,"label":"P5","leaves":1,"t":0.15,"h":2.2},{"horiz":true,"axis":0.0,"lo":21.3,"hi":22.4,"hinge":"lo","swing":-1,"label":"Acceso núcleo baños","leaves":1,"t":0.15,"h":2.2},{"horiz":true,"axis":-1.5,"lo":21.45,"hi":22.3,"hinge":"lo","swing":-1,"label":"B1","leaves":1,"t":0.12,"h":2.2},{"horiz":true,"axis":-1.5,"lo":23.8,"hi":24.7,"hinge":"hi","swing":-1,"label":"B2","leaves":1,"t":0.12,"h":2.2},{"horiz":true,"axis":-1.5,"lo":25.6,"hi":26.7,"hinge":"lo","swing":-1,"label":"B3","leaves":1,"t":0.12,"h":2.2},{"horiz":true,"axis":0.0,"lo":15.2,"hi":16.15,"hinge":"hi","swing":-1,"label":"Acceso enfermería","leaves":1,"t":0.15,"h":2.2}],"windows":[{"horiz":true,"axis":10.8,"lo":24.2,"hi":26.6,"z0":0.9,"z1":2.2,"t":0.25,"label":"Ventana H1"},{"horiz":true,"axis":10.8,"lo":18.2,"hi":20.6,"z0":0.9,"z1":2.2,"t":0.25,"label":"Ventana H2"},{"horiz":true,"axis":10.8,"lo":13.0,"hi":15.4,"z0":0.9,"z1":2.2,"t":0.25,"label":"Ventana OF"},{"horiz":true,"axis":10.8,"lo":7.8,"hi":10.2,"z0":0.9,"z1":2.2,"t":0.25,"label":"Ventana H3"},{"horiz":true,"axis":10.8,"lo":1.8,"hi":4.2,"z0":0.9,"z1":2.2,"t":0.25,"label":"Ventana H4"},{"horiz":true,"axis":0.0,"lo":12.3,"hi":14.85,"z0":1.0,"z1":2.1,"t":0.15,"label":"Ventana estación de enfermería"}],"items":[{"type":"bed","c":[23.695,4.0],"s":[2.2,1.0,0.6],"z":0.0,"rot":0,"label":"Cama 1","room":"H1","id":"H1-C1","head":"W","pear":[23.025,3.68]},{"type":"nightstand","c":[22.775,4.83],"s":[0.45,0.48,0.8],"z":0.0,"rot":0,"label":"Mesa de luz","room":"H1"},{"type":"overbed_table","c":[23.725,3.28],"s":[0.85,0.4,0.85],"z":0.0,"rot":0,"label":"","room":"H1"},{"type":"visitor_chair","c":[24.025,4.88],"s":[0.55,0.55,0.85],"z":0.0,"rot":0,"label":"","room":"H1"},{"type":"curtain","c":[23.962,2.75],"s":[2.9749999999999996,0.04,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H1","seg":[[25.45,2.75],[22.525,2.75]],"state":"open"},{"type":"curtain","c":[23.962,5.25],"s":[2.9749999999999996,0.04,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H1","seg":[[25.45,5.25],[22.525,5.25]],"state":"closed"},{"type":"curtain","c":[25.45,4.0],"s":[0.04,2.5,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H1","seg":[[25.45,2.75],[25.45,5.25]],"state":"open"},{"type":"bed","c":[23.695,6.5],"s":[2.2,1.0,0.6],"z":0.0,"rot":0,"label":"Cama 2","room":"H1","id":"H1-C2","head":"W","pear":[23.025,6.18]},{"type":"nightstand","c":[22.775,7.33],"s":[0.45,0.48,0.8],"z":0.0,"rot":0,"label":"Mesa de luz","room":"H1"},{"type":"overbed_table","c":[23.725,5.78],"s":[0.85,0.4,0.85],"z":0.0,"rot":0,"label":"","room":"H1"},{"type":"visitor_chair","c":[24.025,7.38],"s":[0.55,0.55,0.85],"z":0.0,"rot":0,"label":"","room":"H1"},{"type":"curtain","c":[23.962,7.75],"s":[2.9749999999999996,0.04,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H1","seg":[[25.45,7.75],[22.525,7.75]],"state":"closed"},{"type":"curtain","c":[25.45,6.5],"s":[0.04,2.5,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H1","seg":[[25.45,5.25],[25.45,7.75]],"state":"open"},{"type":"bed","c":[23.695,9.0],"s":[2.2,1.0,0.6],"z":0.0,"rot":0,"label":"Cama 3","room":"H1","id":"H1-C3","head":"W","pear":[23.025,8.68]},{"type":"nightstand","c":[22.775,9.83],"s":[0.45,0.48,0.8],"z":0.0,"rot":0,"label":"Mesa de luz","room":"H1"},{"type":"overbed_table","c":[23.725,8.28],"s":[0.85,0.4,0.85],"z":0.0,"rot":0,"label":"","room":"H1"},{"type":"visitor_chair","c":[24.025,9.88],"s":[0.55,0.55,0.85],"z":0.0,"rot":0,"label":"","room":"H1"},{"type":"curtain","c":[23.962,10.25],"s":[2.9749999999999996,0.04,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H1","seg":[[25.45,10.25],[22.525,10.25]],"state":"closed"},{"type":"curtain","c":[25.45,9.0],"s":[0.04,2.5,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H1","seg":[[25.45,7.75],[25.45,10.25]],"state":"open"},{"type":"curtain_track","c":[28.4,0],"s":[0,0,0],"z":2.42,"rot":0,"label":"","room":"H1","rails":[[[25.45,2.75],[22.525,2.75]],[[25.45,5.25],[22.525,5.25]],[[25.45,7.75],[22.525,7.75]],[[25.45,10.25],[22.525,10.25]],[[25.45,2.75],[25.45,10.25]]],"rods":[[25.45,2.75],[25.45,5.25],[25.45,7.75],[25.45,10.25],[23.9,2.75],[23.9,5.25],[23.9,7.75],[23.9,10.25]]},{"type":"sink","c":[28.0,3.3],"s":[0.45,0.55,0.85],"z":0.0,"rot":0,"label":"Lavamanos","room":"H1","wallside":"E"},{"type":"bed","c":[17.695,4.0],"s":[2.2,1.0,0.6],"z":0.0,"rot":0,"label":"Cama 1","room":"H2","id":"H2-C1","head":"W","pear":[17.025,3.68]},{"type":"nightstand","c":[16.775,4.83],"s":[0.45,0.48,0.8],"z":0.0,"rot":0,"label":"Mesa de luz","room":"H2"},{"type":"overbed_table","c":[17.725,3.28],"s":[0.85,0.4,0.85],"z":0.0,"rot":0,"label":"","room":"H2"},{"type":"visitor_chair","c":[18.025,4.88],"s":[0.55,0.55,0.85],"z":0.0,"rot":0,"label":"","room":"H2"},{"type":"curtain","c":[17.962,2.75],"s":[2.9750000000000014,0.04,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H2","seg":[[19.45,2.75],[16.525,2.75]],"state":"open"},{"type":"curtain","c":[17.962,5.25],"s":[2.9750000000000014,0.04,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H2","seg":[[19.45,5.25],[16.525,5.25]],"state":"closed"},{"type":"curtain","c":[19.45,4.0],"s":[0.04,2.5,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H2","seg":[[19.45,2.75],[19.45,5.25]],"state":"open"},{"type":"bed","c":[17.695,6.5],"s":[2.2,1.0,0.6],"z":0.0,"rot":0,"label":"Cama 2","room":"H2","id":"H2-C2","head":"W","pear":[17.025,6.18]},{"type":"nightstand","c":[16.775,7.33],"s":[0.45,0.48,0.8],"z":0.0,"rot":0,"label":"Mesa de luz","room":"H2"},{"type":"overbed_table","c":[17.725,5.78],"s":[0.85,0.4,0.85],"z":0.0,"rot":0,"label":"","room":"H2"},{"type":"visitor_chair","c":[18.025,7.38],"s":[0.55,0.55,0.85],"z":0.0,"rot":0,"label":"","room":"H2"},{"type":"curtain","c":[17.962,7.75],"s":[2.9750000000000014,0.04,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H2","seg":[[19.45,7.75],[16.525,7.75]],"state":"closed"},{"type":"curtain","c":[19.45,6.5],"s":[0.04,2.5,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H2","seg":[[19.45,5.25],[19.45,7.75]],"state":"open"},{"type":"bed","c":[17.695,9.0],"s":[2.2,1.0,0.6],"z":0.0,"rot":0,"label":"Cama 3","room":"H2","id":"H2-C3","head":"W","pear":[17.025,8.68]},{"type":"nightstand","c":[16.775,9.83],"s":[0.45,0.48,0.8],"z":0.0,"rot":0,"label":"Mesa de luz","room":"H2"},{"type":"overbed_table","c":[17.725,8.28],"s":[0.85,0.4,0.85],"z":0.0,"rot":0,"label":"","room":"H2"},{"type":"visitor_chair","c":[18.025,9.88],"s":[0.55,0.55,0.85],"z":0.0,"rot":0,"label":"","room":"H2"},{"type":"curtain","c":[17.962,10.25],"s":[2.9750000000000014,0.04,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H2","seg":[[19.45,10.25],[16.525,10.25]],"state":"closed"},{"type":"curtain","c":[19.45,9.0],"s":[0.04,2.5,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H2","seg":[[19.45,7.75],[19.45,10.25]],"state":"open"},{"type":"curtain_track","c":[28.4,0],"s":[0,0,0],"z":2.42,"rot":0,"label":"","room":"H2","rails":[[[19.45,2.75],[16.525,2.75]],[[19.45,5.25],[16.525,5.25]],[[19.45,7.75],[16.525,7.75]],[[19.45,10.25],[16.525,10.25]],[[19.45,2.75],[19.45,10.25]]],"rods":[[19.45,2.75],[19.45,5.25],[19.45,7.75],[19.45,10.25],[17.9,2.75],[17.9,5.25],[17.9,7.75],[17.9,10.25]]},{"type":"sink","c":[22.0,3.3],"s":[0.45,0.55,0.85],"z":0.0,"rot":0,"label":"Lavamanos","room":"H2","wallside":"E"},{"type":"office_desk","c":[14.8,9.8],"s":[1.6,0.8,0.75],"z":0.0,"rot":0,"label":"Escritorio","room":"OF"},{"type":"chair","c":[14.8,9.05],"s":[0.55,0.55,0.9],"z":0.0,"rot":180,"label":"","room":"OF"},{"type":"cabinet","c":[12.35,9.2],"s":[0.5,1.6,1.9],"z":0.0,"rot":0,"label":"Armario","room":"OF"},{"type":"cabinet","c":[16.05,5.0],"s":[0.5,1.6,1.9],"z":0.0,"rot":0,"label":"Armario","room":"OF"},{"type":"chair","c":[14.2,4.0],"s":[0.55,0.55,0.9],"z":0.0,"rot":0,"label":"","room":"OF"},{"type":"bed","c":[7.295,4.0],"s":[2.2,1.0,0.6],"z":0.0,"rot":0,"label":"Cama 1","room":"H3","id":"H3-C1","head":"W","pear":[6.625,3.68]},{"type":"nightstand","c":[6.375,4.83],"s":[0.45,0.48,0.8],"z":0.0,"rot":0,"label":"Mesa de luz","room":"H3"},{"type":"overbed_table","c":[7.325,3.28],"s":[0.85,0.4,0.85],"z":0.0,"rot":0,"label":"","room":"H3"},{"type":"visitor_chair","c":[7.625,4.88],"s":[0.55,0.55,0.85],"z":0.0,"rot":0,"label":"","room":"H3"},{"type":"curtain","c":[7.563,2.75],"s":[2.9750000000000014,0.04,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H3","seg":[[9.05,2.75],[6.125,2.75]],"state":"open"},{"type":"curtain","c":[7.563,5.25],"s":[2.9750000000000014,0.04,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H3","seg":[[9.05,5.25],[6.125,5.25]],"state":"closed"},{"type":"curtain","c":[9.05,4.0],"s":[0.04,2.5,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H3","seg":[[9.05,2.75],[9.05,5.25]],"state":"open"},{"type":"bed","c":[7.295,6.5],"s":[2.2,1.0,0.6],"z":0.0,"rot":0,"label":"Cama 2","room":"H3","id":"H3-C2","head":"W","pear":[6.625,6.18]},{"type":"nightstand","c":[6.375,7.33],"s":[0.45,0.48,0.8],"z":0.0,"rot":0,"label":"Mesa de luz","room":"H3"},{"type":"overbed_table","c":[7.325,5.78],"s":[0.85,0.4,0.85],"z":0.0,"rot":0,"label":"","room":"H3"},{"type":"visitor_chair","c":[7.625,7.38],"s":[0.55,0.55,0.85],"z":0.0,"rot":0,"label":"","room":"H3"},{"type":"curtain","c":[7.563,7.75],"s":[2.9750000000000014,0.04,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H3","seg":[[9.05,7.75],[6.125,7.75]],"state":"closed"},{"type":"curtain","c":[9.05,6.5],"s":[0.04,2.5,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H3","seg":[[9.05,5.25],[9.05,7.75]],"state":"open"},{"type":"bed","c":[7.295,9.0],"s":[2.2,1.0,0.6],"z":0.0,"rot":0,"label":"Cama 3","room":"H3","id":"H3-C3","head":"W","pear":[6.625,8.68]},{"type":"nightstand","c":[6.375,9.83],"s":[0.45,0.48,0.8],"z":0.0,"rot":0,"label":"Mesa de luz","room":"H3"},{"type":"overbed_table","c":[7.325,8.28],"s":[0.85,0.4,0.85],"z":0.0,"rot":0,"label":"","room":"H3"},{"type":"visitor_chair","c":[7.625,9.88],"s":[0.55,0.55,0.85],"z":0.0,"rot":0,"label":"","room":"H3"},{"type":"curtain","c":[7.563,10.25],"s":[2.9750000000000014,0.04,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H3","seg":[[9.05,10.25],[6.125,10.25]],"state":"closed"},{"type":"curtain","c":[9.05,9.0],"s":[0.04,2.5,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H3","seg":[[9.05,7.75],[9.05,10.25]],"state":"open"},{"type":"curtain_track","c":[28.4,0],"s":[0,0,0],"z":2.42,"rot":0,"label":"","room":"H3","rails":[[[9.05,2.75],[6.125,2.75]],[[9.05,5.25],[6.125,5.25]],[[9.05,7.75],[6.125,7.75]],[[9.05,10.25],[6.125,10.25]],[[9.05,2.75],[9.05,10.25]]],"rods":[[9.05,2.75],[9.05,5.25],[9.05,7.75],[9.05,10.25],[7.5,2.75],[7.5,5.25],[7.5,7.75],[7.5,10.25]]},{"type":"sink","c":[11.6,3.3],"s":[0.45,0.55,0.85],"z":0.0,"rot":0,"label":"Lavamanos","room":"H3","wallside":"E"},{"type":"bed","c":[1.295,4.0],"s":[2.2,1.0,0.6],"z":0.0,"rot":0,"label":"Cama 1","room":"H4","id":"H4-C1","head":"W","pear":[0.625,3.68]},{"type":"nightstand","c":[0.375,4.83],"s":[0.45,0.48,0.8],"z":0.0,"rot":0,"label":"Mesa de luz","room":"H4"},{"type":"overbed_table","c":[1.325,3.28],"s":[0.85,0.4,0.85],"z":0.0,"rot":0,"label":"","room":"H4"},{"type":"visitor_chair","c":[1.625,4.88],"s":[0.55,0.55,0.85],"z":0.0,"rot":0,"label":"","room":"H4"},{"type":"curtain","c":[1.563,2.75],"s":[2.9750000000000014,0.04,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H4","seg":[[3.05,2.75],[0.125,2.75]],"state":"open"},{"type":"curtain","c":[1.563,5.25],"s":[2.9750000000000014,0.04,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H4","seg":[[3.05,5.25],[0.125,5.25]],"state":"closed"},{"type":"curtain","c":[3.05,4.0],"s":[0.04,2.5,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H4","seg":[[3.05,2.75],[3.05,5.25]],"state":"open"},{"type":"bed","c":[1.295,6.5],"s":[2.2,1.0,0.6],"z":0.0,"rot":0,"label":"Cama 2","room":"H4","id":"H4-C2","head":"W","pear":[0.625,6.18]},{"type":"nightstand","c":[0.375,7.33],"s":[0.45,0.48,0.8],"z":0.0,"rot":0,"label":"Mesa de luz","room":"H4"},{"type":"overbed_table","c":[1.325,5.78],"s":[0.85,0.4,0.85],"z":0.0,"rot":0,"label":"","room":"H4"},{"type":"visitor_chair","c":[1.625,7.38],"s":[0.55,0.55,0.85],"z":0.0,"rot":0,"label":"","room":"H4"},{"type":"curtain","c":[1.563,7.75],"s":[2.9750000000000014,0.04,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H4","seg":[[3.05,7.75],[0.125,7.75]],"state":"closed"},{"type":"curtain","c":[3.05,6.5],"s":[0.04,2.5,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H4","seg":[[3.05,5.25],[3.05,7.75]],"state":"open"},{"type":"bed","c":[1.295,9.0],"s":[2.2,1.0,0.6],"z":0.0,"rot":0,"label":"Cama 3","room":"H4","id":"H4-C3","head":"W","pear":[0.625,8.68]},{"type":"nightstand","c":[0.375,9.83],"s":[0.45,0.48,0.8],"z":0.0,"rot":0,"label":"Mesa de luz","room":"H4"},{"type":"overbed_table","c":[1.325,8.28],"s":[0.85,0.4,0.85],"z":0.0,"rot":0,"label":"","room":"H4"},{"type":"visitor_chair","c":[1.625,9.88],"s":[0.55,0.55,0.85],"z":0.0,"rot":0,"label":"","room":"H4"},{"type":"curtain","c":[1.563,10.25],"s":[2.9750000000000014,0.04,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H4","seg":[[3.05,10.25],[0.125,10.25]],"state":"closed"},{"type":"curtain","c":[3.05,9.0],"s":[0.04,2.5,2.1],"z":0.3,"rot":0,"label":"Cortina","room":"H4","seg":[[3.05,7.75],[3.05,10.25]],"state":"open"},{"type":"curtain_track","c":[28.4,0],"s":[0,0,0],"z":2.42,"rot":0,"label":"","room":"H4","rails":[[[3.05,2.75],[0.125,2.75]],[[3.05,5.25],[0.125,5.25]],[[3.05,7.75],[0.125,7.75]],[[3.05,10.25],[0.125,10.25]],[[3.05,2.75],[3.05,10.25]]],"rods":[[3.05,2.75],[3.05,5.25],[3.05,7.75],[3.05,10.25],[1.5,2.75],[1.5,5.25],[1.5,7.75],[1.5,10.25]]},{"type":"sink","c":[5.6,3.3],"s":[0.45,0.55,0.85],"z":0.0,"rot":0,"label":"Lavamanos","room":"H4","wallside":"E"},{"type":"toilet","c":[21.15,-4.95],"s":[0.4,0.68,0.42],"z":0.0,"rot":0,"label":"Inodoro","room":"B1"},{"type":"washbasin","c":[22.45,-3.0],"s":[0.45,0.55,0.85],"z":0.0,"rot":0,"label":"Lavatorio","room":"B1","wallside":"E"},{"type":"towel_rail","c":[22.76,-4.1],"s":[0.04,0.6,0.05],"z":1.1,"rot":0,"label":"","room":"B1","wallside":"E"},{"type":"mirror","c":[22.8,-3.0],"s":[0.02,0.55,0.75],"z":1.15,"rot":0,"label":"","room":"B1"},{"type":"toilet","c":[23.7,-4.95],"s":[0.4,0.68,0.42],"z":0.0,"rot":0,"label":"Inodoro","room":"B2"},{"type":"grab_bar_fold","c":[24.1,-4.95],"s":[0.06,0.75,0.05],"z":0.75,"rot":0,"label":"","room":"B2"},{"type":"grab_bar","c":[23.02,-4.75],"s":[0.04,0.8,0.04],"z":0.75,"rot":0,"label":"","room":"B2","wallside":"W"},{"type":"washbasin","c":[24.78,-3.1],"s":[0.45,0.55,0.85],"z":0.0,"rot":0,"label":"Lavatorio","room":"B2","wallside":"E"},{"type":"mirror","c":[25.12,-3.1],"s":[0.02,0.55,0.75],"z":1.15,"rot":0,"label":"","room":"B2"},{"type":"towel_rail","c":[25.1,-2.25],"s":[0.04,0.5,0.05],"z":1.1,"rot":0,"label":"","room":"B2","wallside":"E"},{"type":"toilet","c":[25.85,-4.95],"s":[0.4,0.68,0.42],"z":0.0,"rot":0,"label":"Inodoro","room":"B3"},{"type":"grab_bar","c":[25.36,-4.85],"s":[0.04,0.8,0.04],"z":0.75,"rot":0,"label":"","room":"B3","wallside":"W"},{"type":"grab_bar_fold","c":[26.25,-4.95],"s":[0.06,0.75,0.05],"z":0.75,"rot":0,"label":"","room":"B3"},{"type":"shower_tray","c":[27.55,-4.55],"s":[1.4,1.5,0.03],"z":0.0,"rot":0,"label":"Ducha","room":"B3"},{"type":"shower_seat","c":[28.22,-4.55],"s":[0.45,0.45,0.48],"z":0.0,"rot":0,"label":"","room":"B3","wallside":"E"},{"type":"shower_rail","c":[28.32,-4.4],"s":[0.04,0.95,0.04],"z":0.9,"rot":0,"label":"","room":"B3","wallside":"E"},{"type":"shower_head","c":[28.3,-5.0],"s":[0.08,0.08,0.05],"z":2.05,"rot":0,"label":"","room":"B3"},{"type":"shower_curtain","c":[26.85,-4.55],"s":[0.03,1.5,1.9],"z":0.1,"rot":0,"label":"","room":"B3"},{"type":"washbasin","c":[27.95,-2.1],"s":[0.55,0.5,0.8],"z":0.0,"rot":0,"label":"Lavatorio accesible","room":"B3","wallside":"N"},{"type":"mirror","c":[27.95,-1.58],"s":[0.6,0.02,0.8],"z":1.0,"rot":0,"label":"","room":"B3"},{"type":"towel_rail","c":[26.8,-1.62],"s":[0.6,0.04,0.05],"z":1.1,"rot":0,"label":"","room":"B3","wallside":"N"},{"type":"nurse_desk","c":[13.575,-0.47],"s":[2.7,0.75,0.75],"z":0.0,"rot":0,"label":"Escritorio enfermería","room":"NS"},{"type":"chair","c":[14.125,-1.3],"s":[0.6,0.6,0.95],"z":0.0,"rot":180,"label":"","room":"NS"},{"type":"chair","c":[12.925,-1.3],"s":[0.6,0.6,0.95],"z":0.0,"rot":180,"label":"","room":"NS"},{"type":"cabinet","c":[15.3,-2.68],"s":[1.2,0.45,1.9],"z":0.0,"rot":0,"label":"Archivo","room":"NS"},{"type":"cabinet","c":[12.95,-2.68],"s":[1.2,0.45,1.9],"z":0.0,"rot":0,"label":"Archivo","room":"NS"}],"devices":[{"type":"headwall","id":"H1-C1-HW","p":[22.525,4.0,1.55],"face":"E","label":"Cabecero técnico H1 cama 1","room":"H1","w":1.7,"hgt":0.4,"dep":0.1},{"type":"bed_call","id":"H1-C1-PL","p":[22.505,3.38,1.15],"face":"E","label":"Panel llamada cama 1 (con pera)","room":"H1","code":"ACE41220316"},{"type":"headwall","id":"H1-C2-HW","p":[22.525,6.5,1.55],"face":"E","label":"Cabecero técnico H1 cama 2","room":"H1","w":1.7,"hgt":0.4,"dep":0.1},{"type":"bed_call","id":"H1-C2-PL","p":[22.505,5.88,1.15],"face":"E","label":"Panel llamada cama 2 (con pera)","room":"H1","code":"ACE41220316"},{"type":"headwall","id":"H1-C3-HW","p":[22.525,9.0,1.55],"face":"E","label":"Cabecero técnico H1 cama 3","room":"H1","w":1.7,"hgt":0.4,"dep":0.1},{"type":"bed_call","id":"H1-C3-PL","p":[22.505,8.38,1.15],"face":"E","label":"Panel llamada cama 3 (con pera)","room":"H1","code":"ACE41220316"},{"type":"light_switch","id":"H1-SW","p":[26.4,2.495,1.05],"face":"N","label":"Teclas de luz","room":"H1"},{"type":"presence","id":"H1-PR","p":[26.4,2.495,1.35],"face":"N","label":"Panel presencia / cancelación","room":"H1","code":"ACE80081001"},{"type":"corridor_light","id":"H1-LP","p":[27.3,2.265,2.42],"face":"S","label":"Luz de pasillo H1","room":"H1","code":"ACE41020309"},{"type":"rc","id":"RC-H1","p":[26.45,1.95,2.6],"face":"D","label":"Room Controller H1 (ECV169)","room":"H1"},{"type":"headwall","id":"H2-C1-HW","p":[16.525,4.0,1.55],"face":"E","label":"Cabecero técnico H2 cama 1","room":"H2","w":1.7,"hgt":0.4,"dep":0.1},{"type":"bed_call","id":"H2-C1-PL","p":[16.505,3.38,1.15],"face":"E","label":"Panel llamada cama 1 (con pera)","room":"H2","code":"ACE41220316"},{"type":"headwall","id":"H2-C2-HW","p":[16.525,6.5,1.55],"face":"E","label":"Cabecero técnico H2 cama 2","room":"H2","w":1.7,"hgt":0.4,"dep":0.1},{"type":"bed_call","id":"H2-C2-PL","p":[16.505,5.88,1.15],"face":"E","label":"Panel llamada cama 2 (con pera)","room":"H2","code":"ACE41220316"},{"type":"headwall","id":"H2-C3-HW","p":[16.525,9.0,1.55],"face":"E","label":"Cabecero técnico H2 cama 3","room":"H2","w":1.7,"hgt":0.4,"dep":0.1},{"type":"bed_call","id":"H2-C3-PL","p":[16.505,8.38,1.15],"face":"E","label":"Panel llamada cama 3 (con pera)","room":"H2","code":"ACE41220316"},{"type":"light_switch","id":"H2-SW","p":[20.4,2.495,1.05],"face":"N","label":"Teclas de luz","room":"H2"},{"type":"presence","id":"H2-PR","p":[20.4,2.495,1.35],"face":"N","label":"Panel presencia / cancelación","room":"H2","code":"ACE80081001"},{"type":"corridor_light","id":"H2-LP","p":[21.3,2.265,2.42],"face":"S","label":"Luz de pasillo H2","room":"H2","code":"ACE41020309"},{"type":"rc","id":"RC-H2","p":[20.45,1.95,2.6],"face":"D","label":"Room Controller H2 (ECV169)","room":"H2"},{"type":"headwall","id":"H3-C1-HW","p":[6.125,4.0,1.55],"face":"E","label":"Cabecero técnico H3 cama 1","room":"H3","w":1.7,"hgt":0.4,"dep":0.1},{"type":"bed_call","id":"H3-C1-PL","p":[6.105,3.38,1.15],"face":"E","label":"Panel llamada cama 1 (con pera)","room":"H3","code":"ACE41220316"},{"type":"headwall","id":"H3-C2-HW","p":[6.125,6.5,1.55],"face":"E","label":"Cabecero técnico H3 cama 2","room":"H3","w":1.7,"hgt":0.4,"dep":0.1},{"type":"bed_call","id":"H3-C2-PL","p":[6.105,5.88,1.15],"face":"E","label":"Panel llamada cama 2 (con pera)","room":"H3","code":"ACE41220316"},{"type":"headwall","id":"H3-C3-HW","p":[6.125,9.0,1.55],"face":"E","label":"Cabecero técnico H3 cama 3","room":"H3","w":1.7,"hgt":0.4,"dep":0.1},{"type":"bed_call","id":"H3-C3-PL","p":[6.105,8.38,1.15],"face":"E","label":"Panel llamada cama 3 (con pera)","room":"H3","code":"ACE41220316"},{"type":"light_switch","id":"H3-SW","p":[10.0,2.495,1.05],"face":"N","label":"Teclas de luz","room":"H3"},{"type":"presence","id":"H3-PR","p":[10.0,2.495,1.35],"face":"N","label":"Panel presencia / cancelación","room":"H3","code":"ACE80081001"},{"type":"corridor_light","id":"H3-LP","p":[10.9,2.265,2.42],"face":"S","label":"Luz de pasillo H3","room":"H3","code":"ACE41020309"},{"type":"rc","id":"RC-H3","p":[10.05,1.95,2.6],"face":"D","label":"Room Controller H3 (ECV169)","room":"H3"},{"type":"headwall","id":"H4-C1-HW","p":[0.125,4.0,1.55],"face":"E","label":"Cabecero técnico H4 cama 1","room":"H4","w":1.7,"hgt":0.4,"dep":0.1},{"type":"bed_call","id":"H4-C1-PL","p":[0.105,3.38,1.15],"face":"E","label":"Panel llamada cama 1 (con pera)","room":"H4","code":"ACE41220316"},{"type":"headwall","id":"H4-C2-HW","p":[0.125,6.5,1.55],"face":"E","label":"Cabecero técnico H4 cama 2","room":"H4","w":1.7,"hgt":0.4,"dep":0.1},{"type":"bed_call","id":"H4-C2-PL","p":[0.105,5.88,1.15],"face":"E","label":"Panel llamada cama 2 (con pera)","room":"H4","code":"ACE41220316"},{"type":"headwall","id":"H4-C3-HW","p":[0.125,9.0,1.55],"face":"E","label":"Cabecero técnico H4 cama 3","room":"H4","w":1.7,"hgt":0.4,"dep":0.1},{"type":"bed_call","id":"H4-C3-PL","p":[0.105,8.38,1.15],"face":"E","label":"Panel llamada cama 3 (con pera)","room":"H4","code":"ACE41220316"},{"type":"light_switch","id":"H4-SW","p":[4.0,2.495,1.05],"face":"N","label":"Teclas de luz","room":"H4"},{"type":"presence","id":"H4-PR","p":[4.0,2.495,1.35],"face":"N","label":"Panel presencia / cancelación","room":"H4","code":"ACE80081001"},{"type":"corridor_light","id":"H4-LP","p":[4.9,2.265,2.42],"face":"S","label":"Luz de pasillo H4","room":"H4","code":"ACE41020309"},{"type":"rc","id":"RC-H4","p":[4.05,1.95,2.6],"face":"D","label":"Room Controller H4 (ECV169)","room":"H4"},{"type":"pull_cord","id":"B2-TI","p":[25.12,-4.55,1.85],"face":"W","label":"Tirador llamada inodoro B2 (h=1,85 m)","room":"B2","code":"ACE40320303"},{"type":"pull_cord","id":"B3-TI","p":[25.295,-4.3,1.85],"face":"E","label":"Tirador llamada inodoro B3 (h=1,85 m)","room":"B3","code":"ACE40320303"},{"type":"pull_cord","id":"B3-TD","p":[28.3,-3.65,1.85],"face":"W","label":"Tirador llamada ducha B3 (h=1,85 m)","room":"B3","code":"ACE40320303"},{"type":"corridor_light","id":"B2-LP","p":[23.7,0.135,2.42],"face":"N","label":"Luz de pasillo B2","room":"B2","code":"ACE41020309"},{"type":"presence","id":"B2-PR","p":[23.4,0.095,1.35],"face":"N","label":"Presencia / cancelación B2","room":"B2","code":"ACE80081001"},{"type":"rc","id":"RC-B2","p":[25.25,0.45,2.6],"face":"D","label":"Room Controller B2 (ECV169)","room":"B2"},{"type":"corridor_light","id":"B3-LP","p":[23.05,0.135,2.42],"face":"N","label":"Luz de pasillo B3","room":"B3","code":"ACE41020309"},{"type":"presence","id":"B3-PR","p":[22.75,0.095,1.35],"face":"N","label":"Presencia / cancelación B3","room":"B3","code":"ACE80081001"},{"type":"rc","id":"RC-B3","p":[24.45,0.45,2.6],"face":"D","label":"Room Controller B3 (ECV169)","room":"B3"},{"type":"aio_pc","id":"NS-PC","p":[14.025,-0.22,0.75],"face":"S","label":"PC / monitor táctil con software Advantecnia (ACE52040208)","room":"NS","code":"ACE52040208"},{"type":"desk_phone","id":"NS-TEL","p":[12.925,-0.35,0.75],"face":"S","label":"Teléfono de escritorio enfermería (ACE52190200)","room":"NS","code":"ACE52190200"},{"type":"tv","id":"TV-01","p":[11.45,2.275,2.05],"face":"S","label":"TV 55\" – panel de llamadas","room":"CORR"},{"type":"rack","id":"RACK","p":[0.525,1.2,0.0],"face":"E","label":"Gabinete de comunicaciones 42U","room":"CORR","w":0.6,"dep":0.8,"hgt":2.0},{"type":"elec_panel","id":"TE","p":[1.6,0.135,1.5],"face":"N","label":"Tablero eléctrico del servicio","room":"CORR"}],"cables":[{"sys":"bus","spec":"BUS KNX 2x2x0,8 mm LH EIBBUS","pts":[[25.25,0.45,2.6],[25.25,1.75,2.6],[24.45,1.75,2.6],[24.45,0.45,2.6]],"label":"RC-B2 → RC-B3","frm":"RC-B2","to":"RC-B3","len":3.4},{"sys":"bus","spec":"BUS KNX 2x2x0,8 mm LH EIBBUS","pts":[[24.45,0.45,2.6],[24.45,1.75,2.6],[26.45,1.75,2.6],[26.45,1.95,2.6]],"label":"RC-B3 → RC-H1","frm":"RC-B3","to":"RC-H1","len":3.5},{"sys":"bus","spec":"BUS KNX 2x2x0,8 mm LH EIBBUS","pts":[[26.45,1.95,2.6],[26.45,1.75,2.6],[20.45,1.75,2.6],[20.45,1.95,2.6]],"label":"RC-H1 → RC-H2","frm":"RC-H1","to":"RC-H2","len":6.4},{"sys":"bus","spec":"BUS KNX 2x2x0,8 mm LH EIBBUS","pts":[[20.45,1.95,2.6],[20.45,1.75,2.6],[10.05,1.75,2.6],[10.05,1.95,2.6]],"label":"RC-H2 → RC-H3","frm":"RC-H2","to":"RC-H3","len":10.8},{"sys":"bus","spec":"BUS KNX 2x2x0,8 mm LH EIBBUS","pts":[[10.05,1.95,2.6],[10.05,1.75,2.6],[4.05,1.75,2.6],[4.05,1.95,2.6]],"label":"RC-H3 → RC-H4","frm":"RC-H3","to":"RC-H4","len":6.4},{"sys":"bus","spec":"BUS KNX 2x2x0,8 mm LH EIBBUS","pts":[[4.05,1.95,2.6],[4.05,1.75,2.6],[0.53,1.75,2.6],[0.53,1.32,2.6],[0.53,1.32,1.55],[0.53,1.2,1.55]],"label":"RC-H4 → SmartHub","frm":"RC-H4","to":"SmartHub","len":5.32},{"sys":"utp","spec":"Cable de llamada radial – RJ12 / bornes","pts":[[22.505,3.38,1.15],[22.505,3.38,2.6],[22.8,3.38,2.6],[22.8,2.62,2.6],[26.45,2.62,2.6],[26.45,1.95,2.6],[26.45,1.95,2.6]],"label":"H1-C1-PL → RC-H1","frm":"H1-C1-PL","to":"RC-H1","len":6.82},{"sys":"utp","spec":"Cable de llamada radial – RJ12 / bornes","pts":[[22.505,5.88,1.15],[22.505,5.88,2.6],[22.87,5.88,2.6],[22.87,2.69,2.6],[26.45,2.69,2.6],[26.45,1.95,2.6],[26.45,1.95,2.6]],"label":"H1-C2-PL → RC-H1","frm":"H1-C2-PL","to":"RC-H1","len":9.32},{"sys":"utp","spec":"Cable de llamada radial – RJ12 / bornes","pts":[[22.505,8.38,1.15],[22.505,8.38,2.6],[22.94,8.38,2.6],[22.94,2.76,2.6],[26.45,2.76,2.6],[26.45,1.95,2.6],[26.45,1.95,2.6]],"label":"H1-C3-PL → RC-H1","frm":"H1-C3-PL","to":"RC-H1","len":11.83},{"sys":"utp","spec":"Cable de llamada radial – bornes","pts":[[26.4,2.495,1.35],[26.4,2.495,2.6],[26.4,2.83,2.6],[26.45,2.83,2.6],[26.45,1.95,2.6],[26.45,1.95,2.6]],"label":"H1-PR → RC-H1","frm":"H1-PR","to":"RC-H1","len":2.52},{"sys":"utp","spec":"Cable de llamada radial – bornes","pts":[[27.3,2.265,2.42],[27.3,2.265,2.6],[27.3,2.0,2.6],[26.45,2.0,2.6],[26.45,1.95,2.6],[26.45,1.95,2.6]],"label":"H1-LP → RC-H1","frm":"H1-LP","to":"RC-H1","len":1.35},{"sys":"utp","spec":"Cable de llamada radial – RJ12 / bornes","pts":[[16.505,3.38,1.15],[16.505,3.38,2.6],[16.8,3.38,2.6],[16.8,2.62,2.6],[20.45,2.62,2.6],[20.45,1.95,2.6],[20.45,1.95,2.6]],"label":"H2-C1-PL → RC-H2","frm":"H2-C1-PL","to":"RC-H2","len":6.82},{"sys":"utp","spec":"Cable de llamada radial – RJ12 / bornes","pts":[[16.505,5.88,1.15],[16.505,5.88,2.6],[16.87,5.88,2.6],[16.87,2.69,2.6],[20.45,2.69,2.6],[20.45,1.95,2.6],[20.45,1.95,2.6]],"label":"H2-C2-PL → RC-H2","frm":"H2-C2-PL","to":"RC-H2","len":9.32},{"sys":"utp","spec":"Cable de llamada radial – RJ12 / bornes","pts":[[16.505,8.38,1.15],[16.505,8.38,2.6],[16.94,8.38,2.6],[16.94,2.76,2.6],[20.45,2.76,2.6],[20.45,1.95,2.6],[20.45,1.95,2.6]],"label":"H2-C3-PL → RC-H2","frm":"H2-C3-PL","to":"RC-H2","len":11.83},{"sys":"utp","spec":"Cable de llamada radial – bornes","pts":[[20.4,2.495,1.35],[20.4,2.495,2.6],[20.4,2.83,2.6],[20.45,2.83,2.6],[20.45,1.95,2.6],[20.45,1.95,2.6]],"label":"H2-PR → RC-H2","frm":"H2-PR","to":"RC-H2","len":2.51},{"sys":"utp","spec":"Cable de llamada radial – bornes","pts":[[21.3,2.265,2.42],[21.3,2.265,2.6],[21.3,2.0,2.6],[20.45,2.0,2.6],[20.45,1.95,2.6],[20.45,1.95,2.6]],"label":"H2-LP → RC-H2","frm":"H2-LP","to":"RC-H2","len":1.35},{"sys":"utp","spec":"Cable de llamada radial – RJ12 / bornes","pts":[[6.105,3.38,1.15],[6.105,3.38,2.6],[6.4,3.38,2.6],[6.4,2.62,2.6],[10.05,2.62,2.6],[10.05,1.95,2.6],[10.05,1.95,2.6]],"label":"H3-C1-PL → RC-H3","frm":"H3-C1-PL","to":"RC-H3","len":6.83},{"sys":"utp","spec":"Cable de llamada radial – RJ12 / bornes","pts":[[6.105,5.88,1.15],[6.105,5.88,2.6],[6.47,5.88,2.6],[6.47,2.69,2.6],[10.05,2.69,2.6],[10.05,1.95,2.6],[10.05,1.95,2.6]],"label":"H3-C2-PL → RC-H3","frm":"H3-C2-PL","to":"RC-H3","len":9.33},{"sys":"utp","spec":"Cable de llamada radial – RJ12 / bornes","pts":[[6.105,8.38,1.15],[6.105,8.38,2.6],[6.54,8.38,2.6],[6.54,2.76,2.6],[10.05,2.76,2.6],[10.05,1.95,2.6],[10.05,1.95,2.6]],"label":"H3-C3-PL → RC-H3","frm":"H3-C3-PL","to":"RC-H3","len":11.83},{"sys":"utp","spec":"Cable de llamada radial – bornes","pts":[[10.0,2.495,1.35],[10.0,2.495,2.6],[10.0,2.83,2.6],[10.05,2.83,2.6],[10.05,1.95,2.6],[10.05,1.95,2.6]],"label":"H3-PR → RC-H3","frm":"H3-PR","to":"RC-H3","len":2.51},{"sys":"utp","spec":"Cable de llamada radial – bornes","pts":[[10.9,2.265,2.42],[10.9,2.265,2.6],[10.9,2.0,2.6],[10.05,2.0,2.6],[10.05,1.95,2.6],[10.05,1.95,2.6]],"label":"H3-LP → RC-H3","frm":"H3-LP","to":"RC-H3","len":1.35},{"sys":"utp","spec":"Cable de llamada radial – RJ12 / bornes","pts":[[0.105,3.38,1.15],[0.105,3.38,2.6],[0.4,3.38,2.6],[0.4,2.62,2.6],[4.05,2.62,2.6],[4.05,1.95,2.6],[4.05,1.95,2.6]],"label":"H4-C1-PL → RC-H4","frm":"H4-C1-PL","to":"RC-H4","len":6.83},{"sys":"utp","spec":"Cable de llamada radial – RJ12 / bornes","pts":[[0.105,5.88,1.15],[0.105,5.88,2.6],[0.47,5.88,2.6],[0.47,2.69,2.6],[4.05,2.69,2.6],[4.05,1.95,2.6],[4.05,1.95,2.6]],"label":"H4-C2-PL → RC-H4","frm":"H4-C2-PL","to":"RC-H4","len":9.33},{"sys":"utp","spec":"Cable de llamada radial – RJ12 / bornes","pts":[[0.105,8.38,1.15],[0.105,8.38,2.6],[0.54,8.38,2.6],[0.54,2.76,2.6],[4.05,2.76,2.6],[4.05,1.95,2.6],[4.05,1.95,2.6]],"label":"H4-C3-PL → RC-H4","frm":"H4-C3-PL","to":"RC-H4","len":11.83},{"sys":"utp","spec":"Cable de llamada radial – bornes","pts":[[4.0,2.495,1.35],[4.0,2.495,2.6],[4.0,2.83,2.6],[4.05,2.83,2.6],[4.05,1.95,2.6],[4.05,1.95,2.6]],"label":"H4-PR → RC-H4","frm":"H4-PR","to":"RC-H4","len":2.51},{"sys":"utp","spec":"Cable de llamada radial – bornes","pts":[[4.9,2.265,2.42],[4.9,2.265,2.6],[4.9,2.0,2.6],[4.05,2.0,2.6],[4.05,1.95,2.6],[4.05,1.95,2.6]],"label":"H4-LP → RC-H4","frm":"H4-LP","to":"RC-H4","len":1.35},{"sys":"utp","spec":"Cable de llamada radial – bornes","pts":[[25.12,-4.55,1.85],[25.12,-4.55,2.6],[24.97,-4.55,2.6],[24.97,0.3,2.6],[25.25,0.3,2.6],[25.25,0.45,2.6],[25.25,0.45,2.6]],"label":"B2-TI → RC-B2","frm":"B2-TI","to":"RC-B2","len":6.18},{"sys":"utp","spec":"Cable de llamada radial – bornes","pts":[[25.295,-4.3,1.85],[25.295,-4.3,2.6],[25.45,-4.3,2.6],[25.45,0.22,2.6],[24.45,0.22,2.6],[24.45,0.45,2.6],[24.45,0.45,2.6]],"label":"B3-TI → RC-B3","frm":"B3-TI","to":"RC-B3","len":6.65},{"sys":"utp","spec":"Cable de llamada radial – bornes","pts":[[28.3,-3.65,1.85],[28.3,-3.65,2.6],[28.1,-3.65,2.6],[28.1,0.3,2.6],[24.33,0.3,2.6],[24.33,0.45,2.6],[24.45,0.45,2.6],[24.45,0.45,2.6]],"label":"B3-TD → RC-B3","frm":"B3-TD","to":"RC-B3","len":8.94},{"sys":"utp","spec":"Cable de llamada radial – bornes","pts":[[23.7,0.135,2.42],[23.7,0.135,2.6],[23.7,0.62,2.6],[25.25,0.62,2.6],[25.25,0.45,2.6],[25.25,0.45,2.6]],"label":"B2-LP → RC-B2","frm":"B2-LP","to":"RC-B2","len":2.39},{"sys":"utp","spec":"Cable de llamada radial – bornes","pts":[[23.4,0.095,1.35],[23.4,0.095,2.6],[23.35,0.55,2.6],[25.25,0.55,2.6],[25.25,0.45,2.6],[25.25,0.45,2.6]],"label":"B2-PR → RC-B2","frm":"B2-PR","to":"RC-B2","len":3.71},{"sys":"utp","spec":"Cable de llamada radial – bornes","pts":[[23.05,0.135,2.42],[23.05,0.135,2.6],[23.05,0.62,2.6],[24.45,0.62,2.6],[24.45,0.45,2.6],[24.45,0.45,2.6]],"label":"B3-LP → RC-B3","frm":"B3-LP","to":"RC-B3","len":2.23},{"sys":"utp","spec":"Cable de llamada radial – bornes","pts":[[22.75,0.095,1.35],[22.75,0.095,2.6],[22.7,0.55,2.6],[24.45,0.55,2.6],[24.45,0.45,2.6],[24.45,0.45,2.6]],"label":"B3-PR → RC-B3","frm":"B3-PR","to":"RC-B3","len":3.56},{"sys":"net","spec":"Cat6A S/FTP patch","pts":[[0.53,1.2,1.55],[0.78,1.2,1.55],[0.78,1.2,1.35],[0.53,1.2,1.35]],"label":"SmartHub → Switch","frm":"SmartHub","to":"Switch","len":0.7},{"sys":"net","spec":"Cat6A S/FTP patch","pts":[[0.53,1.2,1.35],[0.83,1.1,1.35],[0.83,1.1,0.9],[0.53,1.2,0.9]],"label":"Switch → Servidor","frm":"Switch","to":"Servidor","len":1.08},{"sys":"net","spec":"Cat7 S/FTP","pts":[[0.53,1.2,1.35],[0.53,1.05,2.6],[0.53,1.25,2.6],[14.025,1.25,2.6],[14.025,-0.13,2.6],[14.025,-0.13,0.35],[14.025,-0.22,0.35],[14.025,-0.22,0.75]],"label":"Switch → PC enfermería","frm":"Switch","to":"NS-PC","len":19.07},{"sys":"net","spec":"Cat7 S/FTP","pts":[[0.53,1.2,1.35],[0.53,1.0,2.6],[0.53,1.19,2.6],[12.925,1.19,2.6],[12.925,-0.13,2.6],[12.925,-0.13,0.35],[12.925,-0.35,0.35],[12.925,-0.35,0.75]],"label":"Switch → Teléfono","frm":"Switch","to":"NS-TEL","len":18.04},{"sys":"net","spec":"Cat7 S/FTP","pts":[[0.53,1.2,1.35],[0.53,1.35,2.6],[0.53,1.31,2.6],[11.45,1.31,2.6],[11.45,2.275,2.6],[11.45,2.275,2.05]],"label":"Switch → TV","frm":"Switch","to":"TV-01","len":13.73},{"sys":"pwr","spec":"3x2,5 mm² LSZH","pts":[[1.6,0.135,1.5],[1.6,0.135,2.6],[1.6,0.75,2.6],[0.53,0.75,2.6],[0.53,0.85,2.6],[0.53,0.85,0.3],[0.53,1.2,0.3]],"label":"TE → Gabinete (UPS)","frm":"TE","to":"RACK","len":5.54},{"sys":"pwr","spec":"3x2,5 mm² LSZH","pts":[[1.6,0.135,1.5],[1.6,0.135,2.6],[1.6,0.69,2.6],[13.675,0.69,2.6],[13.675,-0.13,2.6],[13.675,-0.13,0.3]],"label":"TE → Tomas escritorio enfermería","frm":"TE","to":"NS-PC","len":16.85},{"sys":"pwr","spec":"3x2,5 mm² LSZH","pts":[[1.6,0.135,1.5],[1.6,0.135,2.6],[1.6,0.81,2.6],[11.0,0.81,2.6],[11.0,2.275,2.6],[11.0,2.275,2.3]],"label":"TE → Toma TV","frm":"TE","to":"TV-01","len":12.94}],"rooms":[{"code":"H1","name":"Habitación 1","poly":[[28.4,2.4],[22.4,2.4],[22.4,10.8],[28.4,10.8]],"door":"P1","kind":"room"},{"code":"H2","name":"Habitación 2","poly":[[22.4,2.4],[16.4,2.4],[16.4,10.8],[22.4,10.8]],"door":"P2","kind":"room"},{"code":"OF","name":"Oficina","poly":[[16.4,2.4],[12.0,2.4],[12.0,10.8],[16.4,10.8]],"door":"P3","kind":"office"},{"code":"H3","name":"Habitación 3","poly":[[12.0,2.4],[6.0,2.4],[6.0,10.8],[12.0,10.8]],"door":"P4","kind":"room"},{"code":"H4","name":"Habitación 4","poly":[[6.0,2.4],[0.0,2.4],[0.0,10.8],[6.0,10.8]],"door":"P5","kind":"room"},{"code":"VB","name":"Antebaño","poly":[[28.4,-1.5],[20.4,-1.5],[20.4,0],[28.4,0]],"kind":"vest"},{"code":"B1","name":"Baño personal","poly":[[20.4,-5.4],[22.9,-5.4],[22.9,-1.5],[20.4,-1.5]],"kind":"bath"},{"code":"B2","name":"Baño pacientes\n(inodoro)","poly":[[22.9,-5.4],[25.2,-5.4],[25.2,-1.5],[22.9,-1.5]],"kind":"bath"},{"code":"B3","name":"Baño accesible\n(inodoro + ducha)","poly":[[25.2,-5.4],[28.4,-5.4],[28.4,-1.5],[25.2,-1.5]],"kind":"bath"},{"code":"NS","name":"Estación de enfermería","poly":[[16.4,-3.0],[12.0,-3.0],[12.0,0],[16.4,0]],"kind":"nurse"},{"code":"CORR","name":"Pasillo","poly":[[28.4,0],[0.0,0],[0.0,2.4],[28.4,2.4]],"kind":"corridor"}],"labels":[{"text":"P1","p":[27.3,1.8499999999999999],"kind":"door"},{"text":"P2","p":[21.3,1.8499999999999999],"kind":"door"},{"text":"P4","p":[10.9,1.8499999999999999],"kind":"door"},{"text":"P5","p":[4.9,1.8499999999999999],"kind":"door"}],"systems":{"bus":{"color":"#1A9E4B","name_es":"BUS KNX 2x2x0,8 – tarjeta 24 pins → tarjeta (cadena) → SmartHub","name_en":"KNX bus 2x2x0.8 – 24-pin board → board (chain) → SmartHub","name_he":"כבל BUS KNX – כרטיס 24 פינים ← כרטיס (שרשרת) ← SmartHub"},"utp":{"color":"#1A9E4B","name_es":"Cable de llamada radial – cada dispositivo a la tarjeta 24 pins de su cuarto","name_en":"Radial call cable – each device to the 24-pin board of its room","name_he":"כבל קריאה רדיאלי – כל התקן לכרטיס 24 הפינים של החדר"},"net":{"color":"#D62839","name_es":"Cat6 / Cat7 – SmartHub → switch → servidor; PC / teléfono y TV","name_en":"Cat6 / Cat7 – SmartHub → switch → server; PC / phone and TV","name_he":"Cat6 / Cat7 – SmartHub ← מתג ← שרת; מחשב / טלפון ו-TV"},"pwr":{"color":"#1F66D1","name_es":"Electricidad 230 V – solo gabinete, PC / teléfono y TV (el resto es PoE)","name_en":"230 V power – rack, PC / phone and TV only (everything else is PoE)","name_he":"חשמל 230V – ארון, מחשב/טלפון ו-TV בלבד (השאר PoE)"}}}</script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+
+const M = JSON.parse(document.getElementById("model-data").textContent);
+const QS = new URLSearchParams(location.search);
+const CAPTURE = QS.has("capture");
+if (CAPTURE) document.body.classList.add("capture");
+const CLEAN = QS.has("clean");
+
+/* ------------------------------------------------------------------ i18n */
+const T = {
+ es:{title:"Pabellón · Llamada de enfermería",sub:"ACE BG · Advantecnia · Modelo 3D",eq:"Equipamiento",wi:"Cableado",view:"Vista",lights:"Luces",
+  walk:"▶ Recorrido",stop:"■ Detener",labels:"Etiquetas",cut:"Muros bajos",
+  views:{iso:"Isométrica general",top:"Planta",corr:"Pasillo",room:"Habitación tipo (H1)",bath:"Núcleo de baños",nurse:"Estación de enfermería",rack:"Gabinete de comunicaciones"},
+  scen:{off:"Sin llamadas",call:"Llamada H2 · cama 3",pres:"Presencia en H2",blue:"Código azul H4",bath:"Llamada ducha B3",mix:"Escenario mixto"},
+  legEq:"Equipos Advantecnia",legWi:"Código de colores",hint:"Arrastrar: girar · Rueda: zoom · Clic: ficha del equipo",
+  eqL:[["#1E6BD6","chip","Llamada de cama + pera · ACE41220316"],["#3BAA4F","chip","Presencia / cancelación · ACE80081001"],["#D62839","tri","Luz de pasillo ACE41020309 (rojo · verde · azul)"],["#E53935","chip","Tirador baño / ducha · ACE40320303 (≥ 1,80 m)"],["#7E8FA6","chip","Tarjeta conversora / Room Controller ECV169"],["#EEF1F5","chip","Cabecero técnico: O₂ · aire · vacío · 230 V · RJ45"]],
+  wiL:[["#1A9E4B","line","BUS KNX 2x2x0,8 – tarjeta 24 pins → tarjeta → SmartHub"],["#1A9E4B","dash","Radial: cada dispositivo a la tarjeta 24 pins del cuarto"],["#D62839","line","Cat6 / Cat7 solo: SmartHub, switch, servidor, PC/teléfono, TV"],["#1F66D1","line","230 V solo gabinete, PC / teléfono y TV (el resto es PoE)"]],
+  dt:{code:"Código ACE",id:"ID",room:"Local",h:"Altura",type:"Equipo",spec:"Cable",len:"Longitud",conn:"Conecta"},
+ },
+ en:{title:"Inpatient ward · Nurse call",sub:"ACE BG · Advantecnia · 3D model",eq:"Equipment",wi:"Wiring",view:"View",lights:"Lights",
+  walk:"▶ Walkthrough",stop:"■ Stop",labels:"Labels",cut:"Low walls",
+  views:{iso:"Overall isometric",top:"Plan",corr:"Corridor",room:"Typical room (H1)",bath:"Toilet block",nurse:"Nurse station",rack:"Comms rack"},
+  scen:{off:"No calls",call:"Call H2 · bed 3",pres:"Presence in H2",blue:"Code blue H4",bath:"Shower call B3",mix:"Mixed scenario"},
+  legEq:"Advantecnia devices",legWi:"Cable colour code",hint:"Drag: orbit · Wheel: zoom · Click: device card",
+  eqL:[["#1E6BD6","chip","Bed call + pear push · ACE41220316"],["#3BAA4F","chip","Presence / cancel · ACE80081001"],["#D62839","tri","Corridor light ACE41020309 (red · green · blue)"],["#E53935","chip","Toilet / shower pull-cord · ACE40320303"],["#7E8FA6","chip","Converter board / room controller ECV169"],["#EEF1F5","chip","Bed-head unit: O₂ · air · vacuum · power · data"]],
+  wiL:[["#1A9E4B","line","KNX bus 2x2x0.8 – 24-pin board → board → SmartHub"],["#1A9E4B","dash","Radial: each device to its room's 24-pin board"],["#D62839","line","Cat6 / Cat7 only: SmartHub, switch, server, PC/phone, TV"],["#1F66D1","line","230 V only to rack, PC/phone and TV (rest is PoE)"]],
+  dt:{code:"ACE code",id:"ID",room:"Room",h:"Height",type:"Device",spec:"Cable",len:"Length",conn:"Connects"},
+ },
+ he:{title:"מחלקת אשפוז · קריאת אחות",sub:"ACE BG · Advantecnia · מודל תלת-ממדי",eq:"ציוד",wi:"חיווט",view:"תצוגה",lights:"נוריות",
+  walk:"▶ סיור",stop:"■ עצור",labels:"תוויות",cut:"קירות נמוכים",
+  views:{iso:"איזומטרי כללי",top:"תוכנית",corr:"מסדרון",room:"חדר טיפוסי (H1)",bath:"שירותים",nurse:"עמדת אחיות",rack:"ארון תקשורת"},
+  scen:{off:"אין קריאות",call:"קריאה H2 · מיטה 3",pres:"נוכחות ב-H2",blue:"קוד כחול H4",bath:"קריאה מקלחת B3",mix:"תרחיש משולב"},
+  legEq:"התקני Advantecnia",legWi:"קוד צבעי כבלים",hint:"גרירה: סיבוב · גלגלת: זום · לחיצה: כרטיס התקן",
+  eqL:[["#1E6BD6","chip","לחצן קריאה למיטה + אגס · ACE41220316"],["#3BAA4F","chip","נוכחות / ביטול · ACE80081001"],["#D62839","tri","מנורת מסדרון (אדום · ירוק · כחול)"],["#E46F12","chip","משיכת חבל בשירותים (≥ 1.80 מ')"],["#3D4450","chip","בקר חדר ECV169"],["#EEF1F5","chip","קונסולת מיטה: חמצן · אוויר · ואקום · חשמל · תקשורת"]],
+  wiL:[["#1A9E4B","line","כבל BUS KNX – כרטיס 24 פינים ← כרטיס ← SmartHub"],["#1A9E4B","dash","רדיאלי: כל התקן לכרטיס 24 הפינים של החדר"],["#D62839","line","Cat6 / Cat7 בלבד: SmartHub, מתג, שרת, מחשב/טלפון, TV"],["#1F66D1","line","230V לארון, מחשב/טלפון ו-TV בלבד (השאר PoE)"]],
+  dt:{code:"קוד ACE",id:"מזהה",room:"חדר",h:"גובה",type:"התקן",spec:"כבל",len:"אורך",conn:"מחבר"},
+ }};
+let LANG = QS.get("lang") || "he"; if (!["es", "en", "he"].includes(LANG)) LANG = "es";
+const TYPE_NAME = {
+ es:{bed_call:"Panel de llamada de cama",presence:"Presencia / cancelación",corridor_light:"Luz LED de pasillo",rc:"Room Controller ECV169",pull_cord:"Tirador de baño",light_switch:"Teclas de luz",headwall:"Cabecero técnico",aio_pc:"PC All-in-One táctil",desk_phone:"Teléfono IP",tv:"TV 55\"",rack:"Gabinete de comunicaciones",elec_panel:"Tablero eléctrico"},
+ en:{bed_call:"Bed call panel",presence:"Presence / cancel",corridor_light:"Corridor LED light",rc:"Room controller ECV169",pull_cord:"Toilet pull-cord",light_switch:"Light switches",headwall:"Bed-head unit",aio_pc:"Touch all-in-one PC",desk_phone:"IP phone",tv:"55\" TV",rack:"Comms rack",elec_panel:"Electrical panel"},
+ he:{bed_call:"לחצן קריאה למיטה",presence:"נוכחות / ביטול",corridor_light:"מנורת מסדרון",rc:"בקר חדר ECV169",pull_cord:"משיכת חבל",light_switch:"מתגי תאורה",headwall:"קונסולת מיטה",aio_pc:"מחשב מגע",desk_phone:"טלפון IP",tv:"מסך TV",rack:"ארון תקשורת",elec_panel:"לוח חשמל"}};
+
+/* ------------------------------------------------------------------ renderer */
+const stage = document.getElementById("stage");
+const renderer = new THREE.WebGLRenderer({ antialias: !QS.has("noaa"), preserveDrawingBuffer: CAPTURE });
+renderer.setPixelRatio(CAPTURE ? 1 : Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.98;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.setClearColor(0xffffff, 1);
+stage.appendChild(renderer.domElement);
+document.getElementById("loading").remove();
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xffffff);
+const camera = new THREE.PerspectiveCamera(50, 1, 0.05, 400);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = !CAPTURE; controls.dampingFactor = 0.08; controls.maxPolarAngle = Math.PI * 0.495;
+
+const pmrem = new THREE.PMREMGenerator(renderer); scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 0.4;
+scene.add(new THREE.HemisphereLight(0xffffff, 0xe6e9ed, 1.15));
+const sun = new THREE.DirectionalLight(0xffffff, 1.5);
+sun.position.set(4, 30, 14); sun.target.position.set(14.2, 0, -2.7);
+sun.castShadow = true; sun.shadow.mapSize.set(CAPTURE ? 2048 : 4096, CAPTURE ? 2048 : 4096);
+Object.assign(sun.shadow.camera, { left: -22, right: 22, top: 18, bottom: -18, near: 1, far: 80 });
+sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02;
+scene.add(sun, sun.target);
+const fill = new THREE.DirectionalLight(0xfff4e8, 0.45); fill.position.set(40, 12, -20); scene.add(fill);
+
+/* ------------------------------------------------------------------ helpers (modelo x,y,z → three x,z,-y) */
+const V = (x, y, z) => new THREE.Vector3(x, z, -y);
+const groups = { ceil: new THREE.Group(), doors: new THREE.Group(), win: new THREE.Group(), arch: new THREE.Group(), furn: new THREE.Group(), dev: new THREE.Group(), cable: new THREE.Group(), tray: new THREE.Group() };
+Object.values(groups).forEach(g => scene.add(g));
+const archMats = [], furnMats = [];
+const mats = {};
+function mat(color, o = {}) {
+  const key = color + JSON.stringify(o);
+  if (mats[key]) return mats[key];
+  const m = new THREE.MeshStandardMaterial({ color, roughness: o.r ?? 0.75, metalness: o.m ?? 0, emissive: o.e ?? 0x000000, emissiveIntensity: o.ei ?? 1,
+    transparent: !!o.t, opacity: o.t ?? 1, side: o.ds ? THREE.DoubleSide : THREE.FrontSide });
+  mats[key] = m; return m;
+}
+function archMat(c, o) { const m = mat(c, o).clone(); m.userData.base = m.opacity; m.userData.baseT = m.transparent; archMats.push(m); return m; }
+function furnMat(c, o) { const m = mat(c, o).clone(); m.userData.base = m.opacity; m.userData.baseT = m.transparent; furnMats.push(m); return m; }
+function box(parent, cx, cy, z0, sx, sy, sz, m, shadow = true) {
+  const g = new THREE.Mesh(new THREE.BoxGeometry(sx, sz, sy), m);
+  g.position.set(cx, z0 + sz / 2, -cy); g.castShadow = shadow; g.receiveShadow = true; parent.add(g); return g;
+}
+function lbox(parent, x, y, z, sx, sy, sz, m) { // caja local (en grupo): x derecha, y altura, z frente
+  const g = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), m); g.position.set(x, y, z); g.castShadow = true; g.receiveShadow = true; parent.add(g); return g;
+}
+function cyl(parent, r, h, m, seg = 20) { const g = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, seg), m); g.castShadow = true; parent.add(g); return g; }
+function rodBetween(parent, a, b, r, m) {
+  const d = new THREE.Vector3().subVectors(b, a); const L = d.length(); if (L < 1e-4) return;
+  const g = new THREE.Mesh(new THREE.CylinderGeometry(r, r, L, 10), m);
+  g.position.copy(a).addScaledVector(d, 0.5);
+  g.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()); g.castShadow = true; parent.add(g); return g;
+}
+const FACE_ROT = { N: Math.PI, S: 0, E: Math.PI / 2, W: -Math.PI / 2, D: 0 };
+
+/* ------------------------------------------------------------------ pisos */
+const FLOOR = { room: 0xE4ECF3, office: 0xEAE7DD, bath: 0xDDEBEB, vest: 0xE6E8EA, nurse: 0xEFE3CF, corridor: 0xD9E0E6 };
+const floorMats = [];
+for (const r of M.rooms) {
+  const xs = r.poly.map(p => p[0]), ys = r.poly.map(p => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const fm = mat(FLOOR[r.kind] ?? 0xeeeeee, { r: 0.85 }).clone(); floorMats.push(fm);
+  const f = box(groups.arch, (x0 + x1) / 2, (y0 + y1) / 2, -0.02, x1 - x0, y1 - y0, 0.02, fm, false);
+  f.receiveShadow = true;
+  const c = box(groups.ceil, (x0 + x1) / 2, (y0 + y1) / 2, M.meta.ceil, x1 - x0, y1 - y0, 0.02, mat(0xF6F6F4, { r: 0.95, ds: true }), false);
+  c.castShadow = false;
+  if (r.kind !== "corridor") { // luminaria
+    const L = box(groups.ceil, (x0 + x1) / 2, (y0 + y1) / 2 + (r.kind === "room" ? 0.6 : 0), M.meta.ceil - 0.012, 1.2, 0.6, 0.012, mat(0xFFFFFF, { e: 0xFFFFFF, ei: 0.9 }), false); L.castShadow = false;
+  }
+}
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.ShadowMaterial({ opacity: 0.08 }));
+ground.rotation.x = -Math.PI / 2; ground.position.y = -0.03; ground.receiveShadow = true; scene.add(ground);
+
+/* ------------------------------------------------------------------ muros */
+const wallMeshes = [];
+const WALL = archMat(0xFCFCFB, { r: 0.95 }), WALLX = archMat(0xEDEFF1, { r: 0.95 });
+function wallPieces(w) {
+  const [[x0, y0], [x1, y1]] = [w.a, w.b]; const t = w.t; const hz = y0 === y1;
+  let lo = (hz ? Math.min(x0, x1) : Math.min(y0, y1)) - t / 2, hi = (hz ? Math.max(x0, x1) : Math.max(y0, y1)) + t / 2;
+  const cuts = w.openings.map(o => [o.lo, o.hi]).sort((a, b) => a[0] - b[0]);
+  const out = []; let cur = lo;
+  for (const [a, b] of cuts) { if (a > cur) out.push([cur, a]); cur = Math.max(cur, b); }
+  if (cur < hi) out.push([cur, hi]); return out;
+}
+for (const w of M.walls) {
+  const hz = w.a[1] === w.b[1], t = w.t, H = w.h, ax = hz ? w.a[1] : w.a[0], m = w.ext ? WALLX : WALL;
+  const put = (lo, hi, z0, z1) => {
+    const g = hz ? box(groups.arch, (lo + hi) / 2, ax, z0, hi - lo, t, z1 - z0, m) : box(groups.arch, ax, (lo + hi) / 2, z0, t, hi - lo, z1 - z0, m);
+    g.userData.wall = { z0, z1 }; wallMeshes.push(g);
+  };
+  for (const [lo, hi] of wallPieces(w)) put(lo, hi, 0, H);
+  for (const o of w.openings) {
+    if (o.z1 < H) put(o.lo, o.hi, o.z1, H);
+    if (o.z0 > 0) put(o.lo, o.hi, 0, o.z0);
+  }
+}
+// ventanas
+const GLASS = archMat(0xA9D3EE, { r: 0.1, m: 0.1, t: 0.35 }), FRAME = archMat(0xC5CBD2, { r: 0.5, m: 0.3 });
+for (const w of M.windows) {
+  box(groups.win, (w.lo + w.hi) / 2, w.axis, w.z0, w.hi - w.lo, 0.03, w.z1 - w.z0, GLASS, false);
+  for (const xx of [w.lo + 0.03, (w.lo + w.hi) / 2, w.hi - 0.03]) box(groups.win, xx, w.axis, w.z0, 0.05, w.t + 0.02, w.z1 - w.z0, FRAME);
+  box(groups.arch, (w.lo + w.hi) / 2, w.axis, w.z0 - 0.02, w.hi - w.lo, w.t + 0.08, 0.04, FRAME);
+}
+// puertas (hoja abierta ~75°)
+const LEAF = archMat(0xD8C7A8, { r: 0.6 }), DFRAME = archMat(0xB8BEC6, { r: 0.4, m: 0.2 }), HANDLE = archMat(0x9AA3AD, { r: 0.3, m: 0.8 });
+for (const d of M.doors) {
+  const leaves = d.leaves === 1 ? [[d.lo, d.hi, d.hinge]] : [[d.lo, (d.lo + d.hi) / 2, "lo"], [(d.lo + d.hi) / 2, d.hi, "hi"]];
+  for (const [l0, l1, hg] of leaves) {
+    const W = l1 - l0, hx = hg === "lo" ? l0 : l1, sg = hg === "lo" ? 1 : -1;
+    const piv = new THREE.Group(); groups.doors.add(piv);
+    const off = d.swing * d.t / 2;
+    if (d.horiz) piv.position.copy(V(hx, d.axis + off, 0)); else piv.position.copy(V(d.axis + off, hx, 0));
+    const leaf = new THREE.Mesh(new THREE.BoxGeometry(W - 0.02, d.h - 0.02, 0.045), LEAF); leaf.castShadow = true;
+    leaf.position.set(sg * W / 2, d.h / 2, 0); piv.add(leaf);
+    const hd = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.025, 0.07), HANDLE); hd.position.set(sg * (W - 0.1), 1.0, 0); piv.add(hd);
+    // ángulo: hoja abierta hacia el lado swing
+    const ang = 1.25;
+    if (d.horiz) piv.rotation.y = d.swing * sg * ang; else piv.rotation.y = Math.PI / 2 - d.swing * sg * ang;
+  }
+  // marco
+  const lo = d.lo, hi = d.hi;
+  const G = groups.doors;
+  if (d.horiz) { box(G, lo + 0.025, d.axis, 0, 0.05, d.t + 0.04, d.h, DFRAME); box(G, hi - 0.025, d.axis, 0, 0.05, d.t + 0.04, d.h, DFRAME); box(G, (lo + hi) / 2, d.axis, d.h - 0.05, hi - lo, d.t + 0.04, 0.05, DFRAME); }
+  else { box(G, d.axis, lo + 0.025, 0, d.t + 0.04, 0.05, d.h, DFRAME); box(G, d.axis, hi - 0.025, 0, d.t + 0.04, 0.05, d.h, DFRAME); }
+}
+
+// luminarias del pasillo y pasamanos hospitalarios
+for (let x = 2; x < Math.max(...M.walls.map(w => Math.max(w.a[0], w.b[0]))) - 0.5; x += 3) { const L = box(groups.ceil, x, 1.2, M.meta.ceil - 0.012, 1.2, 0.3, 0.012, mat(0xFFFFFF, { e: 0xFFFFFF, ei: 0.9 }), false); L.castShadow = false; }
+const RAIL = mat(0xC9B48F, { r: 0.5 });
+for (const w of M.walls) {
+  const hz = w.a[1] === w.b[1]; if (!hz) continue; const ax = w.a[1];
+  if (Math.abs(ax - 2.4) > 0.01 && Math.abs(ax) > 0.01) continue;
+  const side = ax > 1 ? -1 : 1; // hacia el pasillo
+  for (const [lo, hi] of wallPieces(w)) {
+    if (hi - lo < 0.8) continue;
+    const yy = ax + side * (w.t / 2 + 0.06);
+    rodBetween(groups.arch, V(lo + 0.15, yy, 0.9), V(hi - 0.15, yy, 0.9), 0.025, RAIL);
+    for (let x = lo + 0.3; x < hi - 0.2; x += 1.6) rodBetween(groups.arch, V(x, yy, 0.9), V(x, ax + side * w.t / 2, 0.9), 0.012, mat(0x9AA3AD, { m: 0.6, r: 0.3 }));
+  }
+}
+
+/* ------------------------------------------------------------------ texturas de pantallas Advantecnia */
+const SCEN = {
+  off: {}, h1call: { "H1-LP": "call" }, h1pres: { "H1-LP": "pres" }, call: { "H2-LP": "call" }, pres: { "H2-LP": "pres" }, blue: { "H4-LP": "blue" }, bath: { "B3-LP": "call" },
+  mix: { "H2-LP": "call", "B3-LP": "call", "H3-LP": "pres", "H4-LP": "blue" } };
+const EVENTS = {
+  "H1-LP": { call: ["Room 1 · Bed 2", "Patient call"], pres: ["Room 1 · Bed 2", "Nurse presence"] },
+  "H2-LP": { call: ["Room 2 · Bed 3", "Patient call"], pres: ["Room 2 · Bed 3", "Nurse presence"] },
+  "B3-LP": { call: ["WC B3 · Shower", "Pull-cord call"] }, "H3-LP": { pres: ["Room 3 · Bed 1", "Nurse presence"] },
+  "H4-LP": { blue: ["Room 4 · Bed 2", "CODE BLUE"] } };
+const ST_COL = { call: "#E53935", pres: "#2E9F4F", blue: "#1E6BD6" };
+let scenario = "mix";
+function drawScreen(ctx, W, H, big) {
+  ctx.fillStyle = "#F6F8FA"; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = "#1F2630"; ctx.fillRect(0, 0, W, H * 0.12);
+  ctx.fillStyle = "#fff"; ctx.font = `600 ${H * 0.06}px Arial`; ctx.textBaseline = "middle";
+  ctx.fillText("Nurse Call · Advantecnia", W * 0.03, H * 0.06);
+  ctx.textAlign = "right"; ctx.font = `${H * 0.045}px monospace`; ctx.fillText("Inpatient ward   10:48", W * 0.97, H * 0.06); ctx.textAlign = "left";
+  const ev = Object.entries(SCEN[scenario]).map(([k, s]) => [k, s, EVENTS[k][s]]);
+  const listW = big ? W * 0.58 : W * 0.6;
+  ctx.fillStyle = "#6B7480"; ctx.font = `600 ${H * 0.04}px Arial`; ctx.fillText("ACTIVE CALLS", W * 0.03, H * 0.18);
+  if (!ev.length) { ctx.fillStyle = "#6B7480"; ctx.font = `${H * 0.05}px Arial`; ctx.fillText("No active calls", W * 0.03, H * 0.28); }
+  ev.forEach(([k, s, e], i) => {
+    const y = H * (0.23 + i * 0.16), h = H * 0.13;
+    ctx.fillStyle = "#fff"; ctx.fillRect(W * 0.03, y, listW, h);
+    ctx.fillStyle = ST_COL[s]; ctx.fillRect(W * 0.03, y, W * 0.015, h);
+    ctx.globalAlpha = 0.12; ctx.fillRect(W * 0.03, y, listW, h); ctx.globalAlpha = 1;
+    ctx.fillStyle = "#1F2630"; ctx.font = `700 ${H * 0.058}px Arial`; ctx.fillText(e[0], W * 0.06, y + h * 0.36);
+    ctx.fillStyle = ST_COL[s]; ctx.font = `600 ${H * 0.042}px Arial`; ctx.fillText(e[1], W * 0.06, y + h * 0.74);
+    ctx.fillStyle = "#6B7480"; ctx.textAlign = "right"; ctx.font = `${H * 0.045}px monospace`; ctx.fillText(["00:42", "01:15", "03:02", "00:08"][i] || "00:10", W * 0.03 + listW - W * 0.015, y + h * 0.5); ctx.textAlign = "left";
+  });
+  // mini plano
+  const px = W * 0.65, py = H * 0.2, pw = W * 0.32, ph = H * 0.7;
+  ctx.strokeStyle = "#AEB6BF"; ctx.lineWidth = 2; ctx.strokeRect(px, py, pw, ph);
+  ctx.fillStyle = "#6B7480"; ctx.font = `600 ${H * 0.035}px Arial`; ctx.fillText("FLOOR PLAN", px + 6, py - H * 0.025);
+  const rooms = [["H4", 0], ["H3", 1], ["OF", 2], ["H2", 3], ["H1", 4]];
+  rooms.forEach(([c, i]) => {
+    const st = SCEN[scenario][c + "-LP"]; const x = px + 6 + i * (pw - 12) / 5, w = (pw - 12) / 5 - 4;
+    ctx.fillStyle = st ? ST_COL[st] : "#E3E7EB"; ctx.fillRect(x, py + 8, w, ph * 0.42);
+    ctx.fillStyle = st ? "#fff" : "#4A515B"; ctx.font = `700 ${H * 0.04}px Arial`; ctx.fillText(c, x + 4, py + ph * 0.25);
+  });
+  [["B2", 0], ["B3", 1]].forEach(([c, i]) => {
+    const st = SCEN[scenario][c + "-LP"]; const x = px + 6 + (3.4 + (1 - i) * 0.8) * (pw - 12) / 5, w = (pw - 12) / 5 * 0.75 - 4;
+    ctx.fillStyle = st ? ST_COL[st] : "#E3E7EB"; ctx.fillRect(x, py + ph * 0.62, w, ph * 0.33);
+    ctx.fillStyle = st ? "#fff" : "#4A515B"; ctx.font = `700 ${H * 0.035}px Arial`; ctx.fillText(c, x + 3, py + ph * 0.8);
+  });
+  ctx.fillStyle = "#F7EEDF"; ctx.fillRect(px + 6 + 2 * (pw - 12) / 5, py + ph * 0.62, (pw - 12) / 5 - 4, ph * 0.33);
+}
+const screens = [];
+function screenTex(W, H, big) {
+  const c = document.createElement("canvas"); c.width = W; c.height = H;
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+  screens.push({ c, tex, big }); return tex;
+}
+function refreshScreens() { for (const s of screens) { drawScreen(s.c.getContext("2d"), s.c.width, s.c.height, s.big); s.tex.needsUpdate = true; } }
+
+/* ------------------------------------------------------------------ mobiliario */
+const F = {
+  white: furnMat(0xFFFFFF, { r: 0.6 }), frame: furnMat(0x9AA3AD, { r: 0.35, m: 0.6 }), mattress: furnMat(0xEAF2F8, { r: 0.85 }),
+  sheet: furnMat(0xF9FBFD, { r: 0.9 }), pillow: furnMat(0xFFFFFF, { r: 0.95 }), blanket: furnMat(0x9EC3DE, { r: 0.9 }),
+  wood: furnMat(0xCDB896, { r: 0.6 }), lam: furnMat(0xE9E4DA, { r: 0.55 }), chair: furnMat(0x5E7D96, { r: 0.7 }),
+  curtain: furnMat(0x5B9BD5, { r: 0.95, ds: true }), mesh: furnMat(0xFFFFFF, { r: 0.9, t: 0.5, ds: true }), track: furnMat(0xC7CDD4, { r: 0.4, m: 0.6 }),
+  ceramic: furnMat(0xFFFFFF, { r: 0.2 }), chrome: furnMat(0xC9CED4, { r: 0.18, m: 0.9 }), grab: furnMat(0xC08A3E, { r: 0.35, m: 0.4 }),
+  towel: furnMat(0x7FB7D9, { r: 0.95 }), mirror: furnMat(0xCFE6F3, { r: 0.08, m: 0.2 }), tray: furnMat(0xF2F7FA, { r: 0.35 }),
+  showerc: furnMat(0xA9D3EE, { r: 0.9, t: 0.6, ds: true }), cab: furnMat(0xDADDE2, { r: 0.6 }) };
+function wavyCurtain(parent, x0, y0, x1, y1, z0, h, amp = 0.05, waves = null, mtl = null) {
+  const L = Math.hypot(x1 - x0, y1 - y0); const n = Math.max(24, Math.round(L * 30)); waves = waves ?? Math.max(3, L / 0.18);
+  const geo = new THREE.PlaneGeometry(L, h, n, 1); const pos = geo.attributes.position;
+  for (let i = 0; i < pos.count; i++) { const u = (pos.getX(i) + L / 2) / L; pos.setZ(i, amp * Math.sin(u * waves * Math.PI * 2)); }
+  geo.computeVertexNormals();
+  const m = new THREE.Mesh(geo, mtl || F.curtain); m.castShadow = true;
+  const c = V((x0 + x1) / 2, (y0 + y1) / 2, z0 + h / 2); m.position.copy(c);
+  m.rotation.y = Math.atan2(-(y1 - y0), x1 - x0) * 1; parent.add(m); return m;
+}
+for (const it of M.items) {
+  const [cx, cy] = it.c, [sx, sy, sz] = it.s, z = it.z || 0, P = groups.furn, t = it.type;
+  if (t === "bed") {
+    const g = new THREE.Group(); g.position.copy(V(cx, cy, 0)); P.add(g);
+    // eje local: x ancho, z largo, cabecera en +z local; con cabecera al oeste se gira el grupo
+    const headW = it.head === "W" || it.head === "E"; if (it.head === "W") g.rotation.y = -Math.PI / 2; if (it.head === "E") g.rotation.y = Math.PI / 2;
+    const L = headW ? sx : sy, W = headW ? sy : sx, head = L / 2;
+    // cama hospitalaria articulada: chasis, ruedas, somier con respaldo elevado, colchón, almohada, manta, barandas, cabecera y piecera
+    const BED = { frame: mat(0x8E99A5, { r: 0.35, m: 0.55 }), panel: mat(0xF2F4F6, { r: 0.45 }), accent: mat(0x5B9BD5, { r: 0.5 }),
+      matt: mat(0xDDE8F0, { r: 0.85 }), sheet: mat(0xFFFFFF, { r: 0.9 }), blanket: mat(0x8FB8DA, { r: 0.9 }), rail: mat(0xC9CED4, { r: 0.3, m: 0.7 }) };
+    for (const sxn of [-1, 1]) for (const szn of [-1, 1]) {
+      const wh = cyl(g, 0.055, 0.035, mat(0x30353C, { r: 0.6 })); wh.rotation.z = Math.PI / 2; wh.position.set(sxn * (W / 2 - 0.12), 0.055, szn * (L / 2 - 0.15));
+      lbox(g, sxn * (W / 2 - 0.12), 0.13, szn * (L / 2 - 0.15), 0.04, 0.1, 0.04, BED.frame);
+    }
+    lbox(g, 0, 0.2, 0, W - 0.18, 0.06, L - 0.25, BED.frame);                 // chasis
+    for (const s of [-1, 1]) lbox(g, s * (W / 2 - 0.05), 0.42, 0, 0.04, 0.05, L - 0.12, BED.frame);   // largueros del somier
+    for (const z of [-0.35, 0.35]) lbox(g, 0, 0.31, z, 0.08, 0.22, 0.08, BED.frame);                   // columnas elevadoras
+    // colchón: tramo de piernas + tramo central plano + respaldo elevado (30°)
+    const back = 0.78, flat = L - back - 0.12;
+    lbox(g, 0, 0.56, -L / 2 + 0.06 + flat / 2, W - 0.06, 0.14, flat, BED.matt);
+    lbox(g, 0, 0.645, -L / 2 + 0.06 + flat / 2 - 0.05, W + 0.02, 0.035, flat - 0.1, BED.blanket);       // manta
+    for (const s of [-1, 1]) lbox(g, s * (W / 2 + 0.005), 0.58, -L / 2 + 0.06 + flat / 2 - 0.05, 0.02, 0.12, flat - 0.1, BED.blanket);
+    lbox(g, 0, 0.65, -L / 2 + 0.06 + flat - 0.18, W + 0.03, 0.04, 0.3, BED.sheet);                     // embozo
+    const bk = new THREE.Group(); bk.position.set(0, 0.56, L / 2 - 0.06 - back); bk.rotation.x = -0.5; g.add(bk);
+    lbox(bk, 0, 0.0, back / 2, W - 0.06, 0.13, back, BED.matt);
+    const pil = lbox(bk, 0, 0.11, back - 0.24, W * 0.7, 0.11, 0.34, BED.sheet); pil.scale.set(1, 1, 1);
+    // cabecera (lado muro) y piecera baja con panel celeste
+    lbox(g, 0, 0.62, L / 2 + 0.01, W + 0.04, 0.62, 0.05, BED.panel);
+    lbox(g, 0, 0.6, -L / 2 - 0.01, W - 0.04, 0.2, 0.04, BED.accent);                                  // piecera baja celeste
+    rodBetween(g, new THREE.Vector3(-W / 2 + 0.02, 0.72, -L / 2 - 0.02), new THREE.Vector3(W / 2 - 0.02, 0.72, -L / 2 - 0.02), 0.018, BED.rail);
+    for (const s of [-1, 1]) { lbox(g, s * (W / 2 - 0.02), 0.5, -L / 2 - 0.02, 0.05, 0.46, 0.06, BED.frame); lbox(g, s * (W / 2 - 0.02), 0.62, L / 2 + 0.02, 0.05, 0.66, 0.06, BED.frame); }
+    // barandas laterales (mitad cabecera), tubos
+    for (const s of [-1, 1]) {
+      const x0 = s * (W / 2 + 0.03);
+      for (const yy of [0.72, 0.84]) rodBetween(g, new THREE.Vector3(x0, yy, L / 2 - 0.12), new THREE.Vector3(x0, yy, L / 2 - 0.95), 0.012, BED.rail);
+      for (const zz of [L / 2 - 0.15, L / 2 - 0.92]) rodBetween(g, new THREE.Vector3(x0, 0.45, zz), new THREE.Vector3(x0, 0.86, zz), 0.012, BED.rail);
+    }
+  } else if (t === "nightstand") {
+    box(P, cx, cy, 0.05, sx, sy, sz - 0.05, F.lam); box(P, cx, cy - sy / 2 - 0.005, 0.5, sx - 0.06, 0.01, 0.16, F.white, false);
+    box(P, cx, cy, sz - 0.02, sx + 0.04, sy + 0.04, 0.03, F.wood);
+  } else if (t === "overbed_table") {
+    box(P, cx, cy, sz - 0.03, sx, sy, 0.03, F.wood); box(P, cx - sx / 2 + 0.05, cy, 0.05, 0.05, 0.05, sz - 0.05, F.frame); box(P, cx - sx / 2 + 0.05, cy, 0.02, 0.1, sy, 0.03, F.frame);
+  } else if (t === "chair" || t === "visitor_chair") {
+    const g = new THREE.Group(); g.position.copy(V(cx, cy, 0)); g.rotation.y = (it.rot || 0) * Math.PI / 180; P.add(g);
+    lbox(g, 0, 0.45, 0, sx * 0.9, 0.08, sy * 0.85, F.chair); lbox(g, 0, 0.75, -sy * 0.4, sx * 0.9, 0.5, 0.06, F.chair);
+    for (const a of [-1, 1]) for (const b of [-1, 1]) lbox(g, a * sx * 0.38, 0.21, b * sy * 0.35, 0.03, 0.42, 0.03, F.frame);
+    if (t === "visitor_chair") for (const a of [-1, 1]) lbox(g, a * sx * 0.47, 0.62, 0, 0.05, 0.05, sy * 0.8, F.chair);
+  } else if (t === "cabinet") {
+    box(P, cx, cy, 0, sx, sy, sz, F.cab); box(P, cx, cy, sz - 0.01, sx + 0.02, sy + 0.02, 0.02, F.wood);
+  } else if (t === "office_desk" || t === "nurse_desk") {
+    box(P, cx, cy, sz - 0.04, sx, sy, 0.04, F.wood);
+    for (const a of [-1, 1]) box(P, cx + a * (sx / 2 - 0.04), cy, 0, 0.04, sy - 0.05, sz - 0.04, F.lam);
+    box(P, cx, cy + sy / 2 - 0.03, 0.3, sx - 0.1, 0.02, 0.4, F.lam);
+  } else if (t === "nurse_counter") {
+    box(P, cx, cy, 0, sx, sy, sz, F.lam); box(P, cx, cy, sz, sx + 0.06, sy + 0.12, 0.03, F.wood);
+  } else if (t === "curtain") {
+    // tela celeste ignífuga + franja superior de malla blanca, colgada del riel
+    const [a, b] = it.seg, Lc = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / Lc, uy = (b[1] - a[1]) / Lc;
+    const spans = it.state === "open" ? [[0, 0.42], [Lc - 0.42, Lc]] : [[0, Lc]];
+    for (const [s0, s1] of spans) {
+      const pa = [a[0] + ux * s0, a[1] + uy * s0], pb = [a[0] + ux * s1, a[1] + uy * s1];
+      const wv = it.state === "open" ? 6 : null, amp = it.state === "open" ? 0.07 : 0.045;
+      wavyCurtain(P, pa[0], pa[1], pb[0], pb[1], 0.30, 1.62, amp, wv, F.curtain);
+      wavyCurtain(P, pa[0], pa[1], pb[0], pb[1], 1.92, 0.46, amp, wv, F.mesh);
+    }
+  } else if (t === "curtain_track") {
+    for (const [a, b] of it.rails) rodBetween(P, V(a[0], a[1], z), V(b[0], b[1], z), 0.014, F.track);
+    for (const [rx, ry] of it.rods) rodBetween(P, V(rx, ry, z), V(rx, ry, M.meta.ceil), 0.008, F.track);
+  } else if (t === "sink" || t === "washbasin") {
+    box(P, cx, cy, sz - 0.14, sx, sy, 0.14, F.ceramic);
+    const bowl = new THREE.Mesh(new THREE.CylinderGeometry(Math.min(sx, sy) * 0.33, Math.min(sx, sy) * 0.22, 0.08, 24), mat(0xDDE4EA, { r: 0.2 })); bowl.position.copy(V(cx, cy, sz - 0.03)); P.add(bowl);
+    const ws = it.wallside || "E"; const dx = ws === "E" ? 1 : ws === "W" ? -1 : 0, dy = ws === "N" ? 1 : ws === "S" ? -1 : 0;
+    const fx = cx + dx * (sx / 2 - 0.06), fy = cy + dy * (sy / 2 - 0.06);
+    rodBetween(P, V(fx, fy, sz), V(fx, fy, sz + 0.2), 0.015, F.chrome); rodBetween(P, V(fx, fy, sz + 0.2), V(fx - dx * 0.14, fy - dy * 0.14, sz + 0.2), 0.012, F.chrome);
+    box(P, fx + dy * 0.06, fy + dx * 0.06, sz + 0.1, 0.03, 0.03, 0.08, F.chrome);
+    box(P, cx + dx * (sx / 2 - 0.08), cy + dy * (sy / 2 - 0.08), 0, 0.12, 0.12, sz - 0.14, F.ceramic);
+  } else if (t === "toilet") {
+    const g = new THREE.Group(); g.position.copy(V(cx, cy, 0)); P.add(g);
+    const pedestal = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.16, 0.38, 24), F.ceramic); pedestal.position.set(0, 0.19, -0.05); pedestal.castShadow = true; g.add(pedestal);
+    const bowl = new THREE.Mesh(new THREE.SphereGeometry(0.2, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), F.ceramic); bowl.scale.set(0.95, 0.35, 1.3); bowl.position.set(0, 0.38, -0.08); g.add(bowl);
+    const seat = new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.03, 10, 24), mat(0xF4F6F8, { r: 0.4 })); seat.rotation.x = Math.PI / 2; seat.scale.set(1, 1.3, 1); seat.position.set(0, 0.45, -0.1); g.add(seat);
+    lbox(g, 0, 0.62, 0.25, sx, 0.4, 0.18, F.ceramic); lbox(g, 0.12, 0.84, 0.25, 0.06, 0.02, 0.04, F.chrome);
+  } else if (t === "shower_tray") {
+    box(P, cx, cy, 0, sx, sy, 0.04, F.tray); const dr = cyl(P, 0.05, 0.005, F.chrome); dr.position.copy(V(cx, cy, 0.045));
+  } else if (t === "shower_seat") {
+    box(P, cx, cy, 0.46, sx, sy, 0.04, mat(0xF5F7F9, { r: 0.5 })); box(P, cx + 0.2, cy, 0.3, 0.04, sy, 0.2, F.chrome);
+  } else if (t === "shower_curtain") {
+    wavyCurtain(P, cx, cy - sy / 2, cx, cy + sy / 2, z, sz, 0.035).material = F.showerc;
+    rodBetween(P, V(cx, cy - sy / 2, z + sz + 0.05), V(cx, cy + sy / 2, z + sz + 0.05), 0.012, F.chrome);
+  } else if (t === "shower_head") {
+    rodBetween(P, V(cx, cy, 1.0), V(cx, cy, z + 0.05), 0.012, F.chrome); const h = cyl(P, 0.07, 0.03, F.chrome); h.position.copy(V(cx, cy + 0.08, z)); rodBetween(P, V(cx, cy, z + 0.05), V(cx, cy + 0.08, z + 0.02), 0.01, F.chrome);
+    box(P, cx - 0.02, cy, 1.05, 0.03, 0.18, 0.08, F.chrome);
+  } else if (t === "grab_bar" || t === "shower_rail") {
+    const vert = sx < sy; const a = vert ? V(cx, cy - sy / 2, z) : V(cx - sx / 2, cy, z), b = vert ? V(cx, cy + sy / 2, z) : V(cx + sx / 2, cy, z);
+    rodBetween(P, a, b, 0.018, F.grab);
+  } else if (t === "grab_bar_fold") {
+    rodBetween(P, V(cx, cy - sy / 2, z), V(cx, cy + sy / 2, z), 0.018, F.grab); rodBetween(P, V(cx, cy - sy / 2, z), V(cx, cy - sy / 2, z - 0.05), 0.02, F.grab);
+    box(P, cx, cy - sy / 2 - 0.04, z - 0.1, 0.08, 0.04, 0.2, F.chrome);
+  } else if (t === "towel_rail") {
+    const vert = sx < sy; const L = vert ? sy : sx;
+    const a = vert ? V(cx, cy - L / 2, z) : V(cx - L / 2, cy, z), b = vert ? V(cx, cy + L / 2, z) : V(cx + L / 2, cy, z);
+    rodBetween(P, a, b, 0.01, F.chrome);
+    box(P, cx, cy, z - 0.38, vert ? 0.04 : L * 0.8, vert ? L * 0.8 : 0.04, 0.38, F.towel);
+  } else if (t === "mirror") {
+    box(P, cx, cy, z, sx, sy, sz, F.mirror, false);
+  }
+}
+
+/* ------------------------------------------------------------------ dispositivos */
+const D = {
+  panel: mat(0xF4F4F2, { r: 0.5 }), adv: mat(0xE46F12, { r: 0.45 }), red: mat(0xE53935, { r: 0.4 }), green: mat(0x2E9F4F, { r: 0.45 }),
+  dark: mat(0x3D4450, { r: 0.5 }), black: mat(0x1D2330, { r: 0.3 }), white: mat(0xFFFFFF, { r: 0.4 }), o2: mat(0xFFFFFF, { r: 0.3 }),
+  air: mat(0x2A2A2A, { r: 0.3 }), vac: mat(0xF2C200, { r: 0.35 }), sock: mat(0xF7F9FB, { r: 0.4 }), rj: mat(0xB9C0C8, { r: 0.4 }),
+  lamp: mat(0xFFF6D6, { e: 0xFFE7A0, ei: 0.6 }), pear: mat(0xF4EEE6, { r: 0.5 }), cord: mat(0x7A6E62, { r: 0.6 }), cordR: mat(0xC0392B, { r: 0.6 }),
+  rack: mat(0x5B636E, { r: 0.45, m: 0.2 }), rackGlass: mat(0xDCE7F0, { r: 0.05, t: 0.12 }), led: mat(0x34D058, { e: 0x34D058, ei: 1.2 }),
+};
+const pickables = [], tagAnchors = [], lpMeshes = {};
+const LP_COL = { call: 0xE53935, pres: 0x2E9F4F, blue: 0x1E6BD6 };
+function pickable(obj, info) { obj.traverse(o => { if (o.isMesh) { o.userData.info = info; pickables.push(o); } }); }
+const bedById = Object.fromEntries(M.items.filter(i => i.type === "bed").map(i => [i.id, i]));
+for (const d of M.devices) {
+  const [x, y, z] = d.p; const g = new THREE.Group(); g.position.copy(V(x, y, 0)); g.rotation.y = FACE_ROT[d.face]; groups.dev.add(g);
+  const t = d.type;
+  if (t === "headwall") {
+    lbox(g, 0, z, 0.05, d.w, d.hgt, 0.1, D.panel);
+    lbox(g, 0, z + 0.24, 0.07, d.w * 0.7, 0.06, 0.06, D.lamp);
+    [D.o2, D.air, D.vac].forEach((m, i) => { const c = cyl(g, 0.032, 0.05, m, 18); c.rotation.x = Math.PI / 2; c.position.set(-0.68 + i * 0.13, z, 0.12); const r = cyl(g, 0.042, 0.01, D.dark, 18); r.rotation.x = Math.PI / 2; r.position.set(-0.68 + i * 0.13, z, 0.1); });
+    for (let k = 0; k < 4; k++) { lbox(g, -0.15 + k * 0.12, z, 0.105, 0.085, 0.085, 0.015, D.sock); lbox(g, -0.15 + k * 0.12, z, 0.114, 0.03, 0.02, 0.004, D.dark); }
+    for (let k = 0; k < 2; k++) lbox(g, 0.45 + k * 0.1, z, 0.105, 0.07, 0.07, 0.015, D.rj);
+  } else if (t === "bed_call") {
+    lbox(g, 0, z, 0.012, 0.086, 0.086, 0.024, D.white);
+    lbox(g, 0, z + 0.008, 0.026, 0.062, 0.046, 0.006, mat(0xE6ECEF));
+    lbox(g, -0.015, z + 0.008, 0.031, 0.022, 0.03, 0.006, D.green); lbox(g, 0.015, z + 0.008, 0.031, 0.022, 0.03, 0.006, mat(0x1E6BD6));
+    const jk = cyl(g, 0.009, 0.02, mat(0xC9CED4, { m: 0.6, r: 0.3 }), 12); jk.rotation.x = Math.PI / 2; jk.position.set(0, z - 0.028, 0.03);
+    // pera: cable desde el panel hasta la cama
+    const bed = bedById[d.id.slice(0, -3)];
+    if (bed) {
+      const [px, py] = bed.pear; const fx = d.face === "E" ? 1 : d.face === "W" ? -1 : 0, fy = d.face === "N" ? 1 : d.face === "S" ? -1 : 0;
+      const a = V(x + fx * 0.04, y + fy * 0.04, z - 0.06), pe = V(px, py, 0.62);
+      const mid = V((x + px) / 2, (y + py) / 2, 0.45);
+      const curve = new THREE.CatmullRomCurve3([a, V(x + fx * 0.1, y + fy * 0.1, 0.75), mid, pe]);
+      const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 40, 0.006, 6), D.cord); groups.dev.add(tube);
+      const pear = new THREE.Mesh(new THREE.SphereGeometry(0.03, 16, 12), D.pear); pear.scale.set(1, 1.9, 1); pear.position.copy(pe).add(new THREE.Vector3(0, 0.03, 0)); pear.castShadow = true; groups.dev.add(pear);
+      const btn = new THREE.Mesh(new THREE.SphereGeometry(0.012, 12, 8), D.red); btn.position.copy(pe).add(new THREE.Vector3(0, 0.07, 0.02)); groups.dev.add(btn);
+      pickable(tube, d); pickable(pear, d);
+    }
+  } else if (t === "presence") {
+    lbox(g, 0, z, 0.012, 0.086, 0.086, 0.024, D.white);
+    lbox(g, 0, z, 0.028, 0.068, 0.068, 0.008, mat(0x3BAA4F, { r: 0.4 }));
+  } else if (t === "light_switch") {
+    lbox(g, -0.0, z, 0.012, 0.086, 0.086, 0.02, D.white); lbox(g, -0.02, z, 0.025, 0.035, 0.07, 0.006, mat(0xE8EBEE)); lbox(g, 0.02, z, 0.025, 0.035, 0.07, 0.006, mat(0xE8EBEE));
+  } else if (t === "corridor_light") {
+    lbox(g, 0, z, 0.02, 0.16, 0.16, 0.04, D.white);
+    const lm = new THREE.MeshStandardMaterial({ color: 0xE9F1F7, roughness: 0.3, emissive: 0x000000, emissiveIntensity: 2.2 });
+    lbox(g, 0, z, 0.045, 0.13, 0.13, 0.012, lm);
+    const pl = new THREE.PointLight(0xffffff, 0, 2.2, 2); pl.position.set(0, z - 0.1, 0.3); g.add(pl);
+    lpMeshes[d.id] = { mat: lm, light: pl };
+  } else if (t === "rc") {
+    lbox(g, 0, z - 0.04, 0, 0.11, 0.08, 0.09, D.white); lbox(g, 0, z - 0.04, -0.03, 0.105, 0.075, 0.03, mat(0x7E8FA6, { r: 0.5 }));
+    for (const s of [-1, 1]) lbox(g, s * 0.035, z - 0.083, 0, 0.03, 0.01, 0.07, mat(0x2E9F4F, { r: 0.5 }));
+    lbox(g, 0.03, z - 0.083, 0.03, 0.01, 0.006, 0.01, D.led);
+  } else if (t === "pull_cord") {
+    lbox(g, 0, z, 0.012, 0.086, 0.086, 0.024, D.white);
+    const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.006, 3), D.red); tr.rotation.x = Math.PI / 2; tr.rotation.y = Math.PI / 2; tr.position.set(0, z + 0.005, 0.027); g.add(tr);
+    rodBetween(g, new THREE.Vector3(0, z - 0.045, 0.04), new THREE.Vector3(0, 0.22, 0.04), 0.004, D.cordR);
+    const tri = new THREE.Mesh(new THREE.TorusGeometry(0.03, 0.007, 8, 3), D.cordR); tri.position.set(0, 0.19, 0.04); g.add(tri);
+  } else if (t === "aio_pc") {
+    const tex = screenTex(1024, 640, false);
+    lbox(g, 0, z + 0.06, -0.02, 0.18, 0.012, 0.18, D.black); lbox(g, 0, z + 0.14, -0.04, 0.05, 0.16, 0.03, D.black);
+    const sc = lbox(g, 0, z + 0.36, 0, 0.6, 0.38, 0.035, D.black);
+    const pl = new THREE.Mesh(new THREE.PlaneGeometry(0.57, 0.35), new THREE.MeshBasicMaterial({ map: tex, toneMapped: false })); pl.position.set(0, z + 0.36, 0.019); pl.rotation.x = 0; g.add(pl);
+  } else if (t === "desk_phone") {
+    const b = lbox(g, 0.02, z + 0.035, 0, 0.2, 0.05, 0.2, mat(0x3A3F47, { r: 0.45 })); b.rotation.x = -0.3;
+    const scr = lbox(g, 0.05, z + 0.08, -0.03, 0.12, 0.09, 0.012, mat(0x6C8FB3, { e: 0x2E4E6E, ei: 0.5 })); scr.rotation.x = -0.6;
+    lbox(g, -0.1, z + 0.06, 0.0, 0.055, 0.04, 0.2, mat(0x2B313C)); lbox(g, -0.1, z + 0.085, 0.07, 0.06, 0.03, 0.05, mat(0x2B313C)); lbox(g, -0.1, z + 0.085, -0.07, 0.06, 0.03, 0.05, mat(0x2B313C));
+  } else if (t === "tv") {
+    const tex = screenTex(1280, 720, true);
+    lbox(g, 0, z, 0.03, 1.24, 0.72, 0.05, D.black);
+    const pl = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.675), new THREE.MeshBasicMaterial({ map: tex, toneMapped: false })); pl.position.set(0, z, 0.056); g.add(pl);
+  } else if (t === "rack") {
+    // rack con frente hacia el oeste (-x). Local: z = frente
+    const H = d.hgt, W = d.w, Dp = d.dep;
+    lbox(g, 0, H / 2, -Dp / 2 + 0.01, W, H, 0.02, D.rack); lbox(g, 0, H - 0.02, 0, W, 0.04, Dp, D.rack); lbox(g, 0, 0.04, 0, W, 0.08, Dp, D.rack);
+    for (const s of [-1, 1]) lbox(g, s * (W / 2 - 0.01), H / 2, 0, 0.02, H, Dp, D.rack);
+    for (const s of [-1, 1]) lbox(g, s * (W / 2 - 0.05), H / 2, Dp / 2 - 0.03, 0.04, H, 0.04, D.rack);
+    const front = lbox(g, 0, H / 2, Dp / 2 + 0.005, W - 0.06, H - 0.08, 0.01, D.rackGlass); front.castShadow = false;
+    const units = [[0.30, 0.22, 0x2C3E50, "UPS"], [0.90, 0.045, 0x2B2F36, "Servidor ACE51010103"], [1.06, 0.05, 0x9AA3AD, ""], [1.35, 0.045, 0xC9CED4, "Switch ACEUCM6302"], [1.47, 0.045, 0xD8DDE2, "Patch"],
+      [1.55, 0.06, 0x2E7D4F, "SmartHub"], [1.75, 0.07, 0x6B7480, "Fuente 24V"]];
+    for (const [uz, uh, c] of units) lbox(g, 0, uz, Dp / 2 - 0.08, W - 0.12, uh, 0.14, mat(c, { r: 0.4, m: 0.2 }));
+    for (let k = 0; k < 12; k++) lbox(g, -0.18 + k * 0.03, 1.35, Dp / 2 - 0.005, 0.012, 0.01, 0.01, D.led);
+    lbox(g, 0.2, 1.55, Dp / 2 - 0.005, 0.02, 0.02, 0.01, D.led);
+  } else if (t === "elec_panel") {
+    lbox(g, 0, z, 0.05, 0.6, 0.9, 0.1, mat(0xF0F2F5, { r: 0.5 })); lbox(g, 0, z, 0.105, 0.5, 0.75, 0.01, mat(0xE2E6EA)); lbox(g, 0.22, z, 0.115, 0.02, 0.1, 0.02, D.dark);
+  }
+  pickable(g, d);
+  if (["rc", "corridor_light", "pull_cord", "tv", "aio_pc", "rack"].includes(t)) {
+    const lift = t === "rack" ? d.hgt + 0.25 : t === "rc" ? z + 0.15 : t === "tv" ? z + 0.5 : t === "aio_pc" ? z + 0.65 : z + 0.25;
+    tagAnchors.push({ pos: V(x, y, lift), text: d.id.replace("-LP", " LP").replace("RACK", "GAB"), cls: "dev", type: t });
+  }
+}
+refreshScreens();
+
+/* ------------------------------------------------------------------ cables y bandeja */
+const CM = { bus: mat(0x1A9E4B, { r: 0.4, e: 0x0B4A23, ei: 0.5 }), utp: mat(0x2DBE63, { r: 0.45, e: 0x0B4A23, ei: 0.35 }), net: mat(0xD62839, { r: 0.4, e: 0x5A0B14, ei: 0.5 }), pwr: mat(0x1F66D1, { r: 0.4, e: 0x0A2A5A, ei: 0.5 }) };
+const CR = { bus: 0.034, utp: 0.016, net: 0.026, pwr: 0.021 };
+for (const c of M.cables) {
+  const pts = c.pts.map(p => V(...p)); const grp = new THREE.Group(); groups.cable.add(grp);
+  for (let i = 0; i < pts.length - 1; i++) {
+    if (c.sys === "utp") { // trazo discontinuo
+      const a = pts[i], b = pts[i + 1], L = a.distanceTo(b), n = Math.max(1, Math.floor(L / 0.12));
+      for (let k = 0; k < n; k++) { const t0 = k / n, t1 = Math.min(1, t0 + 0.7 / n); rodBetween(grp, a.clone().lerp(b, t0), a.clone().lerp(b, t1), CR.utp, CM.utp); }
+    } else rodBetween(grp, pts[i], pts[i + 1], CR[c.sys], CM[c.sys]);
+    const j = new THREE.Mesh(new THREE.SphereGeometry(CR[c.sys] * 1.05, 10, 8), CM[c.sys]); j.position.copy(pts[i]); grp.add(j);
+  }
+  for (const e of [pts[0], pts[pts.length - 1]]) { const s = new THREE.Mesh(new THREE.SphereGeometry(CR[c.sys] * 2.2, 12, 10), CM[c.sys]); s.position.copy(e); grp.add(s); }
+  pickable(grp, { cable: c });
+}
+// bandeja portacables del pasillo
+const TRAY = mat(0xB9C0C8, { r: 0.5, m: 0.5, t: 0.55 });
+const XE = Math.max(...M.walls.map(w => Math.max(w.a[0], w.b[0])));
+box(groups.tray, XE / 2, 1.25, M.meta.tray - 0.05, XE - 1.0, 1.45, 0.012, TRAY, false);
+for (const s of [0.53, 1.97]) box(groups.tray, XE / 2, s, M.meta.tray - 0.05, XE - 1.0, 0.012, 0.07, TRAY, false);
+for (let x = 1; x < XE - 0.4; x += 1.5) for (const s of [0.6, 1.9]) rodBetween(groups.tray, V(x, s, M.meta.tray - 0.05), V(x, s, M.meta.ceil), 0.006, TRAY);
+
+/* ------------------------------------------------------------------ etiquetas */
+for (const r of M.rooms) {
+  if (r.kind === "corridor") continue;
+  const xs = r.poly.map(p => p[0]), ys = r.poly.map(p => p[1]);
+  const cx = r.kind === "room" ? Math.min(...xs) + 4.5 : (Math.min(...xs) + Math.max(...xs)) / 2, cy = r.kind === "room" ? 8.8 : (Math.min(...ys) + Math.max(...ys)) / 2;
+  tagAnchors.push({ pos: V(cx, cy, 3.1), text: r.name.split("\n")[0], cls: "room", code: r.code });
+}
+const tagLayer = document.getElementById("tags");
+for (const a of tagAnchors) { const el = document.createElement("div"); el.className = "tag " + a.cls; el.textContent = a.text; tagLayer.appendChild(el); a.el = el; }
+const ROOM_NAMES = {
+  en: { H1: "Room 1", H2: "Room 2", OF: "Office", H3: "Room 3", H4: "Room 4", VB: "Lobby", B1: "Staff WC", B2: "Patient WC", B3: "Accessible WC", NS: "Nurse station" },
+  he: { H1: "חדר 1", H2: "חדר 2", OF: "משרד", H3: "חדר 3", H4: "חדר 4", VB: "פרוזדור", B1: "שירותי צוות", B2: "שירותי מטופלים", B3: "שירותי נכים", NS: "עמדת אחיות" } };
+let showTags = true;
+const _v = new THREE.Vector3();
+const occ = new THREE.Raycaster();
+function occluded(pos) {
+  const dir = pos.clone().sub(camera.position); const L = dir.length(); occ.set(camera.position, dir.normalize()); occ.far = L - 0.3;
+  return occ.intersectObjects(wallMeshes.filter(m => m.visible), false).length > 0;
+}
+function placeTags() {
+  if (CLEAN) { for (const a of tagAnchors) a.el.hidden = true; return; }
+  const w = renderer.domElement.clientWidth, h = renderer.domElement.clientHeight;
+  for (const a of tagAnchors) {
+    const vis = showTags && (a.cls === "room" || wiring || a.type === "tv" || a.type === "rack" || a.type === "aio_pc");
+    _v.copy(a.pos).project(camera);
+    const dist = camera.position.distanceTo(a.pos);
+    if (!vis || _v.z > 1 || _v.z < -1 || Math.abs(_v.x) > 1.05 || Math.abs(_v.y) > 1.05 || (a.cls === "dev" && dist > 26) || (a.cls === "room" && dist < 2.5)) { a.el.hidden = true; continue; }
+    if (occluded(a.pos)) { a.el.hidden = true; continue; }
+    a.el.hidden = false; a.el.style.left = ((_v.x + 1) / 2 * w) + "px"; a.el.style.top = ((1 - _v.y) / 2 * h) + "px";
+  }
+}
+
+/* ------------------------------------------------------------------ modos */
+let wiring = false, lowWalls = false;
+function setOpacity(list, op) { for (const m of list) { m.transparent = op < 1 || m.userData.baseT; m.opacity = Math.min(op, m.userData.base); m.depthWrite = op >= 1 ? true : !m.transparent ? true : op > 0.6; m.needsUpdate = true; } }
+function applyMode() {
+  renderer.shadowMap.needsUpdate = true;
+  groups.cable.visible = wiring; groups.tray.visible = wiring;
+  setOpacity(furnMats, wiring ? 0.28 : 1); setOpacity(archMats.filter(m => m !== GLASS), wiring ? 0.55 : 1);
+  document.getElementById("m-eq").setAttribute("aria-pressed", String(!wiring)); document.getElementById("m-wi").setAttribute("aria-pressed", String(wiring));
+  renderLegend();
+}
+function applyWalls() {
+  renderer.shadowMap.needsUpdate = true;
+  for (const m of wallMeshes) {
+    const { z0, z1 } = m.userData.wall; const top = lowWalls ? Math.min(z1, 1.1) : z1;
+    if (top <= z0) { m.visible = false; continue; } m.visible = true;
+    m.scale.y = (top - z0) / (z1 - z0); m.position.y = z0 + (top - z0) / 2;
+  }
+  groups.doors.visible = !lowWalls; groups.win.visible = !lowWalls;
+  document.getElementById("cut").setAttribute("aria-pressed", String(lowWalls));
+}
+function applyScenario() {
+  const s = SCEN[scenario];
+  for (const [id, o] of Object.entries(lpMeshes)) {
+    const st = s[id]; const c = st ? LP_COL[st] : null;
+    o.mat.color.setHex(c ?? 0xE9ECEF); o.mat.emissive.setHex(c ?? 0x000000); o.light.color.setHex(c ?? 0xffffff); o.light.intensity = c ? 1.6 : 0;
+  }
+  refreshScreens();
+}
+
+/* ------------------------------------------------------------------ vistas y recorrido */
+const VIEWS = {
+  iso: [[19.4, -17, 22], [14.4, 2.6, 0]], top: [[14.2, 2.6, 36], [14.2, 2.7, 0]], corr: [[27.8, 1.2, 1.65], [8.4, 1.2, 1.4]],
+  room: [[26.9, 5.6, 2.05], [23.4, 6.6, 0.55]], bath: [[24.4, 2.6, 7.2], [24.4, -3.3, 0]], nurse: [[13.3, -2.5, 1.55], [14.1, -0.25, 1.0]], rack: [[3.4, 1.7, 1.7], [0.0, 1.2, 1.1]] };
+function setView(k) { const [p, t] = VIEWS[k]; lowWalls = ["iso", "top", "bath"].includes(k) || wiring; applyWalls(); camera.position.copy(V(...p)); controls.target.copy(V(...t)); controls.update(); }
+const KEYS = [ // [t, pos, target, modo, escenario, rótulo]
+  [0, [27.8, 1.2, 1.65], [18.4, 1.2, 1.5], "eq", "h1call", "Llamada activa en Habitación 1"],
+  [6, [24.8, 0.5, 1.65], [27.3, 2.4, 2.3], "eq", "h1call", "Luz de pasillo en rojo sobre P1"],
+  [10, [27.3, 1.7, 1.65], [27.3, 4.2, 1.4], "eq", "h1pres", "Al entrar: presencia (verde)"],
+  [14, [27.1, 4.2, 2.2], [22.9, 7.6, 0.8], "eq", "h1pres", "3 camas con la cabecera contra el muro lateral"],
+  [20, [25.7, 4.1, 1.6], [22.5, 4.1, 1.3], "eq", "h1pres", "Cabecero: gases, 230 V, RJ45 y panel de llamada con pera"],
+  [25, [26.8, 4.3, 1.6], [26.4, 2.45, 1.2], "eq", "h1pres", "Teclas de luz y presencia / cancelación junto a la puerta"],
+  [29, [27.3, 1.6, 1.65], [25.0, 0.9, 1.65], "eq", "mix", ""],
+  [32, [26.0, 1.8, 1.65], [23.3, 0.0, 1.95], "eq", "mix", "Luces y presencia de los baños B2 / B3"],
+  [35, [21.85, 0.9, 1.65], [21.85, -1.0, 1.5], "eq", "mix", ""],
+  [37, [22.4, -0.72, 1.65], [27.5, -1.0, 1.3], "eq", "mix", "Antebaño"],
+  [39, [26.15, -0.9, 1.65], [26.15, -3.5, 1.2], "eq", "mix", ""],
+  [42, [26.2, -2.7, 1.65], [27.7, -4.3, 1.3], "eq", "mix", "Baño accesible: ducha con tirador a 1,85 m"],
+  [46, [26.4, -2.7, 1.65], [25.3, -4.3, 1.4], "eq", "mix", "Tirador del inodoro"],
+  [49, [26.15, -0.9, 1.65], [21.85, -0.8, 1.5], "eq", "mix", ""],
+  [51, [21.85, -0.7, 1.65], [21.85, 1.0, 1.6], "eq", "mix", ""],
+  [53, [26.8, 1.1, 1.65], [16, 1.0, 1.5], "eq", "mix", ""],
+  [57, [17.2, 1.15, 1.65], [15.7, -0.4, 1.4], "eq", "mix", "Estación de enfermería: puerta propia junto al escritorio"],
+  [60, [15.7, -0.9, 1.65], [14.2, -1.4, 1.2], "eq", "mix", ""],
+  [63, [13.4, -2.45, 1.5], [14.0, -0.25, 1.0], "eq", "mix", "Escritorio contra el muro: PC ACE52040208 y teléfono ACE52190200"],
+  [67, [13.4, -2.2, 1.35], [11.45, 2.3, 2.0], "eq", "mix", "La enfermera mira al pasillo y a la TV"],
+  [70, [15.7, -0.9, 1.65], [15.7, 1.0, 1.6], "eq", "mix", ""],
+  [72, [15.6, 1.2, 1.65], [6, 1.2, 1.4], "eq", "mix", ""],
+  [76, [3.0, 1.2, 1.65], [0, 1.2, 1.1], "eq", "mix", "Gabinete: SmartHub, switch ACEUCM6302 y servidor ACE51010103"],
+  [80, [3.0, 1.2, 1.65], [0, 1.2, 1.1], "wi", "mix", "Modo cableado"],
+  [86, [7.5, -9, 12], [9.5, 2.5, 1.2], "wi", "mix", "Tarjetas de 24 pins en cadena hasta el SmartHub"],
+  [93, [20.4, -4, 11], [23.4, 5.5, 1.5], "wi", "mix", "Radial: cada dispositivo a la tarjeta de 24 pins de su cuarto"],
+  [100, [25.4, -9, 9], [24.4, -1.5, 1.2], "wi", "mix", "Baños: tiradores y señalización al bus"],
+  [107, [19.4, -17, 22], [14.4, 2.6, 0], "wi", "mix", "Verde bus · Rojo red IP · Azul 230 V"],
+  [112, [19.4, -17, 22], [14.4, 2.6, 0], "wi", "mix", ""] ];
+const DUR = KEYS[KEYS.length - 1][0];
+const ease = u => u * u * u * (u * (u * 6 - 15) + 10);
+function poseAt(t) {
+  t = Math.max(0, Math.min(DUR, t));
+  let i = 0; while (i < KEYS.length - 2 && KEYS[i + 1][0] <= t) i++;
+  const a = KEYS[i], b = KEYS[i + 1]; const u = ease((t - a[0]) / Math.max(1e-6, b[0] - a[0]));
+  const p = V(...a[1]).lerp(V(...b[1]), u), q = V(...a[2]).lerp(V(...b[2]), u);
+  const lab = a[5];
+  return { p, q, mode: a[3], scen: a[4], lab };
+}
+let playing = false, playT = 0, lastTs = 0;
+const tl = document.getElementById("tl");
+function applyPose(t) {
+  const s = poseAt(t);
+  camera.position.copy(s.p); controls.target.copy(s.q); camera.lookAt(s.q);
+  const w = s.mode === "wi"; if (w !== wiring) { wiring = w; applyMode(); }
+  const lw = w; if (lw !== lowWalls) { lowWalls = lw; applyWalls(); }
+  if (s.scen !== scenario) { scenario = s.scen; applyScenario(); }
+  tl.hidden = !s.lab || CLEAN; tl.innerHTML = s.lab ? `${trCap(s.lab)}<small>${fmt(t)} / ${fmt(DUR)}</small>` : "";
+}
+const CAPS = {"PABELLÓN DE INTERNACIÓN · SISTEMA DE LLAMADA DE ENFERMERÍA": {"en": "INPATIENT WARD · NURSE CALL SYSTEM", "he": "מחלקת אשפוז · מערכת קריאת אחות"}, "Sistema: ACE BG · Advantecnia      Elaboró: Telab International": {"en": "System: ACE BG · Advantecnia      Prepared by: Telab International", "he": "מערכת: ACE BG · Advantecnia      הוכן ע\"י: Telab International"}, "ESCALA · SCALE": {"en": "SCALE", "he": "קנה מידה"}, "FECHA · DATE": {"en": "DATE", "he": "תאריך"}, "LÁMINA": {"en": "SHEET", "he": "גיליון"}, "Cotas en metros · Dimensions in m · מידות במטרים": {"en": "Dimensions in metres", "he": "מידות במטרים"}, "Formato A1 · Rev. A – Anteproyecto": {"en": "A1 format · Rev. A – Preliminary design", "he": "פורמט A1 · מהדורה A – תכנון מוקדם"}, "PLANTA GENERAL – EQUIPAMIENTO": {"en": "GENERAL FLOOR PLAN – EQUIPMENT", "he": "תוכנית כללית – ציוד"}, "PLANTA GENERAL – CABLEADO": {"en": "GENERAL FLOOR PLAN – WIRING", "he": "תוכנית כללית – חיווט"}, "HABITACIÓN TIPO (H2) – DETALLE": {"en": "TYPICAL PATIENT ROOM (H2) – DETAIL", "he": "חדר אשפוז טיפוסי (H2) – פרט"}, "BAÑOS Y ESTACIÓN DE ENFERMERÍA": {"en": "TOILETS & NURSE STATION", "he": "שירותים ועמדת אחיות"}, "ESQUEMA DE TOPOLOGÍA Y LISTA DE MATERIALES": {"en": "SYSTEM TOPOLOGY & BILL OF MATERIALS", "he": "טופולוגיית מערכת ורשימת חומרים"}, "VISTAS 3D – EQUIPAMIENTO": {"en": "3D VIEWS – EQUIPMENT", "he": "מבטים תלת-ממדיים – ציוד"}, "VISTAS 3D – CABLEADO": {"en": "3D VIEWS – WIRING", "he": "מבטים תלת-ממדיים – חיווט"}, "NOTAS · NOTES": {"en": "NOTES", "he": "הערות"}, "SÍMBOLOS · SYMBOLS · סמלים": {"en": "SYMBOLS", "he": "סמלים"}, "CÓDIGO DE COLORES DE CABLEADO · CABLE COLOUR CODE · קוד צבעי כבלים": {"en": "CABLE COLOUR CODE", "he": "קוד צבעי כבלים"}, "COLORES · COLOURS · צבעים": {"en": "COLOURS", "he": "צבעים"}, "HABITACIÓN 1": {"en": "ROOM 1", "he": "חדר 1"}, "Habitación 1": {"en": "Room 1", "he": "חדר 1"}, "CAMA 1": {"en": "BED 1", "he": "מיטה 1"}, "HABITACIÓN 2": {"en": "ROOM 2", "he": "חדר 2"}, "Habitación 2": {"en": "Room 2", "he": "חדר 2"}, "CAMA 2": {"en": "BED 2", "he": "מיטה 2"}, "HABITACIÓN 3": {"en": "ROOM 3", "he": "חדר 3"}, "Habitación 3": {"en": "Room 3", "he": "חדר 3"}, "CAMA 3": {"en": "BED 3", "he": "מיטה 3"}, "HABITACIÓN 4": {"en": "ROOM 4", "he": "חדר 4"}, "Habitación 4": {"en": "Room 4", "he": "חדר 4"}, "CAMA 4": {"en": "BED 4", "he": "מיטה 4"}, "OFICINA": {"en": "OFFICE", "he": "משרד"}, "Antebaño": {"en": "Toilet lobby", "he": "פרוזדור שירותים"}, "Baño personal": {"en": "Staff WC", "he": "שירותי צוות"}, "Baño pacientes\n(inodoro)": {"en": "Patient WC\n(toilet)", "he": "שירותי מטופלים\n(אסלה)"}, "Baño accesible\n(inodoro + ducha)": {"en": "Accessible WC\n(toilet + shower)", "he": "שירותי נכים\n(אסלה + מקלחת)"}, "Estación de enfermería": {"en": "Nurse station", "he": "עמדת אחיות"}, "PASILLO": {"en": "CORRIDOR", "he": "מסדרון"}, "PASILLO  ·  CORRIDOR  ·  מסדרון": {"en": "CORRIDOR", "he": "מסדרון"}, "ACCESO\nSERVICIO ◀": {"en": "WARD\nENTRANCE ◀", "he": "כניסה\nלמחלקה ◀"}, "Acceso": {"en": "Entrance", "he": "כניסה"}, "Puerta": {"en": "Door", "he": "דלת"}, "ESCRITORIO\nENFERMERÍA": {"en": "NURSE\nDESK", "he": "שולחן\nאחיות"}, "GABINETE\nCOMUNIC.": {"en": "COMMS\nRACK", "he": "ארון\nתקשורת"}, "2,40 pasillo": {"en": "2.40 corridor", "he": "2.40 מסדרון"}, "cielorraso 2,50": {"en": "ceiling 2.50", "he": "תקרה 2.50"}, "Vista desde el este": {"en": "View from the east", "he": "מבט ממזרח"}, "Vista desde el oeste": {"en": "View from the west", "he": "מבט ממערב"}, "Vista desde el norte": {"en": "View from the north", "he": "מבט מצפון"}, "Vista desde el sur": {"en": "View from the south", "he": "מבט מדרום"}, "AIRE": {"en": "AIR", "he": "אוויר"}, "VAC": {"en": "VAC", "he": "ואקום"}, "luz lectura": {"en": "reading light", "he": "תאורת קריאה"}, "LL · Llamada de cama ACE41220316 + pera (1 por cama)": {"en": "LL · Bed call ACE41220316 + pear push (1 per bed)", "he": "LL · לחצן קריאה למיטה ACE41220316 + אגס (1 למיטה)"}, "PR · Presencia / cancelación ACE80081001": {"en": "PR · Presence / cancel ACE80081001", "he": "PR · נוכחות / ביטול ACE80081001"}, "LP · Luz indicadora de pasillo ACE41020309 (rojo llamada · verde presencia · azul código azul)": {"en": "LP · Corridor indicator light ACE41020309 (red call · green presence · blue code blue)", "he": "LP · מנורת מסדרון ACE41020309 (אדום קריאה · ירוק נוכחות · כחול קוד כחול)"}, "TI/TD · Tirador baño / ducha ACE40320303 (≥ 1,80 m)": {"en": "TI/TD · Toilet / shower pull-cord ACE40320303 (≥ 1.80 m)", "he": "TI/TD · משיכת חבל אסלה / מקלחת ACE40320303 (≥ 1.80 מ')"}, "RC · Tarjeta conversora / Room Controller ECV169 (techo pasillo)": {"en": "RC · Converter board / room controller ECV169 (corridor ceiling)", "he": "RC · כרטיס ממיר / בקר חדר ECV169 (תקרת מסדרון)"}, "CT · Cabecero técnico: O₂ · Aire · Vacío, tomas 230 V, RJ45": {"en": "CT · Bed-head unit: O₂ · air · vacuum, 230 V sockets, RJ45", "he": "CT · קונסולת מיטה: חמצן · אוויר · ואקום, שקעי 230V, RJ45"}, "S · Teclas de encendido de luz del cuarto": {"en": "S · Room light switches", "he": "S · מתגי תאורת חדר"}, "Gabinete: SmartHub, switch ACEUCM6302, servidor ACE51010103": {"en": "Rack: SmartHub, switch ACEUCM6302, server ACE51010103", "he": "ארון: SmartHub, מתג ACEUCM6302, שרת ACE51010103"}, "Puesto enfermería: teléfono ACE52190200 / PC ACE52040208 y TV": {"en": "Nurse desk: phone ACE52190200 / PC ACE52040208 and TV", "he": "עמדת אחיות: טלפון ACE52190200 / מחשב ACE52040208 ו-TV"}, "Tablero eléctrico del servicio": {"en": "Ward electrical sub-panel", "he": "לוח חשמל מחלקתי"}, "BUS KNX 2x2x0,8 mm LH EIBBUS – cadena RC → RC → SmartHub": {"en": "KNX bus 2x2x0.8 mm LH EIBBUS – chain RC → RC → SmartHub", "he": "כבל BUS KNX 2x2x0.8 – שרשור RC ← RC ← SmartHub"}, "UTP Cat6 a terminales / RJ12 – dispositivo → Room Controller": {"en": "UTP Cat6 to terminals / RJ12 – device → room controller", "he": "UTP Cat6 למהדקים / RJ12 – התקן ← בקר חדר"}, "Red IP Cat6A / Cat7 – SmartHub · Switch · Servidor · PC · TV · Teléfono": {"en": "IP network Cat6A / Cat7 – SmartHub · switch · server · PC · TV · phone", "he": "רשת IP Cat6A / Cat7 – SmartHub · מתג · שרת · מחשב · TV · טלפון"}, "Electricidad 230 V – cabeceros, gabinete, PC, TV": {"en": "230 V power – bed-heads, rack, PC, TV", "he": "חשמל 230V – קונסולות, ארון, מחשב, TV"}, "◀ BUS KNX 2x2x0,8 encadenado hacia el SmartHub (gabinete)": {"en": "◀ KNX bus 2x2x0.8 daisy-chained to the SmartHub (rack)", "he": "◀ כבל BUS KNX משורשר אל ה-SmartHub (ארון)"}, "Cat7 a PC / TV / Teléfono ▶": {"en": "Cat7 to PC / TV / phone ▶", "he": "Cat7 למחשב / TV / טלפון ▶"}, "230 V desde tablero TE ▶": {"en": "230 V from panel TE ▶", "he": "230V מלוח TE ▶"}, "Recorridos sobre cielorraso en bandeja portacables h = 2,60 m · bajadas embutidas en muro": {"en": "Runs above the ceiling in cable tray h = 2.60 m · drops concealed in walls", "he": "תוואים מעל התקרה במגש כבלים בגובה 2.60 מ' · ירידות סמויות בקיר"}, "BUS → RC-H1 … SmartHub": {"en": "BUS → RC-H1 … SmartHub", "he": "BUS ← RC-H1 … SmartHub"}, "◀ Cat7 / 230 V\ndesde gabinete": {"en": "◀ Cat7 / 230 V\nfrom rack", "he": "◀ Cat7 / 230V\nמהארון"}, "desde RC-H1": {"en": "from RC-H1", "he": "מ-RC-H1"}, "hacia RC-H3": {"en": "to RC-H3", "he": "אל RC-H3"}, "RC-H2 (ECV169)\nsobre cielorraso": {"en": "RC-H2 (ECV169)\nabove ceiling", "he": "RC-H2 (ECV169)\nמעל התקרה"}, "Luz indicadora\nACE41020309": {"en": "Indicator light\nACE41020309", "he": "מנורת סימון\nACE41020309"}, "PC ACE52040208": {"en": "PC ACE52040208", "he": "מחשב ACE52040208"}, "TEL ACE52190200": {"en": "PHONE ACE52190200", "he": "טלפון ACE52190200"}, "TV 55\" Advantecnia": {"en": "TV 55\" Advantecnia", "he": "TV 55\" Advantecnia"}, "LP pasillo": {"en": "LP corridor", "he": "LP מסדרון"}, "PR presencia": {"en": "PR presence", "he": "PR נוכחות"}, "LL cama 1·2·3": {"en": "LL bed 1·2·3", "he": "LL מיטה 1·2·3"}, "TI inodoro": {"en": "TI toilet", "he": "TI אסלה"}, "TD ducha": {"en": "TD shower", "he": "TD מקלחת"}, "LP-B2 (pasillo)": {"en": "LP-B2 (corridor)", "he": "LP-B2 (מסדרון)"}, "PR-B2 (pasillo)": {"en": "PR-B2 (corridor)", "he": "PR-B2 (מסדרון)"}, "Baño B2": {"en": "WC B2", "he": "שירותים B2"}, "Baño B3": {"en": "WC B3", "he": "שירותים B3"}, "UTP Cat6\nterminales": {"en": "UTP Cat6\nterminals", "he": "UTP Cat6\nמהדקים"}, "A · EQUIPAMIENTO HABITACIÓN TIPO  ·  1:30": {"en": "A · TYPICAL ROOM – EQUIPMENT  ·  1:30", "he": "A · חדר טיפוסי – ציוד  ·  1:30"}, "B · CABLEADO HABITACIÓN TIPO  ·  1:30": {"en": "B · TYPICAL ROOM – WIRING  ·  1:30", "he": "B · חדר טיפוסי – חיווט  ·  1:30"}, "C · ALZADO MURO DE CABECEROS (desde la habitación)  ·  1:30": {"en": "C · BED-HEAD WALL ELEVATION (from the room)  ·  1:30", "he": "C · חזית קיר הקונסולות (מתוך החדר)  ·  1:30"}, "D · ALZADO PASILLO – P2  ·  1:30": {"en": "D · CORRIDOR ELEVATION – P2  ·  1:30", "he": "D · חזית מסדרון – P2  ·  1:30"}, "A · NÚCLEO DE BAÑOS – EQUIPAMIENTO Y CABLEADO  ·  1:30": {"en": "A · TOILET BLOCK – EQUIPMENT & WIRING  ·  1:30", "he": "A · גוש שירותים – ציוד וחיווט  ·  1:30"}, "B · ALZADO B2 – tirador inodoro": {"en": "B · ELEVATION B2 – toilet pull-cord", "he": "B · חזית B2 – משיכת חבל אסלה"}, "C · ALZADO B3 – tirador inodoro": {"en": "C · ELEVATION B3 – toilet pull-cord", "he": "C · חזית B3 – משיכת חבל אסלה"}, "D · ALZADO B3 – tirador ducha": {"en": "D · ELEVATION B3 – shower pull-cord", "he": "D · חזית B3 – משיכת חבל מקלחת"}, "E · ALZADO PASILLO – acceso baños": {"en": "E · CORRIDOR ELEVATION – toilet entrance", "he": "E · חזית מסדרון – כניסה לשירותים"}, "F · ESTACIÓN DE ENFERMERÍA + TV  ·  1:30": {"en": "F · NURSE STATION + TV  ·  1:30", "he": "F · עמדת אחיות + TV  ·  1:30"}, "G · ALZADO TV (muro P3–P4)": {"en": "G · TV ELEVATION (wall P3–P4)", "he": "G · חזית TV (קיר P3–P4)"}, "A · TOPOLOGÍA DEL SISTEMA DE LLAMADA DE ENFERMERÍA  ·  System topology  ·  טופולוגיית המערכת": {"en": "A · NURSE CALL SYSTEM TOPOLOGY", "he": "A · טופולוגיית מערכת קריאת אחות"}, "B · LISTA DE MATERIALES  ·  Bill of materials  ·  רשימת חומרים": {"en": "B · BILL OF MATERIALS", "he": "B · רשימת חומרים"}, "A · Isométrica general – equipamiento": {"en": "A · Overall isometric – equipment", "he": "A · איזומטרי כללי – ציוד"}, "B · Habitación: camas, cortinas, cabeceros y paneles": {"en": "B · Room: beds, curtains, bed-heads and panels", "he": "B · חדר: מיטות, וילונות, קונסולות ולחצנים"}, "C · Pasillo: luces y presencia de los baños": {"en": "C · Corridor: toilet lights and presence buttons", "he": "C · מסדרון: מנורות ולחצני נוכחות של השירותים"}, "D · Núcleo de baños": {"en": "D · Toilet block", "he": "D · גוש שירותים"}, "E · Estación de enfermería – PC táctil Advantecnia": {"en": "E · Nurse station – Advantecnia touch PC", "he": "E · עמדת אחיות – מחשב מגע Advantecnia"}, "F · Gabinete de comunicaciones": {"en": "F · Comms rack", "he": "F · ארון תקשורת"}, "A · Isométrica general – cableado (verde: bus KNX / UTP · rojo: red IP · azul: 230 V)": {"en": "A · Overall isometric – wiring (green: KNX bus / UTP · red: IP network · blue: 230 V)", "he": "A · איזומטרי כללי – חיווט (ירוק: BUS / UTP · אדום: רשת IP · כחול: 230V)"}, "B · Planta – cableado": {"en": "B · Plan – wiring", "he": "B · תוכנית – חיווט"}, "C · Baños – tiradores, luces y presencia a sus RC": {"en": "C · Toilets – pull-cords, lights and presence to their RC", "he": "C · שירותים – חבלים, מנורות ונוכחות לבקר"}, "1.  Habitaciones: 3 camas con la cabecera contra\nel muro lateral, cabecero técnico por cama y\ncortina en U por cama (riel de techo).": {"en": "1.  Rooms: 3 beds with the head against the\nside wall, one bed-head unit per bed and a\nU-shaped ceiling-track curtain per bed.", "he": "1.  חדרים: 3 מיטות עם הראש לקיר הצד,\nקונסולה לכל מיטה ווילון בצורת U\nלכל מיטה (מסילת תקרה)."}, "2.  Botonera interior junto a la puerta: teclas de\nluz + presencia/cancelación (h = 1,05 / 1,35 m).": {"en": "2.  Inside, next to the door: light switches +\npresence/cancel (h = 1.05 / 1.35 m).", "he": "2.  בתוך החדר ליד הדלת: מתגי תאורה +\nנוכחות/ביטול (גובה 1.05 / 1.35 מ')."}, "3.  Luz indicadora cuadrada ACE41020309 sobre\nel marco de cada puerta, hacia el pasillo\n(h = 2,42 m).": {"en": "3.  Square indicator light ACE41020309 above\neach door frame, facing the corridor\n(h = 2.42 m).", "he": "3.  מנורת סימון מרובעת ACE41020309 מעל\nמשקוף כל דלת, לכיוון המסדרון\n(גובה 2.42 מ')."}, "4.  Baños B2 y B3: tiradores a ≥ 1,80 m. Luces y\nbotones de presencia de B2/B3 en el pasillo,\njunto al acceso al núcleo de baños.": {"en": "4.  WC B2 and B3: pull-cords at ≥ 1.80 m. Lights\nand presence buttons of B2/B3 in the corridor,\nnext to the toilet-block entrance.", "he": "4.  שירותים B2 ו-B3: חבלים בגובה ≥ 1.80 מ'.\nמנורות ולחצני נוכחות של B2/B3 במסדרון,\nליד הכניסה לגוש השירותים."}, "5.  Estación de enfermería frente a P3, con puerta\npropia; escritorio contra el muro del pasillo\n(ventana), la enfermera mira al pasillo y a la\nTV entre P3 y P4.": {"en": "5.  Nurse station opposite P3 with its own door;\ndesk against the corridor wall (window): the\nnurse faces the corridor and the TV between\nP3 and P4.", "he": "5.  עמדת אחיות מול P3 עם דלת משלה;\nשולחן צמוד לקיר המסדרון (חלון): האחות\nפונה למסדרון ולמסך ה-TV שבין P3 ל-P4."}, "1.  Cada dispositivo (LL, PR, LP, TI) se conecta\ncon UTP Cat6 a terminales al Room Controller\nde su cuarto (topología del fabricante).": {"en": "1.  Each device (LL, PR, LP, TI) connects with\nUTP Cat6 to the terminals of its room\ncontroller (manufacturer topology).", "he": "1.  כל התקן (LL, PR, LP, TI) מחובר בכבל\nUTP Cat6 למהדקי בקר החדר שלו\n(טופולוגיית היצרן)."}, "2.  Los RC ECV169 van fuera del cuarto, en el techo\ndel pasillo junto a la puerta, y se encadenan\ncon BUS KNX 2x2x0,8 mm LH EIBBUS.": {"en": "2.  The ECV169 controllers sit outside the room,\nin the corridor ceiling next to the door, and\nare daisy-chained with KNX bus 2x2x0.8 mm.", "he": "2.  בקרי ECV169 מותקנים מחוץ לחדר, בתקרת\nהמסדרון ליד הדלת, ומשורשרים בכבל\nBUS KNX 2x2x0.8."}, "3.  El último RC (H4) cierra la cadena en el\nSmartHub (Raspberry) del gabinete; de allí\nCat6A al switch y del switch al servidor.": {"en": "3.  The last RC (H4) ends the chain at the\nSmartHub (Raspberry) in the rack; then Cat6A\nto the switch and on to the server.", "he": "3.  הבקר האחרון (H4) סוגר את השרשרת ב-\nSmartHub (Raspberry) שבארון; משם Cat6A\nלמתג ומהמתג לשרת."}, "4.  PC de enfermería, teléfono IP y TV: Cat7\ndirecto al switch.": {"en": "4.  Nurse PC, phone and TV: Cat7 direct\nto the switch.", "he": "4.  מחשב האחיות, הטלפון וה-TV: Cat7\nישירות למתג."}, "5.  Metrajes en lámina 05 (+15 % de reserva).": {"en": "5.  Cable lengths on sheet 05 (+15 % spare).", "he": "5.  אורכי כבלים בגיליון 05 (+15% רזרבה)."}, "1.  Camas con la cabecera contra el muro lateral;\ncabecero técnico por cama: O₂, aire, vacío,\n4 tomas 230 V, 2 RJ45, luz de lectura.": {"en": "1.  Beds with the head against the side wall;\nbed-head unit per bed: O₂, air, vacuum,\n4 × 230 V sockets, 2 RJ45, reading light.", "he": "1.  מיטות עם הראש לקיר הצד; קונסולה\nלכל מיטה: חמצן, אוויר, ואקום, 4 שקעי\n230V, 2 RJ45, תאורת קריאה."}, "2.  Panel de llamada Advantecnia a la derecha del\ncabecero (h = 1,15 m) con pera de llamada\ndesconectable que llega a la cama.": {"en": "2.  Advantecnia bed call unit next to the\nbed-head (h = 1.15 m) with a detachable\npear push reaching the bed.", "he": "2.  לחצן קריאה Advantecnia ליד הקונסולה\n(גובה 1.15 מ') עם אגס נתיק\nשמגיע למיטה."}, "3.  Junto a la puerta (interior): teclas de luz\nh = 1,05 m y panel presencia/cancelación\nh = 1,35 m.": {"en": "3.  Next to the door (inside): light switches\nh = 1.05 m and presence/cancel\nh = 1.35 m.", "he": "3.  ליד הדלת (בפנים): מתגי תאורה\nבגובה 1.05 מ' ונוכחות/ביטול\nבגובה 1.35 מ'."}, "4.  Luz indicadora ACE41020309 sobre el marco,\nhacia el pasillo, h = 2,42 m:\nrojo = llamada · verde = presencia ·\nazul = código azul · apagada = sin llamada.": {"en": "4.  Indicator light ACE41020309 above the frame,\nfacing the corridor, h = 2.42 m:\nred = call · green = presence ·\nblue = code blue · off = no call.", "he": "4.  מנורת סימון ACE41020309 מעל המשקוף,\nלכיוון המסדרון, גובה 2.42 מ':\nאדום = קריאה · ירוק = נוכחות ·\nכחול = קוד כחול · כבוי = אין קריאה."}, "5.  Room Controller ECV169 fuera del cuarto, en\ncielorraso del pasillo, junto a la puerta.\nRecibe 3 LL + PR + LP por UTP Cat6.": {"en": "5.  Room controller ECV169 outside the room,\nin the corridor ceiling next to the door.\nReceives 3 LL + PR + LP over UTP Cat6.", "he": "5.  בקר חדר ECV169 מחוץ לחדר, בתקרת\nהמסדרון ליד הדלת. מקבל 3 LL + PR + LP\nבכבל UTP Cat6."}, "6.  Cortina en U por cama: riel de techo con\nvarillas, malla superior blanca y tela\nignífuga celeste; frente recogido.": {"en": "6.  U-shaped curtain per bed: ceiling track on\nrods, white top mesh and light-blue\nflame-retardant fabric; front drawn back.", "he": "6.  וילון U לכל מיטה: מסילת תקרה על\nמוטות, רשת עליונה לבנה ובד תכלת\nמעכב בעירה; החזית פתוחה."}, "7.  Ventana al fondo de cada habitación,\n2,40 × 1,30 m, antepecho 0,90 m.": {"en": "7.  Window at the far end of each room,\n2.40 × 1.30 m, sill at 0.90 m.", "he": "7.  חלון בקצה כל חדר,\n2.40 × 1.30 מ', אדן בגובה 0.90 מ'."}, "1.  B1 baño del personal (sin llamada).": {"en": "1.  B1 staff WC (no call).", "he": "1.  B1 שירותי צוות (ללא קריאה)."}, "2.  B2: inodoro con barra fija y abatible;\ntirador TI a 1,85 m.": {"en": "2.  B2: toilet with fixed and fold-down grab bar;\npull-cord TI at 1.85 m.", "he": "2.  B2: אסלה עם מאחז קבוע ומתקפל;\nחבל TI בגובה 1.85 מ'."}, "3.  B3 accesible: inodoro + ducha con asiento\nabatible y barras; tiradores TI (inodoro)\ny TD (ducha) a 1,85 m.": {"en": "3.  B3 accessible: toilet + shower with fold-down\nseat and grab bars; pull-cords TI (toilet)\nand TD (shower) at 1.85 m.", "he": "3.  B3 נגיש: אסלה + מקלחת עם מושב מתקפל\nומאחזים; חבלים TI (אסלה)\nו-TD (מקלחת) בגובה 1.85 מ'."}, "4.  En el pasillo, junto al acceso: LP-B2 / LP-B3\na 2,42 m y PR-B2 / PR-B3 a 1,35 m.": {"en": "4.  In the corridor, next to the entrance:\nLP-B2 / LP-B3 at 2.42 m and PR-B2 / PR-B3 at 1.35 m.", "he": "4.  במסדרון, ליד הכניסה: LP-B2 / LP-B3\nבגובה 2.42 מ' ו-PR-B2 / PR-B3 בגובה 1.35 מ'."}, "5.  RC-B2 y RC-B3 en cielorraso del pasillo;\nse suman a la cadena del bus (1 y 2).": {"en": "5.  RC-B2 and RC-B3 in the corridor ceiling;\nthey join the bus chain (1 and 2).", "he": "5.  RC-B2 ו-RC-B3 בתקרת המסדרון;\nמצטרפים לשרשרת ה-BUS (1 ו-2)."}, "6.  Estación con puerta propia; escritorio\ncontra el muro del pasillo (ventana): la\nenfermera mira al pasillo y a la TV.\nTeléfono ACE52190200 / PC ACE52040208.": {"en": "6.  Station with its own door; desk against\nthe corridor wall (window): the nurse faces\nthe corridor and the TV.\nPhone ACE52190200 / PC ACE52040208.", "he": "6.  עמדה עם דלת משלה; השולחן צמוד\nלקיר המסדרון (חלון): האחות פונה\nלמסדרון ול-TV.\nטלפון ACE52190200 / מחשב ACE52040208."}, "1.  Metrajes medidos sobre los recorridos del\nmodelo (incluye bajadas verticales) + 15 %.": {"en": "1.  Lengths measured on the model routes\n(vertical drops included) + 15 %.", "he": "1.  אורכים נמדדו על תוואי המודל\n(כולל ירידות אנכיות) + 15%."}, "2.  El segundo par del bus 2x2x0,8 lleva la\nalimentación 24 Vdc de los RC desde la\nfuente del gabinete.": {"en": "2.  The second pair of the 2x2x0.8 bus carries\nthe 24 Vdc supply of the controllers from\nthe rack power supply.", "he": "2.  הזוג השני של כבל ה-BUS מוביל את\nמתח ה-24VDC לבקרים מספק\nהכוח שבארון."}, "3.  Verificar con Advantecnia el número máximo\nde RC por línea de bus y la longitud total.": {"en": "3.  Confirm with Advantecnia the maximum number\nof controllers per bus line and total length.", "he": "3.  יש לאשר מול Advantecnia את מספר הבקרים\nהמרבי לקו BUS ואת האורך הכולל."}, "4.  Cantidades de anteproyecto: validar en obra.": {"en": "4.  Preliminary quantities: verify on site.", "he": "4.  כמויות לתכנון מוקדם: לאמת באתר."}, "Cotas de altura en metros desde piso terminado. Paneles Advantecnia: LL 1,15 · PR 1,35 · teclas luz 1,05 · LP 2,42 · RC sobre cielorraso.": {"en": "Heights in metres from finished floor. Advantecnia devices: LL 1.15 · PR 1.35 · light switches 1.05 · LP 2.42 · RC above ceiling.", "he": "גבהים במטרים מהריצוף. התקני Advantecnia: LL 1.15 · PR 1.35 · מתגי תאורה 1.05 · LP 2.42 · RC מעל התקרה."}, "Tiradores TI/TD montados a 1,85 m (≥ 1,80 m) con cordón hasta 0,20 m del piso · LP a 2,42 m · PR a 1,35 m · cotas en m desde piso terminado.": {"en": "Pull-cords TI/TD mounted at 1.85 m (≥ 1.80 m) with cord down to 0.20 m from the floor · LP at 2.42 m · PR at 1.35 m · heights in m from finished floor.", "he": "חבלי TI/TD בגובה 1.85 מ' (≥ 1.80 מ') עם חבל עד 0.20 מ' מהרצפה · LP בגובה 2.42 מ' · PR בגובה 1.35 מ' · גבהים מהריצוף."}, "BUS KNX 2x2x0,8 mm LH EIBBUS  –  encadenado (daisy chain)": {"en": "KNX bus 2x2x0.8 mm LH EIBBUS  –  daisy chain", "he": "כבל BUS KNX 2x2x0.8  –  שרשור"}, "ECV169 · 24 pins 12-48 V": {"en": "ECV169 · 24 pins 12-48 V", "he": "ECV169 · 24 פינים 12-48V"}, "Raspberry Pi · gateway": {"en": "Raspberry Pi · gateway", "he": "Raspberry Pi · שער"}, "Switch PoE": {"en": "PoE switch", "he": "מתג PoE"}, "gestionable 24p": {"en": "managed 24-port", "he": "מנוהל 24 פורטים"}, "Servidor": {"en": "Server", "he": "שרת"}, "software Advantecnia": {"en": "Advantecnia software", "he": "תוכנת Advantecnia"}, "PC All-in-One": {"en": "All-in-one PC", "he": "מחשב All-in-One"}, "touch · estación enfermería": {"en": "touch · nurse station", "he": "מגע · עמדת אחיות"}, "TV 55\"": {"en": "TV 55\"", "he": "TV 55\""}, "panel de llamadas": {"en": "call display", "he": "תצוגת קריאות"}, "Teléfono IP": {"en": "Desk phone", "he": "טלפון שולחני"}, "escritorio": {"en": "desk", "he": "שולחן"}, "Cat7 – cada equipo directo a un puerto del switch": {"en": "Cat7 – each device straight to a switch port", "he": "Cat7 – כל התקן ישירות לפורט במתג"}, "Tablero eléctrico TE": {"en": "Electrical panel TE", "he": "לוח חשמל TE"}, "230 V · circuitos dedicados": {"en": "230 V · dedicated circuits", "he": "230V · מעגלים ייעודיים"}, "UPS + fuente 24 Vdc": {"en": "UPS + 24 Vdc supply", "he": "UPS + ספק 24VDC"}, "alimenta el bus (2º par)": {"en": "feeds the bus (2nd pair)", "he": "מזין את ה-BUS (זוג 2)"}, "GABINETE DE COMUNICACIONES (fin de pasillo)": {"en": "COMMS RACK (corridor end)", "he": "ארון תקשורת (סוף המסדרון)"}, "Estados de la luz de pasillo:": {"en": "Corridor light states:", "he": "מצבי מנורת המסדרון:"}, "ROJO – llamada (cama / baño)": {"en": "RED – call (bed / toilet)", "he": "אדום – קריאה (מיטה / שירותים)"}, "VERDE – presencia de enfermería": {"en": "GREEN – nurse presence", "he": "ירוק – נוכחות אחות"}, "AZUL – código azul": {"en": "BLUE – code blue", "he": "כחול – קוד כחול"}, "APAGADA – sin llamada": {"en": "OFF – no call", "he": "כבוי – אין קריאה"}, "Flujo de una llamada:": {"en": "How a call flows:", "he": "מהלך קריאה:"}, "1. Paciente pulsa la pera (o tira del cordón en el baño).": {"en": "1. The patient presses the pear push (or pulls the cord in the toilet).", "he": "1. המטופל לוחץ על האגס (או מושך בחבל בשירותים)."}, "2. El panel informa al Room Controller del cuarto (UTP Cat6).": {"en": "2. The unit reports to the room controller (UTP Cat6).", "he": "2. הלחצן מדווח לבקר החדר (UTP Cat6)."}, "3. El RC enciende la luz de pasillo en ROJO y envía el evento por el bus.": {"en": "3. The controller turns the corridor light RED and sends the event on the bus.", "he": "3. הבקר מדליק את מנורת המסדרון באדום ושולח את האירוע ב-BUS."}, "4. El SmartHub lo pasa por IP al servidor Advantecnia.": {"en": "4. The SmartHub forwards it over IP to the Advantecnia server.", "he": "4. ה-SmartHub מעביר אותו ב-IP לשרת Advantecnia."}, "5. La llamada aparece en la PC táctil, el teléfono y la TV.": {"en": "5. The call appears on the touch PC, the phone and the TV.", "he": "5. הקריאה מופיעה במחשב המגע, בטלפון וב-TV."}, "6. La enfermera entra, pulsa PRESENCIA (verde) y luego CANCELA.": {"en": "6. The nurse enters, presses PRESENCE (green) and then CANCEL.", "he": "6. האחות נכנסת, לוחצת נוכחות (ירוק) ואחר כך ביטול."}, "Código": {"en": "Code", "he": "קוד"}, "Descripción": {"en": "Description", "he": "תיאור"}, "Cant.": {"en": "Qty", "he": "כמות"}, "Observación": {"en": "Remarks", "he": "הערה"}, "ADVANTECNIA / ACE BG": {"en": "ADVANTECNIA / ACE BG", "he": "ADVANTECNIA / ACE BG"}, "RED E INFORMÁTICA": {"en": "NETWORK & IT", "he": "רשת ומחשוב"}, "CABLES (metraje calculado + 15 % reserva)": {"en": "CABLES (calculated length + 15 % spare)", "he": "כבלים (אורך מחושב + 15% רזרבה)"}, "INFRAESTRUCTURA HOSPITALARIA (otros rubros)": {"en": "HOSPITAL INFRASTRUCTURE (other trades)", "he": "תשתית בית חולים (מקצועות אחרים)"}, "Llamada de cama con conector de pera – ACE41220316": {"en": "Bed call unit with pear-push socket – ACE41220316", "he": "לחצן קריאה למיטה עם שקע אגס – ACE41220316"}, "Pera de llamada (cable + pulsador)": {"en": "Pear push (cable + button)", "he": "אגס קריאה (כבל + לחצן)"}, "Presencia / cancelación – ACE80081001": {"en": "Presence / cancel – ACE80081001", "he": "נוכחות / ביטול – ACE80081001"}, "Luz indicadora de pasillo 3 colores – ACE41020309": {"en": "3-colour corridor indicator light – ACE41020309", "he": "מנורת מסדרון תלת-צבעית – ACE41020309"}, "Llamada de baño / ducha con tirador – ACE40320303": {"en": "Toilet / shower pull-cord call – ACE40320303", "he": "קריאת שירותים / מקלחת במשיכת חבל – ACE40320303"}, "Tarjeta conversora / Room Controller PCB 24 pins 12-48 V ECV169": {"en": "Converter board / room controller PCB 24 pins 12-48 V ECV169", "he": "כרטיס ממיר / בקר חדר PCB 24 פינים 12-48V ECV169"}, "SmartHub (Raspberry Pi) – gateway bus/IP": {"en": "SmartHub (Raspberry Pi) – bus/IP gateway", "he": "SmartHub (Raspberry Pi) – שער BUS/IP"}, "Servidor + software Advantecnia – ACE51010103": {"en": "Server + Advantecnia software – ACE51010103", "he": "שרת + תוכנת Advantecnia – ACE51010103"}, "PC / monitor táctil – ACE52040208": {"en": "Touch PC / monitor – ACE52040208", "he": "מחשב / מסך מגע – ACE52040208"}, "Teléfono de escritorio enfermería – ACE52190200": {"en": "Nurse desk phone – ACE52190200", "he": "טלפון שולחני לאחיות – ACE52190200"}, "TV 55\" + soporte de pared": {"en": "TV 55\" + wall bracket", "he": "TV 55\" + זרוע קיר"}, "Switch – ACEUCM6302": {"en": "Switch – ACEUCM6302", "he": "מתג – ACEUCM6302"}, "Gabinete 42U + patch panel + PDU + UPS + fuente 24 Vdc": {"en": "42U rack + patch panel + PDU + UPS + 24 Vdc supply", "he": "ארון 42U + פאץ' פנל + PDU + UPS + ספק 24VDC"}, "BUS KNX 2x2x0,8 mm LH EIBBUS (verde)": {"en": "KNX bus 2x2x0.8 mm LH EIBBUS (green)", "he": "כבל BUS KNX 2x2x0.8 (ירוק)"}, "UTP Cat6 dispositivos → RC (verde)": {"en": "UTP Cat6 devices → RC (green)", "he": "UTP Cat6 התקנים ← בקר (ירוק)"}, "Cat6A / Cat7 S/FTP red IP (rojo)": {"en": "Cat6A / Cat7 S/FTP IP network (red)", "he": "Cat6A / Cat7 S/FTP רשת IP (אדום)"}, "Energía 3x2,5 mm² LSZH (azul)": {"en": "Power 3x2.5 mm² LSZH (blue)", "he": "חשמל 3x2.5 ממ\"ר LSZH (כחול)"}, "Cabecero técnico (O₂/aire/vacío, 4×230 V, 2×RJ45, luz)": {"en": "Bed-head unit (O₂/air/vacuum, 4×230 V, 2×RJ45, light)", "he": "קונסולת מיטה (חמצן/אוויר/ואקום, 4×230V, 2×RJ45, תאורה)"}, "Cama hospitalaria + mesa de luz + mesa de comer": {"en": "Hospital bed + bedside cabinet + overbed table", "he": "מיטת בית חולים + שידה + שולחן אוכל"}, "Riel de cortina en U + cortinas ignífugas": {"en": "U curtain track + flame-retardant curtains", "he": "מסילת וילון U + וילונות מעכבי בעירה"}, "Barras de apoyo fijas / abatibles, asiento ducha": {"en": "Fixed / fold-down grab bars, shower seat", "he": "מאחזים קבועים / מתקפלים, מושב מקלחת"}, "1 por cama": {"en": "1 per bed", "he": "1 למיטה"}, "4 cuartos + 2 baños": {"en": "4 rooms + 2 WCs", "he": "4 חדרים + 2 שירותים"}, "B2 ×1 · B3 ×2": {"en": "B2 ×1 · B3 ×2", "he": "B2 ×1 · B3 ×2"}, "H1 H2 H3 H4 B2 B3": {"en": "H1 H2 H3 H4 B2 B3", "he": "H1 H2 H3 H4 B2 B3"}, "en gabinete": {"en": "in rack", "he": "בארון"}, "estación enfermería": {"en": "nurse station", "he": "עמדת אחיות"}, "alternativa a la PC": {"en": "alternative to the PC", "he": "חלופה למחשב"}, "muro P3–P4": {"en": "wall P3–P4", "he": "קיר P3–P4"}, "fin de pasillo": {"en": "corridor end", "he": "סוף המסדרון"}, "1 por habitación": {"en": "1 per room", "he": "1 לחדר"}, "4 juegos": {"en": "4 sets", "he": "4 סטים"}, "1 lote": {"en": "1 lot", "he": "מנה 1"}, "B2 · B3": {"en": "B2 · B3", "he": "B2 · B3"}, "BUS KNX 2x2x0,8 mm – tarjeta 24 pins → tarjeta (cadena) → SmartHub": {"en": "KNX bus 2x2x0.8 mm – 24-pin board → board (chain) → SmartHub", "he": "כבל BUS KNX 2x2x0.8 – כרטיס 24 פינים ← כרטיס (שרשרת) ← SmartHub"}, "Radial en cada cuarto – cada dispositivo a su tarjeta 24 pins": {"en": "Radial in each room – every device to its 24-pin board", "he": "רדיאלי בכל חדר – כל התקן לכרטיס 24 הפינים שלו"}, "Cat6 / Cat7 solo: SmartHub → switch → servidor · PC / teléfono · TV": {"en": "Cat6 / Cat7 only: SmartHub → switch → server · PC / phone · TV", "he": "Cat6 / Cat7 בלבד: SmartHub ← מתג ← שרת · מחשב / טלפון · TV"}, "1.  En cada cuarto la conexión es radial: cada\ndispositivo (LL, PR, LP, TI) con su propio cable\na la tarjeta de 24 pins (ECV169) del cuarto.": {"en": "1.  Each room is wired radially: every device\n(LL, PR, LP, TI) has its own cable to the\nroom's 24-pin board (ECV169).", "he": "1.  כל חדר מחווט רדיאלית: לכל התקן\n(LL, PR, LP, TI) כבל משלו לכרטיס\n24 הפינים של החדר (ECV169)."}, "2.  Las tarjetas de 24 pins van fuera del cuarto,\nsobre el techo del pasillo, y se encadenan una\na otra con BUS KNX 2x2x0,8 mm LH EIBBUS.": {"en": "2.  The 24-pin boards sit outside the room, above\nthe corridor ceiling, and are chained board to\nboard with KNX bus 2x2x0.8 mm LH EIBBUS.", "he": "2.  כרטיסי 24 הפינים מותקנים מחוץ לחדר,\nמעל תקרת המסדרון, ומשורשרים כרטיס\nלכרטיס בכבל BUS KNX 2x2x0.8."}, "4.  Cat6/Cat7 solo en: SmartHub → switch →\nservidor, PC o teléfono de enfermería y TV.\nNingún cuarto tiene conexión Cat6/Cat7.": {"en": "4.  Cat6/Cat7 only for: SmartHub → switch →\nserver, nurse PC or desk phone, and TV.\nNo room has a Cat6/Cat7 connection.", "he": "4.  Cat6/Cat7 רק עבור: SmartHub ← מתג ←\nשרת, מחשב או טלפון האחיות, וה-TV.\nאין חיבור Cat6/Cat7 בחדרים."}, "5.  Tarjeta 24 pins ECV169 fuera del cuarto,\nsobre el cielorraso del pasillo. Cada LL, PR\ny LP llega con su propio cable (radial).": {"en": "5.  24-pin board ECV169 outside the room, above\nthe corridor ceiling. Each LL, PR and LP\narrives on its own cable (radial).", "he": "5.  כרטיס 24 פינים ECV169 מחוץ לחדר, מעל\nתקרת המסדרון. כל LL, PR ו-LP מגיע\nבכבל משלו (רדיאלי)."}, "radial\nRJ12 / bornes": {"en": "radial\nRJ12 / terminals", "he": "רדיאלי\nRJ12 / מהדקים"}, "Cable de llamada radial dispositivo → tarjeta (verde)": {"en": "Radial call cable device → board (green)", "he": "כבל קריאה רדיאלי התקן ← כרטיס (ירוק)"}, "Cat6 / Cat7 – SmartHub, switch, PC/teléfono, TV (rojo)": {"en": "Cat6 / Cat7 – SmartHub, switch, PC/phone, TV (red)", "he": "Cat6 / Cat7 – SmartHub, מתג, מחשב/טלפון, TV (אדום)"}, "Electricidad 230 V – solo gabinete, PC / teléfono y TV (el resto es PoE)": {"en": "230 V power – rack, PC / phone and TV only (everything else is PoE)", "he": "חשמל 230V – לארון, למחשב/טלפון ול-TV בלבד (השאר PoE)"}, "230 V solo gabinete, PC/teléfono, TV": {"en": "230 V to rack, PC/phone, TV only", "he": "230V לארון, מחשב/טלפון, TV בלבד"}, "UPS + alimentación PoE": {"en": "UPS + PoE supply", "he": "UPS + הזנת PoE"}, "tarjetas y dispositivos por PoE": {"en": "boards and devices on PoE", "he": "כרטיסים והתקנים ב-PoE"}, "Gabinete 42U + patch panel + PDU + UPS + fuente PoE": {"en": "42U rack + patch panel + PDU + UPS + PoE supply", "he": "ארון 42U + פאץ' פנל + PDU + UPS + ספק PoE"}, "2.  Tarjetas 24 pins y dispositivos de llamada\nalimentados por PoE desde el gabinete:\nsin electricidad en los cuartos.": {"en": "2.  24-pin boards and call devices are powered\nby PoE from the rack: no power circuits\nin the rooms.", "he": "2.  כרטיסי 24 הפינים והתקני הקריאה מוזנים\nב-PoE מהארון: אין מעגלי חשמל\nבחדרים."}, "6.  Todo el sistema de llamada es PoE: 230 V\nsolo en gabinete, PC / teléfono y TV.": {"en": "6.  The whole call system is PoE: 230 V only\nat the rack, PC / phone and TV.", "he": "6.  כל מערכת הקריאה מוזנת ב-PoE: 230V\nרק בארון, במחשב/טלפון וב-TV."}, "5.  Todo el sistema de llamada es PoE: 230 V\nsolo en gabinete, PC / teléfono y TV.": {"en": "5.  The whole call system is PoE: 230 V only\nat the rack, PC / phone and TV.", "he": "5.  כל מערכת הקריאה מוזנת ב-PoE: 230V\nרק בארון, במחשב/טלפון וב-TV."}, "BUS KNX 2x2x0,8 mm  –  tarjeta 24 pins → tarjeta (cadena) → SmartHub": {"en": "KNX bus 2x2x0.8 mm  –  24-pin board → board (chain) → SmartHub", "he": "כבל BUS KNX 2x2x0.8  –  כרטיס 24 פינים ← כרטיס (שרשרת) ← SmartHub"}, "General floor plan – Equipment & devices": {"en": "Planta general – equipamiento", "he": "General floor plan – Equipment & devices"}, "General floor plan – Wiring & cable routes": {"en": "Planta general – cableado", "he": "General floor plan – Wiring & cable routes"}, "Typical patient room – plan, wiring & elevations": {"en": "Habitación tipo – planta, cableado y alzados", "he": "Typical patient room – plan, wiring & elevations"}, "Toilets & nurse station – plans and elevations": {"en": "Baños y estación de enfermería", "he": "Toilets & nurse station – plans and elevations"}, "System topology & bill of materials": {"en": "Topología y lista de materiales", "he": "System topology & bill of materials"}, "3D views – Equipment": {"en": "Vistas 3D – equipamiento", "he": "3D views – Equipment"}, "3D views – Wiring": {"en": "Vistas 3D – cableado", "he": "3D views – Wiring"}, "Nurse Call System · Inpatient Ward   |   מערכת קריאת אחות · מחלקת אשפוז": {"en": "Sistema de llamada de enfermería · Pabellón de internación", "he": "Nurse Call System · Inpatient Ward"}, "Sistema de llamada de enfermería": {"en": "Nurse call system", "he": "מערכת קריאת אחות"}, "Pabellón de internación · 4 habitaciones, 12 camas, núcleo de baños y estación de enfermería": {"en": "Inpatient ward · 4 rooms, 12 beds, toilet block and nurse station", "he": "מחלקת אשפוז · 4 חדרים, 12 מיטות, גוש שירותים ועמדת אחיות"}, "ACE BG · Advantecnia  —  Planos 2D, 3D y cableado": {"en": "ACE BG · Advantecnia  —  2D plans, 3D and wiring", "he": "ACE BG · Advantecnia  —  תוכניות 2D, תלת-ממד וחיווט"}, "Telab International · Octubre 2026 · Anteproyecto Rev. A": {"en": "Telab International · October 2026 · Preliminary design Rev. A", "he": "Telab International · אוקטובר 2026 · תכנון מוקדם מהדורה A"}, "Lista de materiales del sistema": {"en": "System bill of materials", "he": "רשימת חומרים למערכת"}, "Equipo Advantecnia / ACE BG": {"en": "Advantecnia / ACE BG equipment", "he": "ציוד Advantecnia / ACE BG"}, "Llamada de cama + pera · ACE41220316": {"en": "Bed call + pear push · ACE41220316", "he": "לחצן קריאה למיטה + אגס · ACE41220316"}, "Presencia / cancelación · ACE80081001": {"en": "Presence / cancel · ACE80081001", "he": "נוכחות / ביטול · ACE80081001"}, "Luz indicadora de pasillo · ACE41020309": {"en": "Corridor indicator light · ACE41020309", "he": "מנורת מסדרון · ACE41020309"}, "Tirador baño / ducha · ACE40320303": {"en": "Toilet / shower pull-cord · ACE40320303", "he": "משיכת חבל אסלה / מקלחת · ACE40320303"}, "Tarjeta conversora ECV169 (Room Controller)": {"en": "Converter board ECV169 (room controller)", "he": "כרטיס ממיר ECV169 (בקר חדר)"}, "SmartHub (Raspberry Pi)": {"en": "SmartHub (Raspberry Pi)", "he": "SmartHub (Raspberry Pi)"}, "Servidor ACE51010103 · Switch ACEUCM6302": {"en": "Server ACE51010103 · Switch ACEUCM6302", "he": "שרת ACE51010103 · מתג ACEUCM6302"}, "Teléfono ACE52190200 · PC ACE52040208 · TV 55\"": {"en": "Phone ACE52190200 · PC ACE52040208 · TV 55\"", "he": "טלפון ACE52190200 · מחשב ACE52040208 · TV 55\""}, "Cable (metraje + 15 %)": {"en": "Cable (length + 15 %)", "he": "כבל (אורך + 15%)"}, "Metros": {"en": "Metres", "he": "מטרים"}, "Cable radial dispositivos": {"en": "Radial device cable", "he": "כבל רדיאלי להתקנים"}, "Energía 3x2,5 mm²": {"en": "Power 3x2.5 mm²", "he": "חשמל 3x2.5 ממ\"ר"}, "Metrajes medidos sobre los recorridos del modelo, con bajadas verticales. Cantidades de anteproyecto, a validar en obra y con Advantecnia (máximo de RC por línea de bus).": {"en": "Lengths measured on the model routes, vertical drops included. Preliminary quantities, to be verified on site and with Advantecnia (maximum boards per bus line).", "he": "האורכים נמדדו על תוואי המודל כולל ירידות אנכיות. כמויות לתכנון מוקדם, לאימות באתר ומול Advantecnia (מספר כרטיסים מרבי לקו BUS)."}, "Entregables del proyecto": {"en": "Project deliverables", "he": "תוצרי הפרויקט"}, "7 láminas A1: plantas, detalles, alzados, topología, materiales y vistas 3D": {"en": "7 A1 sheets: plans, details, elevations, topology, materials and 3D views", "he": "7 גיליונות A1: תוכניות, פרטים, חזיתות, טופולוגיה, חומרים ומבטי תלת-ממד"}, "Plano CAD con capas por sistema y cables en 3D; se abre en AutoCAD y se guarda como DWG": {"en": "CAD drawing with layers per system and 3D cables; opens in AutoCAD and saves as DWG", "he": "שרטוט CAD עם שכבות לכל מערכת וכבלים בתלת-ממד; נפתח ב-AutoCAD ונשמר כ-DWG"}, "Modelo BIM para importar o vincular en Revit": {"en": "BIM model to import or link in Revit", "he": "מודל BIM לייבוא או קישור ב-Revit"}, "Visor web: equipamiento / cableado, recorrido y simulación de luces": {"en": "Web viewer: equipment / wiring, walkthrough and light simulation", "he": "מציג אינטרנטי: ציוד / חיווט, סיור וסימולציית מנורות"}, "Video walkthrough del pabellón y del cableado": {"en": "Walkthrough video of the ward and the wiring", "he": "סרטון סיור במחלקה ובחיווט"}, "Esta presentación": {"en": "This presentation", "he": "מצגת זו"}, "El proyecto en cifras": {"en": "The project in numbers", "he": "הפרויקט במספרים"}, "Entrada por el extremo este · P1 Hab. 1 · P2 Hab. 2 · P3 Oficina · P4 Hab. 3 · P5 Hab. 4 · gabinete al final del pasillo": {"en": "Entrance at the east end · P1 Room 1 · P2 Room 2 · P3 Office · P4 Room 3 · P5 Room 4 · rack at the corridor end", "he": "כניסה בקצה המזרחי · P1 חדר 1 · P2 חדר 2 · P3 משרד · P4 חדר 3 · P5 חדר 4 · ארון בסוף המסדרון"}, "camas con panel de llamada y pera": {"en": "beds with call unit and pear push", "he": "מיטות עם לחצן קריאה ואגס"}, "tarjetas de 24 pins (ECV169) en cadena": {"en": "24-pin boards (ECV169) in a chain", "he": "כרטיסי 24 פינים (ECV169) בשרשרת"}, "luces LED de pasillo de 3 colores": {"en": "3-colour LED corridor lights", "he": "מנורות מסדרון תלת-צבעיות"}, "tiradores de baño a 1,85 m": {"en": "toilet pull-cords at 1.85 m", "he": "חבלי משיכה בשירותים בגובה 1.85 מ'"}, "Planta general – equipamiento": {"en": "General plan – equipment", "he": "תוכנית כללית – ציוד"}, "Camas, cortinas, cabeceros técnicos, paneles Advantecnia, baños, estación de enfermería y gabinete": {"en": "Beds, curtains, bed-head units, Advantecnia devices, toilets, nurse station and rack", "he": "מיטות, וילונות, קונסולות, התקני Advantecnia, שירותים, עמדת אחיות וארון"}, "Planta general – cableado": {"en": "General plan – wiring", "he": "תוכנית כללית – חיווט"}, "Verde · bus y radial": {"en": "Green · bus and radial", "he": "ירוק · BUS ורדיאלי"}, "Rojo · Cat6 / Cat7": {"en": "Red · Cat6 / Cat7", "he": "אדום · Cat6 / Cat7"}, "Azul · 230 V (resto PoE)": {"en": "Blue · 230 V (rest PoE)", "he": "כחול · 230V (השאר PoE)"}, "Habitación tipo: 3 camas contra el muro lateral": {"en": "Typical room: 3 beds against the side wall", "he": "חדר טיפוסי: 3 מיטות צמודות לקיר הצד"}, "Habitación 1 (junto a la entrada): cama del medio vista desde el centro del cuarto, con su cortina en U abierta al frente.": {"en": "Room 1 (next to the entrance): middle bed seen from the centre of the room, with its U curtain open at the front.", "he": "חדר 1 (ליד הכניסה): המיטה האמצעית במבט ממרכז החדר, עם וילון ה-U פתוח מקדימה."}, "Cabecera de las 3 camas contra el muro lateral; puerta en la esquina opuesta, sobre el pasillo": {"en": "Head of the 3 beds against the side wall; door in the opposite corner, on the corridor", "he": "ראש 3 המיטות צמוד לקיר הצד; הדלת בפינה הנגדית, אל המסדרון"}, "Cortina en U por cama: riel de techo con varillas, malla superior blanca y tela celeste": {"en": "U curtain per bed: ceiling track on rods, white top mesh and light-blue fabric", "he": "וילון U לכל מיטה: מסילת תקרה על מוטות, רשת לבנה עליונה ובד תכלת"}, "Cabecero técnico por cama: O₂, aire, vacío, 4 tomas 230 V, 2 RJ45, luz de lectura": {"en": "Bed-head unit per bed: O₂, air, vacuum, 4 × 230 V sockets, 2 RJ45, reading light", "he": "קונסולה לכל מיטה: חמצן, אוויר, ואקום, 4 שקעי 230V, 2 RJ45, תאורת קריאה"}, "Llamada de cama ACE41220316 con pera, junto al cabecero (1,15 m)": {"en": "Bed call ACE41220316 with pear push, next to the bed-head (1.15 m)", "he": "לחצן קריאה ACE41220316 עם אגס, ליד הקונסולה (1.15 מ')"}, "Junto a la puerta: teclas de luz (1,05 m) y presencia / cancelación ACE80081001 (1,35 m)": {"en": "Next to the door: light switches (1.05 m) and presence / cancel ACE80081001 (1.35 m)", "he": "ליד הדלת: מתגי תאורה (1.05 מ') ונוכחות / ביטול ACE80081001 (1.35 מ')"}, "Sobre el marco, hacia el pasillo: luz indicadora ACE41020309 rojo / verde / azul (2,42 m)": {"en": "Above the frame, facing the corridor: indicator light ACE41020309 red / green / blue (2.42 m)", "he": "מעל המשקוף, לכיוון המסדרון: מנורת סימון ACE41020309 אדום / ירוק / כחול (2.42 מ')"}, "Tarjeta conversora ECV169 fuera del cuarto, sobre el cielorraso del pasillo": {"en": "Converter board ECV169 outside the room, above the corridor ceiling", "he": "כרטיס ממיר ECV169 מחוץ לחדר, מעל תקרת המסדרון"}, "Núcleo de baños frente a la Habitación 1": {"en": "Toilet block opposite Room 1", "he": "גוש שירותים מול חדר 1"}, "B1 · baño del personal, sin llamada": {"en": "B1 · staff WC, no call", "he": "B1 · שירותי צוות, ללא קריאה"}, "B2 · inodoro con tirador de llamada ACE40320303": {"en": "B2 · toilet with pull-cord call ACE40320303", "he": "B2 · אסלה עם חבל קריאה ACE40320303"}, "B3 · baño accesible: inodoro y ducha, un tirador ACE40320303 en cada uno": {"en": "B3 · accessible WC: toilet and shower, one pull-cord ACE40320303 in each", "he": "B3 · שירותי נכים: אסלה ומקלחת, חבל ACE40320303 בכל אחד"}, "Todos los tiradores montados a 1,85 m (mínimo 1,80 m), cordón hasta 0,20 m del piso": {"en": "All pull-cords mounted at 1.85 m (minimum 1.80 m), cord down to 0.20 m from the floor", "he": "כל החבלים מותקנים בגובה 1.85 מ' (מינימום 1.80 מ'), החבל עד 0.20 מ' מהרצפה"}, "En el pasillo, junto al acceso: 2 luces de señalización y 2 botones de presencia / cancelación": {"en": "In the corridor, next to the entrance: 2 indicator lights and 2 presence / cancel buttons", "he": "במסדרון, ליד הכניסה: 2 מנורות סימון ו-2 לחצני נוכחות / ביטול"}, "RC-B2 y RC-B3 se suman a la cadena del bus": {"en": "RC-B2 and RC-B3 join the bus chain", "he": "RC-B2 ו-RC-B3 מצטרפים לשרשרת ה-BUS"}, "Luces y botones de B2 / B3 vistos desde el pasillo": {"en": "B2 / B3 lights and buttons seen from the corridor", "he": "מנורות ולחצנים של B2 / B3 במבט מהמסדרון"}, "Estación de enfermería, TV y gabinete": {"en": "Nurse station, TV and rack", "he": "עמדת אחיות, TV וארון"}, "Frente a la oficina (P3), con puerta propia. Escritorio contra el muro del pasillo, con ventana: la PC ACE52040208 y el teléfono ACE52190200 quedan del lado de la pared y la enfermera mira al pasillo y a la TV de 55\" (entre P3 y P4).": {"en": "Opposite the office (P3), with its own door. Desk against the corridor wall, with a window: PC ACE52040208 and phone ACE52190200 sit on the wall side and the nurse faces the corridor and the 55\" TV (between P3 and P4).", "he": "מול המשרד (P3), עם דלת משלה. השולחן צמוד לקיר המסדרון עם חלון: המחשב ACE52040208 והטלפון ACE52190200 בצד הקיר, והאחות פונה למסדרון ולמסך ה-55\" (בין P3 ל-P4)."}, "Al final del pasillo, opuesto a la entrada: gabinete 42U con SmartHub (Raspberry Pi), switch ACEUCM6302, servidor ACE51010103, UPS y alimentación PoE de tarjetas y dispositivos.": {"en": "At the corridor end, opposite the entrance: 42U rack with SmartHub (Raspberry Pi), switch ACEUCM6302, server ACE51010103, UPS and PoE supply for boards and devices.", "he": "בסוף המסדרון, מול הכניסה: ארון 42U עם SmartHub (Raspberry Pi), מתג ACEUCM6302, שרת ACE51010103, UPS והזנת PoE לכרטיסים ולהתקנים."}, "Topología: de la pera al servidor": {"en": "Topology: from the pear push to the server", "he": "טופולוגיה: מהאגס עד לשרת"}, "Paciente pulsa la pera o tira del cordón": {"en": "Patient presses the pear push or pulls the cord", "he": "המטופל לוחץ על האגס או מושך בחבל"}, "El dispositivo avisa a la tarjeta 24 pins (radial)": {"en": "The device reports to the 24-pin board (radial)", "he": "ההתקן מדווח לכרטיס 24 הפינים (רדיאלי)"}, "Luz de pasillo en ROJO y evento al bus": {"en": "Corridor light RED and event on the bus", "he": "מנורת המסדרון באדום ואירוע ב-BUS"}, "SmartHub → switch → servidor por IP": {"en": "SmartHub → switch → server over IP", "he": "SmartHub ← מתג ← שרת ב-IP"}, "Llamada en PC, teléfono y TV": {"en": "Call on PC, phone and TV", "he": "קריאה במחשב, בטלפון וב-TV"}, "Enfermera: presencia (verde) y cancelación": {"en": "Nurse: presence (green) and cancel", "he": "אחות: נוכחות (ירוק) וביטול"}, "Cableado en 3D": {"en": "Wiring in 3D", "he": "חיווט בתלת-ממד"}, "Tarjeta 24 pins → tarjeta (cadena) → SmartHub": {"en": "24-pin board → board (chain) → SmartHub", "he": "כרטיס 24 פינים ← כרטיס (שרשרת) ← SmartHub"}, "Radial en cada cuarto": {"en": "Radial in each room", "he": "רדיאלי בכל חדר"}, "Cada dispositivo a la tarjeta 24 pins del cuarto": {"en": "Each device to the room's 24-pin board", "he": "כל התקן לכרטיס 24 הפינים של החדר"}, "Solo SmartHub → switch → servidor, PC / teléfono y TV": {"en": "Only SmartHub → switch → server, PC / phone and TV", "he": "רק SmartHub ← מתג ← שרת, מחשב / טלפון ו-TV"}, "Energía 230 V (3x2,5 mm²)": {"en": "230 V power (3x2.5 mm²)", "he": "חשמל 230V (3x2.5 ממ\"ר)"}, "Solo gabinete, PC / teléfono y TV; el resto es PoE": {"en": "Rack, PC / phone and TV only; everything else is PoE", "he": "ארון, מחשב / טלפון ו-TV בלבד; השאר PoE"}, "Recorridos sobre cielorraso en bandeja portacables a 2,60 m; bajadas embutidas en muro.": {"en": "Runs above the ceiling in a cable tray at 2.60 m; drops concealed in walls.", "he": "תוואים מעל התקרה במגש כבלים בגובה 2.60 מ'; ירידות סמויות בקירות."}, "Llamada activa en Habitación 1": {"en": "Active call in Room 1", "he": "קריאה פעילה בחדר 1"}, "Luz de pasillo en rojo sobre P1": {"en": "Corridor light red above P1", "he": "מנורת המסדרון באדום מעל P1"}, "Al entrar: presencia (verde)": {"en": "On entering: presence (green)", "he": "בכניסה: נוכחות (ירוק)"}, "3 camas con la cabecera contra el muro lateral": {"en": "3 beds with the head against the side wall", "he": "3 מיטות עם הראש לקיר הצד"}, "Cabecero: gases, 230 V, RJ45 y panel de llamada con pera": {"en": "Bed-head: gases, 230 V, RJ45 and call unit with pear push", "he": "קונסולה: גזים, 230V, RJ45 ולחצן קריאה עם אגס"}, "Teclas de luz y presencia / cancelación junto a la puerta": {"en": "Light switches and presence / cancel next to the door", "he": "מתגי תאורה ונוכחות / ביטול ליד הדלת"}, "Luces y presencia de los baños B2 / B3": {"en": "Lights and presence of toilets B2 / B3", "he": "מנורות ונוכחות של שירותים B2 / B3"}, "Baño accesible: ducha con tirador a 1,85 m": {"en": "Accessible WC: shower with pull-cord at 1.85 m", "he": "שירותי נכים: מקלחת עם חבל בגובה 1.85 מ'"}, "Tirador del inodoro": {"en": "Toilet pull-cord", "he": "חבל משיכה באסלה"}, "Estación de enfermería: puerta propia junto al escritorio": {"en": "Nurse station: own door next to the desk", "he": "עמדת אחיות: דלת משלה ליד השולחן"}, "Escritorio contra el muro: PC ACE52040208 y teléfono ACE52190200": {"en": "Desk against the wall: PC ACE52040208 and phone ACE52190200", "he": "שולחן צמוד לקיר: מחשב ACE52040208 וטלפון ACE52190200"}, "La enfermera mira al pasillo y a la TV": {"en": "The nurse faces the corridor and the TV", "he": "האחות פונה למסדרון ול-TV"}, "Gabinete: SmartHub, switch ACEUCM6302 y servidor ACE51010103": {"en": "Rack: SmartHub, switch ACEUCM6302 and server ACE51010103", "he": "ארון: SmartHub, מתג ACEUCM6302 ושרת ACE51010103"}, "Modo cableado": {"en": "Wiring mode", "he": "מצב חיווט"}, "Tarjetas de 24 pins en cadena hasta el SmartHub": {"en": "24-pin boards chained to the SmartHub", "he": "כרטיסי 24 פינים בשרשרת עד ה-SmartHub"}, "Radial: cada dispositivo a la tarjeta de 24 pins de su cuarto": {"en": "Radial: each device to its room's 24-pin board", "he": "רדיאלי: כל התקן לכרטיס 24 הפינים של החדר"}, "Baños: tiradores y señalización al bus": {"en": "Toilets: pull-cords and indicators on the bus", "he": "שירותים: חבלים ומנורות סימון ל-BUS"}, "Verde bus · Rojo red IP · Azul 230 V": {"en": "Green bus · Red Cat6/Cat7 · Blue 230 V (rest PoE)", "he": "ירוק BUS · אדום Cat6/Cat7 · כחול 230V (השאר PoE)"}};
+const trCap = s => (LANG === "es" || !s) ? s : ((CAPS[s] && CAPS[s][LANG]) || s);
+const fmt = t => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
+function setPlaying(v) { playing = v; const b = document.getElementById("walk"); b.setAttribute("aria-pressed", String(v)); b.textContent = v ? T[LANG].stop : T[LANG].walk; controls.enabled = !v; if (!v) tl.hidden = true; else { playT = 0; lastTs = performance.now(); } }
+
+/* ------------------------------------------------------------------ UI */
+const $ = id => document.getElementById(id);
+function renderLegend() {
+  const L = T[LANG]; const rows = wiring ? L.wiL : L.eqL;
+  $("legend").innerHTML = `<h3>${wiring ? L.legWi : L.legEq}</h3><ul>` + rows.map(([c, k, txt]) =>
+    `<li>${k === "line" ? `<span class="sw" style="background:${c}"></span>` : k === "dash" ? `<span class="sw dash"></span>` : k === "tri" ? `<span class="tri"></span>` : `<span class="chip" style="background:${c}"></span>`}<span>${txt}</span></li>`).join("") +
+    `</ul><div class="hint">${L.hint}</div>`;
+}
+function renderUI() {
+  const L = T[LANG]; document.documentElement.lang = LANG; document.documentElement.dir = LANG === "he" ? "rtl" : "ltr";
+  $("t-title").textContent = L.title; $("t-sub").textContent = L.sub; $("m-eq").textContent = L.eq; $("m-wi").textContent = L.wi;
+  $("t-view").textContent = L.view; $("t-lights").textContent = L.lights; $("lbl").textContent = L.labels; $("cut").textContent = L.cut;
+  $("walk").textContent = playing ? L.stop : L.walk;
+  const v = $("view").value || "iso"; $("view").innerHTML = Object.entries(L.views).map(([k, t]) => `<option value="${k}">${t}</option>`).join(""); $("view").value = v;
+  $("scen").innerHTML = Object.entries(L.scen).map(([k, t]) => `<option value="${k}">${t}</option>`).join(""); $("scen").value = scenario;
+  document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === LANG)));
+  for (const a of tagAnchors) if (a.cls === "room") a.el.textContent = LANG === "es" ? a.text : (ROOM_NAMES[LANG][a.code] || a.text);
+  renderLegend();
+}
+$("m-eq").onclick = () => { wiring = false; applyMode(); };
+$("m-wi").onclick = () => { wiring = true; applyMode(); };
+$("view").onchange = e => { setPlaying(false); if (fp) setFp(false); setView(e.target.value); };
+$("scen").onchange = e => { scenario = e.target.value; applyScenario(); };
+$("walk").onclick = () => { if (fp) setFp(false); setPlaying(!playing); };
+$("lbl").onclick = () => { showTags = !showTags; $("lbl").setAttribute("aria-pressed", String(showTags)); };
+$("cut").onclick = () => { lowWalls = !lowWalls; applyWalls(); };
+document.querySelectorAll("[data-lang]").forEach(b => b.onclick = () => { LANG = b.dataset.lang; renderUI(); fpUI(); docsUI(); });
+$("info-x").onclick = () => { $("info").hidden = true; };
+// selección
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(); let downAt = null;
+renderer.domElement.addEventListener("pointerdown", e => downAt = [e.clientX, e.clientY]);
+renderer.domElement.addEventListener("pointerup", e => {
+  if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 5) return;
+  const r = renderer.domElement.getBoundingClientRect(); mouse.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
+  ray.setFromCamera(mouse, camera);
+  const hits = ray.intersectObjects(pickables.filter(o => { let p = o; while (p) { if (!p.visible) return false; p = p.parent; } return true; }), false);
+  if (!hits.length) return; const info = hits[0].object.userData.info; const L = T[LANG];
+  if (info.cable) {
+    const c = info.cable; $("i-title").textContent = M.systems[c.sys]["name_" + (LANG === "en" ? "en" : LANG === "he" ? "he" : "es")];
+    $("i-dl").innerHTML = `<dt>${L.dt.spec}</dt><dd>${c.spec}</dd><dt>${L.dt.conn}</dt><dd>${c.label}</dd><dt>${L.dt.len}</dt><dd>${c.len.toFixed(1)} m</dd>`;
+  } else {
+    $("i-title").textContent = TYPE_NAME[LANG][info.type] || info.type;
+    $("i-dl").innerHTML = `<dt>${L.dt.id}</dt><dd>${info.id}</dd><dt>${L.dt.room}</dt><dd>${info.room}</dd><dt>${L.dt.h}</dt><dd>${info.p[2].toFixed(2)} m</dd><dt>${L.dt.type}</dt><dd>${info.label}</dd>` + (info.code ? `<dt>${L.dt.code}</dt><dd>${info.code}</dd>` : "");
+  }
+  $("info").style.borderTopColor = info.cable ? M.systems[info.cable.sys].color : "var(--accent)"; $("info").hidden = false;
+});
+["pointerdown", "wheel"].forEach(ev => renderer.domElement.addEventListener(ev, () => { if (playing) setPlaying(false); }, { passive: true }));
+
+/* ------------------------------------------------------------------ modo caminar (primera persona) */
+const FPT = { es: { on: "🚶 Caminar", off: "✕ Salir de caminar", go: "Ir a…", hint: "Flechas / W A S D: caminar · Arrastrar: mirar · Botones: caminar y girar" },
+  en: { on: "🚶 Walk", off: "✕ Exit walk", go: "Go to…", hint: "Arrows / W A S D: walk · Drag: look around · Buttons: walk and turn" },
+  he: { on: "🚶 הליכה", off: "✕ יציאה מהליכה", go: "עבור אל…", hint: "חיצים / W A S D: הליכה · גרירה: הסתכלות · כפתורים: הליכה וסיבוב" } };
+let fp = false, yaw = 0, pitch = 0, lastFpTs = 0; const keys = {}; const EYE = 1.6;
+const fpRay = new THREE.Raycaster();
+function fpLook() { const d = new THREE.Vector3(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch)); camera.lookAt(camera.position.clone().add(d)); }
+function fpFrom(pos, look) { camera.position.copy(pos); const d = look.clone().sub(pos); yaw = Math.atan2(d.x, d.z); pitch = Math.max(-1.2, Math.min(1.2, Math.atan2(d.y, Math.hypot(d.x, d.z)))); fpLook(); }
+function setFp(on) {
+  fp = on; if (on && playing) setPlaying(false);
+  document.body.classList.toggle("fpmode", on); $("pad").hidden = !on; $("fp").setAttribute("aria-pressed", String(on)); $("fp").textContent = on ? FPT[LANG].off : FPT[LANG].on;
+  renderer.domElement.classList.toggle("fpcur", on); controls.enabled = !on;
+  if (on) {
+    if (typeof showBld === "function") showBld(false);
+    lowWalls = false; applyWalls();
+    const [p, t] = VIEWS.corr;
+    if (camera.position.y > 2.4 || camera.position.y < 0.5) fpFrom(V(p[0], p[1], EYE), V(t[0], t[1], EYE));
+    else { camera.position.y = EYE; fpFrom(camera.position.clone(), controls.target.clone().setY(EYE)); }
+  } else { const d = new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw)); controls.target.copy(camera.position.clone().addScaledVector(d, 1.5)); controls.update(); }
+}
+function blocked(pos, dir, dist) {
+  for (const h of [0.45, 1.2]) {
+    fpRay.set(new THREE.Vector3(pos.x, h, pos.z), dir); fpRay.far = dist + 0.3;
+    if (fpRay.intersectObjects(wallMeshes.filter(m => m.visible), false).length) return true;
+  }
+  return false;
+}
+function fpStep(dt) {
+  const turn = (keys.L ? 1 : 0) - (keys.R ? 1 : 0), mv = (keys.F ? 1 : 0) - (keys.B ? 1 : 0), side = (keys.SL ? 1 : 0) - (keys.SR ? 1 : 0);
+  yaw += turn * 1.6 * dt;
+  const fwd = new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw)), lft = new THREE.Vector3(fwd.z, 0, -fwd.x);
+  const step = fwd.multiplyScalar(mv).add(lft.multiplyScalar(side));
+  if (step.lengthSq() > 0) {
+    step.normalize(); const d = 1.5 * dt;
+    if (!blocked(camera.position, step, d)) camera.position.addScaledVector(step, d);
+    else for (const [ax, comp] of [[new THREE.Vector3(Math.sign(step.x), 0, 0), Math.abs(step.x)], [new THREE.Vector3(0, 0, Math.sign(step.z)), Math.abs(step.z)]])
+      if (comp > 0.05 && !blocked(camera.position, ax, d * comp)) { camera.position.addScaledVector(ax, d * comp); break; }
+  }
+  camera.position.y = EYE; fpLook();
+}
+const KMAP = { ArrowUp: "F", KeyW: "F", ArrowDown: "B", KeyS: "B", ArrowLeft: "L", ArrowRight: "R", KeyA: "SL", KeyD: "SR", KeyQ: "L", KeyE: "R" };
+addEventListener("keydown", e => { if (!fp || e.target.tagName === "SELECT") return; const k = KMAP[e.code]; if (k) { keys[k] = true; e.preventDefault(); } });
+addEventListener("keyup", e => { const k = KMAP[e.code]; if (k) keys[k] = false; });
+addEventListener("blur", () => { for (const k in keys) keys[k] = false; });
+document.querySelectorAll("#pad button").forEach(b => {
+  const k = b.dataset.k;
+  b.addEventListener("pointerdown", e => { keys[k] = true; b.setPointerCapture(e.pointerId); e.preventDefault(); });
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach(ev => b.addEventListener(ev, () => { keys[k] = false; }));
+});
+let lookAt0 = null;
+renderer.domElement.addEventListener("pointerdown", e => { if (fp) lookAt0 = [e.clientX, e.clientY]; });
+addEventListener("pointermove", e => {
+  if (!fp || !lookAt0) return;
+  yaw -= (e.clientX - lookAt0[0]) * 0.005; pitch = Math.max(-1.2, Math.min(1.2, pitch - (e.clientY - lookAt0[1]) * 0.005));
+  lookAt0 = [e.clientX, e.clientY]; fpLook();
+});
+addEventListener("pointerup", () => { lookAt0 = null; });
+// "Ir a…": parado frente al equipo, mirándolo
+const GOTO = M.devices.filter(d => !["riser", "switch", "buscomm", "light_switch", "elec_panel"].includes(d.type));
+const FDIR = { N: [0, 1], S: [0, -1], E: [1, 0], W: [-1, 0] };
+function gotoDev(d) {
+  if (!fp) setFp(true);
+  const [x, y, z] = d.p; let [fx, fy] = FDIR[d.face] || [0, 0];
+  let dist = d.type === "rack" ? 1.6 : d.type === "headwall" ? 2.2 : 1.3;
+  if (!fx && !fy) { fx = 0; fy = -1; dist = 1.1; }
+  fpFrom(V(x + fx * dist, y + fy * dist, EYE), V(x, y, d.type === "rack" ? 1.2 : z)); showInfo(d);
+}
+function showInfo(info) {
+  const L = T[LANG]; $("i-title").textContent = TYPE_NAME[LANG][info.type] || info.type;
+  $("i-dl").innerHTML = `<dt>${L.dt.id}</dt><dd>${info.id}</dd><dt>${L.dt.room}</dt><dd>${info.room}</dd><dt>${L.dt.h}</dt><dd>${info.p[2].toFixed(2)} m</dd><dt>${L.dt.type}</dt><dd>${info.label}</dd>` + (info.code ? `<dt>${L.dt.code}</dt><dd>${info.code}</dd>` : "");
+  $("info").style.borderTopColor = "var(--accent)"; $("info").hidden = false;
+}
+function fpUI() {
+  $("fp").textContent = fp ? FPT[LANG].off : FPT[LANG].on; $("fphint").textContent = FPT[LANG].hint;
+  $("goto").innerHTML = `<option value="">${FPT[LANG].go}</option>` + GOTO.map((d, i) => `<option value="${i}">${d.id} · ${TYPE_NAME[LANG][d.type] || d.type}</option>`).join("");
+}
+$("fp").onclick = () => setFp(!fp);
+$("goto").onchange = e => { const v = e.target.value; if (v !== "") gotoDev(GOTO[+v]); e.target.value = ""; e.target.blur(); };
+fpUI();
+/* ------------------------------------------------------------------ documentos del proyecto */
+const DOCS = JSON.parse(document.getElementById("docs-data").textContent || "[]");
+const DT = { es: { btn: "📄 Documentos", t: "Documentos del proyecto", pdf: ["Planos 2D", "Láminas A1 en PDF"], pptx: ["Presentación", "PowerPoint"], mp4: ["Video del recorrido", "MP4"], dxf: ["Plano CAD", "DXF – en AutoCAD guardar como DWG"], ifc: ["Modelo BIM", "IFC – abrir en Revit"], md: ["Léeme", "Instrucciones"] },
+  en: { btn: "📄 Documents", t: "Project documents", pdf: ["2D plans", "A1 sheets, PDF"], pptx: ["Presentation", "PowerPoint"], mp4: ["Walkthrough video", "MP4"], dxf: ["CAD drawing", "DXF – save as DWG in AutoCAD"], ifc: ["BIM model", "IFC – open in Revit"], md: ["Read me", "Instructions"] },
+  he: { btn: "📄 מסמכים", t: "מסמכי הפרויקט", pdf: ["תוכניות דו-ממד", "גיליונות A1, PDF"], pptx: ["מצגת", "PowerPoint"], mp4: ["סרטון סיור", "MP4"], dxf: ["שרטוט CAD", "DXF – לשמור כ-DWG ב-AutoCAD"], ifc: ["מודל BIM", "IFC – לפתוח ב-Revit"], md: ["קרא אותי", "הוראות"] } };
+function docsUI() {
+  const L = DT[LANG]; $("docs").hidden = !DOCS.length; $("docs").textContent = L.btn; $("doc-t").textContent = L.t;
+  $("doc-list").innerHTML = DOCS.map(d => { const k = d.f.split(".").pop().toLowerCase(); const [a, b] = L[k] || [d.f, ""];
+    return `<li><a href="#" data-i="${DOCS.indexOf(d)}"><b>${k.toUpperCase()}</b><span>${a}<small>${b} · ${d.mb} MB</small></span></a></li>`; }).join("");
+  $("doc-list").querySelectorAll("a").forEach(a => a.onclick = e => { e.preventDefault(); openDoc(DOCS[+a.dataset.i]); });
+}
+async function openDoc(d) {
+  const k = d.f.split(".").pop().toLowerCase(), box = $("dv-body"); $("docview").hidden = false; $("dv-t").textContent = (DT[LANG][k] || [d.f])[0];
+  if (k === "mp4") box.innerHTML = `<video src="${d.f}" controls playsinline autoplay style="width:100%;max-height:78vh;background:#fff"></video>`;
+  else if (k === "pdf") box.innerHTML = `<iframe src="${d.f}" title="PDF" style="width:100%;height:78vh;border:0"></iframe>`;
+  else { const t = await (await fetch(d.f)).text(); box.innerHTML = `<pre style="white-space:pre-wrap;font:14px/1.5 var(--display);max-height:78vh;overflow:auto;margin:0" dir="auto"></pre>`; box.firstChild.textContent = t; }
+}
+$("docs").onclick = () => { $("docpanel").hidden = !$("docpanel").hidden; };
+$("doc-x").onclick = () => { $("docpanel").hidden = true; };
+$("dv-x").onclick = () => { $("docview").hidden = true; $("dv-body").innerHTML = ""; };
+docsUI();
+
+function resize() { const w = stage.clientWidth, h = stage.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+addEventListener("resize", resize); resize();
+applyMode(); applyWalls(); applyScenario(); renderUI(); setView("iso");
+if (location.hash === "#cableado") { wiring = true; applyMode(); }
+
+function updateCeil() { groups.ceil.visible = !wiring && !lowWalls && camera.position.y < M.meta.ceil - 0.05; }
+function frame(ts) {
+  if (playing) { playT += (ts - lastTs) / 1000; lastTs = ts; if (playT >= DUR) setPlaying(false); else applyPose(playT); }
+  else if (fp) fpStep(Math.min(0.05, (ts - (lastFpTs || ts)) / 1000));
+  else controls.update();
+  lastFpTs = ts;
+  updateCeil(); renderer.render(scene, camera); placeTags();
+  requestAnimationFrame(frame);
+}
+if (!CAPTURE) requestAnimationFrame(frame);
+// API para captura de video / imágenes
+window.__DUR = DUR;
+if (CAPTURE) renderer.shadowMap.autoUpdate = false;
+window.__render = (t) => { applyPose(t); updateCeil(); renderer.render(scene, camera); placeTags(); return true; };
+window.__still = (view, mode, scen, cut) => { tl.hidden = true; wiring = mode === "wi"; applyMode(); scenario = scen || "mix"; applyScenario(); lowWalls = !!cut; applyWalls(); setView(view); camera.lookAt(controls.target); updateCeil(); renderer.shadowMap.needsUpdate = true; renderer.render(scene, camera); placeTags(); return true; };
+window.__ready = true;
+</script>
