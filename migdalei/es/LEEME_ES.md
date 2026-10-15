@@ -1,46 +1,31 @@
-# Migdalei Yam a Tijon – Departamentos tutelados – Llamada de enfermería ACE BG / Advantecnia
+# Migdalei Yam a Tijon – Vivienda tutelada – Llamada de enfermería ACE BG / Advantecnia
 
-Anteproyecto Rev. A · 12/10/2026 · Telab International
+Rev. B · 15/10/2026 · Telab International · sobre el plano de arquitectura L5 (piso tipo)
 
-## Contenido
+## Archivos
 | Archivo | Qué es | Cómo se abre |
 |---|---|---|
-| `planos_2D_ES.pdf` | 7 láminas A1: piso tipo equipamiento y cableado (1:60), departamento tipo A y tipo B con alturas, esquema vertical PB + 6 pisos, topología y lista de materiales, vistas 3D | Cualquier lector PDF; imprimir en A1 |
-| `plano_CAD_ES.dxf` | Plano CAD del piso tipo con capas por sistema; cables como polilíneas 3D; equipos como bloques con atributos ID / DESCRIPCION / ALTURA_M / CODIGO | AutoCAD, BricsCAD, DraftSight. Para **DWG**: abrir en AutoCAD → Guardar como → DWG |
-| `modelo_BIM_ES.ifc` | Modelo BIM IFC4 del edificio: PB + 6 pisos con muros, puertas, ventanas, muebles, dispositivos y cables | **Revit**: Archivo → Abrir → IFC y guardar como **RVT** |
-| `visor_3d_ES.html` | Visor 3D: equipamiento / cableado, recorrido, vistas, **modo Caminar** e **Ir a…** cada equipo | Doble clic (necesita internet). Versión en línea: https://claude.ai/artifact/4L9gAG1KqRfpgipCaP8ry9 |
-| `recorrido_ES.mp4` | Video del recorrido con leyendas en español | Cualquier reproductor |
+| `planos_2D_ES.pdf` | 9 láminas A1: piso tipo (llamada y cableado), depto. 1 habitación, depto. 2 habitaciones, planta baja con desk de enfermería, esquema vertical, lista de materiales y vistas 3D | Cualquier lector PDF; imprimir en A1 |
 | `presentacion_ES.pptx` | Presentación de 11 diapositivas | PowerPoint, Keynote, Google Slides |
-| `renders/` | Imágenes 3D | Cualquier visor |
-| `fuentes/` | Scripts que generan todo desde `model.json` | Python 3 + Node |
+| `recorrido_ES.mp4` | Video del recorrido con leyendas | Cualquier reproductor |
+| `plano_CAD_ES.dxf` | CAD: piso tipo y PB con capas por sistema; equipos como bloques con ID / DESCRIPCION / ALTURA_M / CODIGO | AutoCAD → Guardar como → **DWG** |
+| `modelo_BIM_ES.ifc` | BIM IFC4: PB + 8 pisos con muros, ventanas, muebles, equipos y cables | **Revit**: Abrir → IFC → guardar como **RVT** |
+| `visor_3d_ES.html` | Visor 3D con **🚶 Caminar**, **Ir a…** y **📄 Documentos** (ver y bajar todos los archivos) | En línea: https://alexjusid-jpg.github.io/planos/migdalei/es/ |
 
-## Cómo caminar en el visor 3D
-1. Botón **🚶 Caminar**: quedás parado en el pasillo a la altura de los ojos.
-2. Computadora: flechas o W / S para avanzar y retroceder, A / D para ir de costado, ← → o Q / E para girar, arrastrar el mouse para mirar.
-3. Celular o tablet: botones ▲ ▼ ⟲ ⟳ en pantalla y arrastrar con el dedo para mirar.
-4. Las paredes no se atraviesan: se entra por las puertas.
-5. **Ir a…**: elegí un equipo (por ejemplo D1-TAB) y quedás parado frente a él con su ficha y código ACE.
+## El edificio
+- 8 pisos iguales con 4 departamentos: x01 y x02 de 1 habitación (2 baños), x03 y x04 de 2 habitaciones (2 baños). 32 departamentos.
+- Planta baja: recepción con el **desk de enfermería** y teléfono de escritorio Android ACE52190200; oficina con el servidor ACE51010103; 2 baños públicos. *Distribución de PB propuesta: se ajusta con el plano del arquitecto.*
 
-## Edificio
-- Planta baja: recepción con el puesto de enfermería (teléfono ACE52190200) y el gabinete principal con el servidor ACE51010103.
-- Pisos 1 a 6: 6 departamentos por piso, 3 tipo A y 3 tipo B intercalados (36 en total). Sala de comunicaciones junto al ascensor.
-- Tipo A: living con cocina abierta, dormitorio principal con baño en suite (ducha + inodoro), dormitorio 2, baño de visitas con ducha, hall y depósito.
-- Tipo B: living con cocina abierta, un dormitorio y un baño con ducha.
-- Mobiliario de vivienda (no hospitalario).
-
-## Equipos por departamento
-Tablet Android en el living (llamada y voz) · llamada con voz ACE82182451 en el dormitorio principal · tiradores ACE40320303W en inodoro y ducha (1,85 m) · presencia / cancelación junto a la puerta (opcional) · LCom ACE71610003 en el cielorraso del hall. Sin luz de pasillo.
+## Equipos
+- Tablet en la puerta de cada departamento (iPad / Android): 32.
+- Panel de llamada con voz y botones ACE82182451 en el salón y en cada dormitorio (con pera junto a la cama): 80.
+- Tiradores ACE40320303W en el inodoro y en la ducha de todos los baños: 138 (incluye los 10 baños públicos).
+- Luz de pasillo ACE41020309 sobre cada baño público: 10.
+- LCom ACE71610003 por departamento y por baño público; 2 Buscomm + switch PoE por piso; servidor en PB.
 
 ## Cableado (todo Cat6 / Cat7 y PoE)
-- **Verde**: Cat6 radial de cada equipo al LCom del departamento.
-- **Naranja**: LCom → LCom → LCom → Buscomm ACE70810000 (2 Buscomm por piso).
-- **Rojo**: Buscomm → switch PoE ACEUCM6302 del piso → montante → servidor de PB.
-- La llamada llega por voz o como alarma al puesto de enfermería.
+Verde: Cat6 radial de cada equipo al LCom · Naranja: cadena LCom → LCom → Buscomm del gabinete del piso · Rojo: switch → montante → servidor de PB.
 
 ## Cómo modificar
-1. Editar `fuentes/model_mig.py` (distribución, muebles, equipos) y ejecutar `python3 model_mig.py`.
-2. Planos: `python3 plan_mig.py`. CAD / BIM: `python3 export_mig.py`. Visor: `python3 build_viewer_mig.py`.
-3. Textos en inglés y hebreo: `fuentes/i18n/*.py` → regenerar `i18n_mig.json`.
-
-## A verificar
+`model_mig2.py` (equipos y ubicaciones) → `python3 model_mig2.py` → `./build_lang_mig2.sh es|en|he` → `python3 build_viewer_mig2.py`.
 Cantidades de anteproyecto: validar con Advantecnia y en obra.
