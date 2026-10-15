@@ -5,8 +5,8 @@ Rev. B · 15/10/2026 · Telab International · sobre el plano de arquitectura L5
 ## Archivos
 | Archivo | Qué es | Cómo se abre |
 |---|---|---|
-| `planos_2D_ES.pdf` | 9 láminas A1: piso tipo (llamada y cableado), depto. 1 habitación, depto. 2 habitaciones, planta baja con desk de enfermería, esquema vertical, lista de materiales y vistas 3D | Cualquier lector PDF; imprimir en A1 |
-| `presentacion_ES.pptx` | Presentación de 11 diapositivas | PowerPoint, Keynote, Google Slides |
+| `planos_2D_ES.pdf` | 11 láminas A1: piso tipo (llamada y cableado), equipos con sus fotos, marcas del cliente en el plano L2, depto. 1 habitación, depto. 2 habitaciones, planta baja con desk de enfermería, esquema vertical, lista de materiales y vistas 3D | Cualquier lector PDF; imprimir en A1 |
+| `presentacion_ES.pptx` | Presentación de 12 diapositivas | PowerPoint, Keynote, Google Slides |
 | `recorrido_ES.mp4` | Video del recorrido con leyendas | Cualquier reproductor |
 | `plano_CAD_ES.dxf` | CAD: piso tipo y PB con capas por sistema; equipos como bloques con ID / DESCRIPCION / ALTURA_M / CODIGO | AutoCAD → Guardar como → **DWG** |
 | `modelo_BIM_ES.ifc` | BIM IFC4: PB + 8 pisos con muros, ventanas, muebles, equipos y cables | **Revit**: Abrir → IFC → guardar como **RVT** |
