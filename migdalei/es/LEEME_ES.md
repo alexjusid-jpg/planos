@@ -6,7 +6,7 @@ Rev. B · 15/10/2026 · Telab International · sobre el plano de arquitectura L5
 | Archivo | Qué es | Cómo se abre |
 |---|---|---|
 | `planos_2D_ES.pdf` | 11 láminas A1: piso tipo (llamada y cableado), equipos con sus fotos, marcas del cliente en el plano L2, depto. 1 habitación, depto. 2 habitaciones, planta baja con desk de enfermería, esquema vertical, lista de materiales y vistas 3D | Cualquier lector PDF; imprimir en A1 |
-| `presentacion_ES.pptx` | Presentación de 12 diapositivas | PowerPoint, Keynote, Google Slides |
+| `presentacion_ES.pptx` | Presentación de 13 diapositivas | PowerPoint, Keynote, Google Slides |
 | `recorrido_ES.mp4` | Video del recorrido con leyendas | Cualquier reproductor |
 | `plano_CAD_ES.dxf` | CAD: piso tipo y PB con capas por sistema; equipos como bloques con ID / DESCRIPCION / ALTURA_M / CODIGO | AutoCAD → Guardar como → **DWG** |
 | `modelo_BIM_ES.ifc` | BIM IFC4: PB + 8 pisos con muros, ventanas, muebles, equipos y cables | **Revit**: Abrir → IFC → guardar como **RVT** |
@@ -14,17 +14,17 @@ Rev. B · 15/10/2026 · Telab International · sobre el plano de arquitectura L5
 
 ## El edificio
 - 8 pisos iguales con 4 departamentos: x01 y x02 de 1 habitación (2 baños), x03 y x04 de 2 habitaciones (2 baños). 32 departamentos.
-- Planta baja: recepción con el **desk de enfermería** y teléfono de escritorio Android ACE52190200; oficina con el servidor ACE51010103; 2 baños públicos. *Distribución de PB propuesta: se ajusta con el plano del arquitecto.*
+- Planta baja: recepción con el **desk de enfermería** y teléfono Grandstream Android (PoE directo al switch; alarma en rojo, presencia en verde, médico en azul, voz en naranja); gabinete con servidor Buslogic Premium y switch PoE D-Link DES-1210-28P; 2 baños públicos. *Distribución de PB propuesta: se ajusta con el plano del arquitecto.*
 
 ## Equipos
 - Tablet en la puerta de cada departamento (iPad / Android): 32.
 - Panel de llamada con voz y botones ACE82182451 en el salón y en cada dormitorio (con pera junto a la cama): 80.
 - Tiradores ACE40320303W en el inodoro y en la ducha de todos los baños: 138 (incluye los 10 baños públicos).
 - Luz de pasillo ACE41020309 sobre cada baño público: 10.
-- LCom ACE71610003 por departamento y por baño público; 2 Buscomm + switch PoE por piso; servidor en PB.
+- LCom ACE71610003 por departamento y por baño público; 2 BoxCom ACE70810000 en el techo y switch PoE D-Link DES-1210-28P (24 puertos) en el gabinete de cada piso; servidor Buslogic Premium en PB.
 
 ## Cableado (todo Cat6 / Cat7 y PoE)
-Verde: Cat6 radial de cada equipo al LCom · Naranja: cadena LCom → LCom → Buscomm del gabinete del piso · Rojo: switch → montante → servidor de PB.
+Verde: Cat6 radial de cada equipo al LCom · Naranja: cadena LCom → LCom → BoxCom del techo · Rojo: switch → montante → servidor de PB.
 
 ## Cómo modificar
 `model_mig2.py` (equipos y ubicaciones) → `python3 model_mig2.py` → `./build_lang_mig2.sh es|en|he` → `python3 build_viewer_mig2.py`.

@@ -493,7 +493,7 @@ $SKPOLY
   9
 $TDCREATE
  40
-2461329.8470601854
+2461329.925902778
   9
 $TDUCREATE
  40
@@ -501,7 +501,7 @@ $TDUCREATE
   9
 $TDUPDATE
  40
-2461329.8470601854
+2461329.925902778
   9
 $TDUUPDATE
  40
@@ -553,7 +553,7 @@ $SPLINESEGS
   9
 $HANDSEED
   5
-822
+831
   9
 $SURFTAB1
  70
@@ -933,11 +933,11 @@ $PSTYLEMODE
   9
 $FINGERPRINTGUID
   2
-{DEC5A7E4-AD00-4948-815F-A1B80C80E4B6}
+{D0CC31CC-EB1C-4640-A96B-4413E7F0A15D}
   9
 $VERSIONGUID
   2
-{5BB924D1-8E73-49EC-881E-20EB2FED13EF}
+{666131BA-2AFF-475C-B659-6C274F0756AC}
   9
 $EXTNAMES
 290
@@ -1377,7 +1377,7 @@ AcDbSymbolTable
   0
 VPORT
   5
-81E
+82D
 330
 8
 100
@@ -3629,7 +3629,7 @@ ACAD
   0
 APPID
   5
-81F
+82E
 330
 3
 100
@@ -3643,7 +3643,7 @@ HATCHBACKGROUNDCOLOR
   0
 APPID
   5
-820
+82F
 330
 3
 100
@@ -55409,21 +55409,21 @@ AcDbPolyline
  70
 1
  10
-51.1
+51.025
  20
-2.3600000000000003
+2.4250000000000003
  10
-51.699999999999996
+51.574999999999996
  20
-2.3600000000000003
+2.4250000000000003
  10
-51.699999999999996
+51.574999999999996
  20
-2.54
+2.475
  10
-51.1
+51.025
  20
-2.54
+2.475
   0
 ELLIPSE
   5
@@ -64899,7 +64899,7 @@ AcDbText
  40
 0.06
   1
-Gabinete de piso 12U (Tripp Lite SRW12US)
+Gabinete de piso 12U con switch PoE D-Link DES-1210-28P
  11
 14.65
  21
@@ -65037,9 +65037,9 @@ AcDbBlockReference
   2
 ADV_BUSCOMM
  10
-14.65
+14.3
  20
-6.37
+6.76
  30
 0.0
   0
@@ -65055,9 +65055,9 @@ T-TEXTOS
 100
 AcDbText
  10
-14.65
+14.3
  20
-6.07
+6.46
  30
 0.0
  40
@@ -65065,9 +65065,9 @@ AcDbText
   1
 BC1
  11
-14.65
+14.3
  21
-6.07
+6.46
  31
 0.0
 100
@@ -65081,9 +65081,9 @@ ID
  72
 0
  11
-14.65
+14.3
  21
-6.07
+6.46
  31
 0.0
   0
@@ -65099,19 +65099,19 @@ T-TEXTOS
 100
 AcDbText
  10
-14.65
+14.3
  20
-5.92
+6.31
  30
 0.0
  40
 0.06
   1
-Buscomm ACE70810000 – deptos. x01, x04 y baño público
+BoxCom ACE70810000 en el techo – deptos. x01, x04 y baño público
  11
-14.65
+14.3
  21
-5.92
+6.31
  31
 0.0
 100
@@ -65125,9 +65125,9 @@ DESCRIPCION
  72
 0
  11
-14.65
+14.3
  21
-5.92
+6.31
  31
 0.0
   0
@@ -65143,19 +65143,19 @@ T-TEXTOS
 100
 AcDbText
  10
-14.65
+14.3
  20
-5.82
+6.21
  30
 0.0
  40
 0.06
   1
-1.62
+2.55
  11
-14.65
+14.3
  21
-5.82
+6.21
  31
 0.0
 100
@@ -65169,9 +65169,9 @@ ALTURA_M
  72
 0
  11
-14.65
+14.3
  21
-5.82
+6.21
  31
 0.0
   0
@@ -65187,9 +65187,9 @@ T-TEXTOS
 100
 AcDbText
  10
-14.65
+14.3
  20
-5.72
+6.109999999999999
  30
 0.0
  40
@@ -65197,9 +65197,9 @@ AcDbText
   1
 ACE70810000
  11
-14.65
+14.3
  21
-5.72
+6.109999999999999
  31
 0.0
 100
@@ -65213,9 +65213,9 @@ CODIGO
  72
 0
  11
-14.65
+14.3
  21
-5.72
+6.109999999999999
  31
 0.0
   0
@@ -65245,9 +65245,9 @@ AcDbBlockReference
   2
 ADV_BUSCOMM
  10
-14.65
+15.0
  20
-6.37
+6.76
  30
 0.0
   0
@@ -65263,9 +65263,9 @@ T-TEXTOS
 100
 AcDbText
  10
-14.65
+15.0
  20
-6.07
+6.46
  30
 0.0
  40
@@ -65273,9 +65273,9 @@ AcDbText
   1
 BC2
  11
-14.65
+15.0
  21
-6.07
+6.46
  31
 0.0
 100
@@ -65289,9 +65289,9 @@ ID
  72
 0
  11
-14.65
+15.0
  21
-6.07
+6.46
  31
 0.0
   0
@@ -65307,19 +65307,19 @@ T-TEXTOS
 100
 AcDbText
  10
-14.65
+15.0
  20
-5.92
+6.31
  30
 0.0
  40
 0.06
   1
-Buscomm ACE70810000 – deptos. x02 y x03
+BoxCom ACE70810000 en el techo – deptos. x02 y x03
  11
-14.65
+15.0
  21
-5.92
+6.31
  31
 0.0
 100
@@ -65333,9 +65333,9 @@ DESCRIPCION
  72
 0
  11
-14.65
+15.0
  21
-5.92
+6.31
  31
 0.0
   0
@@ -65351,19 +65351,19 @@ T-TEXTOS
 100
 AcDbText
  10
-14.65
+15.0
  20
-5.82
+6.21
  30
 0.0
  40
 0.06
   1
-1.52
+2.55
  11
-14.65
+15.0
  21
-5.82
+6.21
  31
 0.0
 100
@@ -65377,9 +65377,9 @@ ALTURA_M
  72
 0
  11
-14.65
+15.0
  21
-5.82
+6.21
  31
 0.0
   0
@@ -65395,9 +65395,9 @@ T-TEXTOS
 100
 AcDbText
  10
-14.65
+15.0
  20
-5.72
+6.109999999999999
  30
 0.0
  40
@@ -65405,9 +65405,9 @@ AcDbText
   1
 ACE70810000
  11
-14.65
+15.0
  21
-5.72
+6.109999999999999
  31
 0.0
 100
@@ -65421,9 +65421,9 @@ CODIGO
  72
 0
  11
-14.65
+15.0
  21
-5.72
+6.109999999999999
  31
 0.0
   0
@@ -65523,7 +65523,7 @@ AcDbText
  40
 0.06
   1
-Switch PoE del piso ACEUCM6302
+Switch PoE del piso D-Link DES-1210-28P (24 puertos PoE)
  11
 14.65
  21
@@ -65611,7 +65611,7 @@ AcDbText
  40
 0.06
   1
-ACEUCM6302
+D-Link DES-1210-28P
  11
 14.65
  21
@@ -65869,9 +65869,9 @@ AcDbBlockReference
   2
 TEL_ANDROID
  10
-52.35
+52.0
  20
-2.35
+2.3
  30
 0.0
   0
@@ -65887,9 +65887,9 @@ T-TEXTOS
 100
 AcDbText
  10
-52.35
+52.0
  20
-2.0500000000000003
+1.9999999999999998
  30
 0.0
  40
@@ -65897,9 +65897,9 @@ AcDbText
   1
 PB-TEL
  11
-52.35
+52.0
  21
-2.0500000000000003
+1.9999999999999998
  31
 0.0
 100
@@ -65913,9 +65913,9 @@ ID
  72
 0
  11
-52.35
+52.0
  21
-2.0500000000000003
+1.9999999999999998
  31
 0.0
   0
@@ -65931,19 +65931,19 @@ T-TEXTOS
 100
 AcDbText
  10
-52.35
+52.0
  20
-1.9000000000000001
+1.8499999999999999
  30
 0.0
  40
 0.06
   1
-Teléfono de escritorio Android ACE52190200 – desk de enfermería
+Teléfono Grandstream Android – desk de enfermería (PoE directo al switch)
  11
-52.35
+52.0
  21
-1.9000000000000001
+1.8499999999999999
  31
 0.0
 100
@@ -65957,9 +65957,9 @@ DESCRIPCION
  72
 0
  11
-52.35
+52.0
  21
-1.9000000000000001
+1.8499999999999999
  31
 0.0
   0
@@ -65975,9 +65975,9 @@ T-TEXTOS
 100
 AcDbText
  10
-52.35
+52.0
  20
-1.8
+1.7499999999999998
  30
 0.0
  40
@@ -65985,9 +65985,9 @@ AcDbText
   1
 1.07
  11
-52.35
+52.0
  21
-1.8
+1.7499999999999998
  31
 0.0
 100
@@ -66001,9 +66001,9 @@ ALTURA_M
  72
 0
  11
-52.35
+52.0
  21
-1.8
+1.7499999999999998
  31
 0.0
   0
@@ -66019,19 +66019,19 @@ T-TEXTOS
 100
 AcDbText
  10
-52.35
+52.0
  20
-1.7000000000000002
+1.65
  30
 0.0
  40
 0.06
   1
-ACE52190200
+Grandstream
  11
-52.35
+52.0
  21
-1.7000000000000002
+1.65
  31
 0.0
 100
@@ -66045,9 +66045,9 @@ CODIGO
  72
 0
  11
-52.35
+52.0
  21
-1.7000000000000002
+1.65
  31
 0.0
   0
@@ -66147,7 +66147,7 @@ AcDbText
  40
 0.06
   1
-Gabinete PB: servidor ACE51010103 + switch ACEUCM6302 + Buscomm ACE70810000
+Gabinete PB: servidor Buslogic Premium + switch PoE D-Link DES-1210-28P
  11
 49.45
  21
@@ -66235,7 +66235,7 @@ AcDbText
  40
 0.06
   1
-ACE51010103
+Buslogic Premium
  11
 49.45
  21
@@ -67329,9 +67329,217 @@ AcDbEntity
   8
 E-ADV-LCOM
   0
-POLYLINE
+INSERT
   5
 6AD
+330
+17
+100
+AcDbEntity
+  8
+E-RED-GABINETE
+100
+AcDbBlockReference
+ 66
+1
+  2
+ADV_BUSCOMM
+ 10
+50.2
+ 20
+5.0
+ 30
+0.0
+  0
+ATTRIB
+  5
+6AF
+330
+17
+100
+AcDbEntity
+  8
+T-TEXTOS
+100
+AcDbText
+ 10
+50.2
+ 20
+4.7
+ 30
+0.0
+ 40
+0.1
+  1
+PB-BC
+ 11
+50.2
+ 21
+4.7
+ 31
+0.0
+100
+AcDbAttribute
+  2
+ID
+ 70
+0
+ 71
+1
+ 72
+0
+ 11
+50.2
+ 21
+4.7
+ 31
+0.0
+  0
+ATTRIB
+  5
+6B0
+330
+17
+100
+AcDbEntity
+  8
+T-TEXTOS
+100
+AcDbText
+ 10
+50.2
+ 20
+4.55
+ 30
+0.0
+ 40
+0.06
+  1
+BoxCom ACE70810000 en el techo – PB
+ 11
+50.2
+ 21
+4.55
+ 31
+0.0
+100
+AcDbAttribute
+  2
+DESCRIPCION
+ 70
+1
+ 71
+1
+ 72
+0
+ 11
+50.2
+ 21
+4.55
+ 31
+0.0
+  0
+ATTRIB
+  5
+6B1
+330
+17
+100
+AcDbEntity
+  8
+T-TEXTOS
+100
+AcDbText
+ 10
+50.2
+ 20
+4.45
+ 30
+0.0
+ 40
+0.06
+  1
+2.55
+ 11
+50.2
+ 21
+4.45
+ 31
+0.0
+100
+AcDbAttribute
+  2
+ALTURA_M
+ 70
+1
+ 71
+1
+ 72
+0
+ 11
+50.2
+ 21
+4.45
+ 31
+0.0
+  0
+ATTRIB
+  5
+6B2
+330
+17
+100
+AcDbEntity
+  8
+T-TEXTOS
+100
+AcDbText
+ 10
+50.2
+ 20
+4.35
+ 30
+0.0
+ 40
+0.06
+  1
+ACE70810000
+ 11
+50.2
+ 21
+4.35
+ 31
+0.0
+100
+AcDbAttribute
+  2
+CODIGO
+ 70
+1
+ 71
+1
+ 72
+0
+ 11
+50.2
+ 21
+4.35
+ 31
+0.0
+  0
+SEQEND
+  5
+6AE
+330
+6AD
+100
+AcDbEntity
+  8
+E-RED-GABINETE
+  0
+POLYLINE
+  5
+6B3
 330
 17
 100
@@ -67353,7 +67561,7 @@ AcDb3dPolyline
   0
 VERTEX
   5
-6AF
+6B5
 330
 17
 100
@@ -67375,7 +67583,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-6B0
+6B6
 330
 17
 100
@@ -67397,7 +67605,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-6B1
+6B7
 330
 17
 100
@@ -67419,126 +67627,6 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-6B2
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-6.5
- 20
-11.4
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-6B3
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-6.5
- 20
-11.4
- 30
-2.55
- 70
-32
-  0
-SEQEND
-  5
-6AE
-330
-6AD
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-  0
-POLYLINE
-  5
-6B4
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDb3dPolyline
- 66
-1
- 10
-0.0
- 20
-0.0
- 30
-0.0
- 70
-8
-  0
-VERTEX
-  5
-6B6
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-1.51
- 20
-14.37
- 30
-1.3
- 70
-32
-  0
-VERTEX
-  5
-6B7
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-1.51
- 20
-14.37
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
 6B8
 330
 17
@@ -67553,7 +67641,7 @@ AcDb3dPolylineVertex
  10
 6.5
  20
-14.37
+11.4
  30
 2.62
  70
@@ -67577,37 +67665,15 @@ AcDb3dPolylineVertex
  20
 11.4
  30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-6BA
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-6.5
- 20
-11.4
- 30
 2.55
  70
 32
   0
 SEQEND
   5
-6B5
-330
 6B4
+330
+6B3
 100
 AcDbEntity
   8
@@ -67615,7 +67681,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-6BB
+6BA
 330
 17
 100
@@ -67637,6 +67703,28 @@ AcDb3dPolyline
   0
 VERTEX
   5
+6BC
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+1.51
+ 20
+14.37
+ 30
+1.3
+ 70
+32
+  0
+VERTEX
+  5
 6BD
 330
 17
@@ -67649,11 +67737,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-9.449
+1.51
  20
-15.58
+14.37
  30
-1.2
+2.62
  70
 32
   0
@@ -67671,9 +67759,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-9.449
+6.5
  20
-15.58
+14.37
  30
 2.62
  70
@@ -67693,7 +67781,7 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-9.449
+6.5
  20
 11.4
  30
@@ -67719,37 +67807,15 @@ AcDb3dPolylineVertex
  20
 11.4
  30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-6C1
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-6.5
- 20
-11.4
- 30
 2.55
  70
 32
   0
 SEQEND
   5
-6BC
-330
 6BB
+330
+6BA
 100
 AcDbEntity
   8
@@ -67757,7 +67823,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-6C2
+6C1
 330
 17
 100
@@ -67779,6 +67845,28 @@ AcDb3dPolyline
   0
 VERTEX
   5
+6C3
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+9.449
+ 20
+15.58
+ 30
+1.2
+ 70
+32
+  0
+VERTEX
+  5
 6C4
 330
 17
@@ -67793,9 +67881,9 @@ AcDb3dPolylineVertex
  10
 9.449
  20
-13.91
+15.58
  30
-1.85
+2.62
  70
 32
   0
@@ -67815,7 +67903,7 @@ AcDb3dPolylineVertex
  10
 9.449
  20
-13.91
+11.4
  30
 2.62
  70
@@ -67837,7 +67925,7 @@ AcDb3dPolylineVertex
  10
 6.5
  20
-13.91
+11.4
  30
 2.62
  70
@@ -67861,37 +67949,15 @@ AcDb3dPolylineVertex
  20
 11.4
  30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-6C8
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-6.5
- 20
-11.4
- 30
 2.55
  70
 32
   0
 SEQEND
   5
-6C3
-330
 6C2
+330
+6C1
 100
 AcDbEntity
   8
@@ -67899,7 +67965,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-6C9
+6C8
 330
 17
 100
@@ -67921,6 +67987,28 @@ AcDb3dPolyline
   0
 VERTEX
   5
+6CA
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+9.449
+ 20
+13.91
+ 30
+1.85
+ 70
+32
+  0
+VERTEX
+  5
 6CB
 330
 17
@@ -67933,11 +68021,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-7.05
+9.449
  20
-14.85
+13.91
  30
-1.85
+2.62
  70
 32
   0
@@ -67955,9 +68043,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-7.05
+6.5
  20
-14.85
+13.91
  30
 2.62
  70
@@ -67977,7 +68065,7 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-7.05
+6.5
  20
 11.4
  30
@@ -68003,37 +68091,15 @@ AcDb3dPolylineVertex
  20
 11.4
  30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-6CF
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-6.5
- 20
-11.4
- 30
 2.55
  70
 32
   0
 SEQEND
   5
-6CA
-330
 6C9
+330
+6C8
 100
 AcDbEntity
   8
@@ -68041,7 +68107,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-6D0
+6CF
 330
 17
 100
@@ -68063,6 +68129,28 @@ AcDb3dPolyline
   0
 VERTEX
   5
+6D1
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+7.05
+ 20
+14.85
+ 30
+1.85
+ 70
+32
+  0
+VERTEX
+  5
 6D2
 330
 17
@@ -68075,11 +68163,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-7.494
+7.05
  20
-12.77
+14.85
  30
-1.85
+2.62
  70
 32
   0
@@ -68097,9 +68185,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-7.494
+7.05
  20
-12.77
+11.4
  30
 2.62
  70
@@ -68119,7 +68207,7 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-7.494
+6.5
  20
 11.4
  30
@@ -68145,37 +68233,15 @@ AcDb3dPolylineVertex
  20
 11.4
  30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-6D6
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-6.5
- 20
-11.4
- 30
 2.55
  70
 32
   0
 SEQEND
   5
-6D1
-330
 6D0
+330
+6CF
 100
 AcDbEntity
   8
@@ -68183,7 +68249,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-6D7
+6D6
 330
 17
 100
@@ -68205,6 +68271,28 @@ AcDb3dPolyline
   0
 VERTEX
   5
+6D8
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+7.494
+ 20
+12.77
+ 30
+1.85
+ 70
+32
+  0
+VERTEX
+  5
 6D9
 330
 17
@@ -68217,11 +68305,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-9.449
+7.494
  20
-12.5
+12.77
  30
-1.85
+2.62
  70
 32
   0
@@ -68239,9 +68327,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-9.449
+7.494
  20
-12.5
+11.4
  30
 2.62
  70
@@ -68263,7 +68351,7 @@ AcDb3dPolylineVertex
  10
 6.5
  20
-12.5
+11.4
  30
 2.62
  70
@@ -68287,13 +68375,133 @@ AcDb3dPolylineVertex
  20
 11.4
  30
+2.55
+ 70
+32
+  0
+SEQEND
+  5
+6D7
+330
+6D6
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+  0
+POLYLINE
+  5
+6DD
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDb3dPolyline
+ 66
+1
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+ 70
+8
+  0
+VERTEX
+  5
+6DF
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+9.449
+ 20
+12.5
+ 30
+1.85
+ 70
+32
+  0
+VERTEX
+  5
+6E0
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+9.449
+ 20
+12.5
+ 30
 2.62
  70
 32
   0
 VERTEX
   5
-6DD
+6E1
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+6.5
+ 20
+12.5
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+6E2
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+6.5
+ 20
+11.4
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+6E3
 330
 17
 100
@@ -68315,9 +68523,9 @@ AcDb3dPolylineVertex
   0
 SEQEND
   5
-6D8
+6DE
 330
-6D7
+6DD
 100
 AcDbEntity
   8
@@ -68325,7 +68533,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-6DE
+6E4
 330
 17
 100
@@ -68347,7 +68555,7 @@ AcDb3dPolyline
   0
 VERTEX
   5
-6E0
+6E6
 330
 17
 100
@@ -68369,7 +68577,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-6E1
+6E7
 330
 17
 100
@@ -68391,7 +68599,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-6E2
+6E8
 330
 17
 100
@@ -68413,126 +68621,6 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-6E3
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-24.88
- 20
-11.4
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-6E4
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-24.88
- 20
-11.4
- 30
-2.55
- 70
-32
-  0
-SEQEND
-  5
-6DF
-330
-6DE
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-  0
-POLYLINE
-  5
-6E5
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDb3dPolyline
- 66
-1
- 10
-0.0
- 20
-0.0
- 30
-0.0
- 70
-8
-  0
-VERTEX
-  5
-6E7
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-29.997
- 20
-15.3
- 30
-1.3
- 70
-32
-  0
-VERTEX
-  5
-6E8
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-29.997
- 20
-15.3
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
 6E9
 330
 17
@@ -68547,7 +68635,7 @@ AcDb3dPolylineVertex
  10
 24.88
  20
-15.3
+11.4
  30
 2.62
  70
@@ -68571,37 +68659,15 @@ AcDb3dPolylineVertex
  20
 11.4
  30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-6EB
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-24.88
- 20
-11.4
- 30
 2.55
  70
 32
   0
 SEQEND
   5
-6E6
-330
 6E5
+330
+6E4
 100
 AcDbEntity
   8
@@ -68609,7 +68675,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-6EC
+6EB
 330
 17
 100
@@ -68631,6 +68697,28 @@ AcDb3dPolyline
   0
 VERTEX
   5
+6ED
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+29.997
+ 20
+15.3
+ 30
+1.3
+ 70
+32
+  0
+VERTEX
+  5
 6EE
 330
 17
@@ -68643,11 +68731,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-21.92
+29.997
  20
-15.53
+15.3
  30
-1.2
+2.62
  70
 32
   0
@@ -68665,9 +68753,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-21.92
+24.88
  20
-15.53
+15.3
  30
 2.62
  70
@@ -68687,7 +68775,7 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-21.92
+24.88
  20
 11.4
  30
@@ -68713,37 +68801,15 @@ AcDb3dPolylineVertex
  20
 11.4
  30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-6F2
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-24.88
- 20
-11.4
- 30
 2.55
  70
 32
   0
 SEQEND
   5
-6ED
-330
 6EC
+330
+6EB
 100
 AcDbEntity
   8
@@ -68751,7 +68817,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-6F3
+6F2
 330
 17
 100
@@ -68773,6 +68839,28 @@ AcDb3dPolyline
   0
 VERTEX
   5
+6F4
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+21.92
+ 20
+15.53
+ 30
+1.2
+ 70
+32
+  0
+VERTEX
+  5
 6F5
 330
 17
@@ -68785,11 +68873,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-22.66
+21.92
  20
-14.846
+15.53
  30
-1.85
+2.62
  70
 32
   0
@@ -68807,9 +68895,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-22.66
+21.92
  20
-14.846
+11.4
  30
 2.62
  70
@@ -68829,7 +68917,7 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-22.66
+24.88
  20
 11.4
  30
@@ -68855,37 +68943,15 @@ AcDb3dPolylineVertex
  20
 11.4
  30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-6F9
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-24.88
- 20
-11.4
- 30
 2.55
  70
 32
   0
 SEQEND
   5
-6F4
-330
 6F3
+330
+6F2
 100
 AcDbEntity
   8
@@ -68893,7 +68959,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-6FA
+6F9
 330
 17
 100
@@ -68915,6 +68981,28 @@ AcDb3dPolyline
   0
 VERTEX
   5
+6FB
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+22.66
+ 20
+14.846
+ 30
+1.85
+ 70
+32
+  0
+VERTEX
+  5
 6FC
 330
 17
@@ -68927,11 +69015,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-24.33
+22.66
  20
-14.85
+14.846
  30
-1.85
+2.62
  70
 32
   0
@@ -68949,9 +69037,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-24.33
+22.66
  20
-14.85
+11.4
  30
 2.62
  70
@@ -68971,7 +69059,7 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-24.33
+24.88
  20
 11.4
  30
@@ -68997,37 +69085,15 @@ AcDb3dPolylineVertex
  20
 11.4
  30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-700
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-24.88
- 20
-11.4
- 30
 2.55
  70
 32
   0
 SEQEND
   5
-6FB
-330
 6FA
+330
+6F9
 100
 AcDbEntity
   8
@@ -69035,7 +69101,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-701
+700
 330
 17
 100
@@ -69057,6 +69123,28 @@ AcDb3dPolyline
   0
 VERTEX
   5
+702
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+24.33
+ 20
+14.85
+ 30
+1.85
+ 70
+32
+  0
+VERTEX
+  5
 703
 330
 17
@@ -69069,11 +69157,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-23.94
+24.33
  20
-12.75
+14.85
  30
-1.85
+2.62
  70
 32
   0
@@ -69091,9 +69179,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-23.94
+24.33
  20
-12.75
+11.4
  30
 2.62
  70
@@ -69113,7 +69201,7 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-23.94
+24.88
  20
 11.4
  30
@@ -69139,37 +69227,15 @@ AcDb3dPolylineVertex
  20
 11.4
  30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-707
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-24.88
- 20
-11.4
- 30
 2.55
  70
 32
   0
 SEQEND
   5
-702
-330
 701
+330
+700
 100
 AcDbEntity
   8
@@ -69177,7 +69243,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-708
+707
 330
 17
 100
@@ -69199,6 +69265,28 @@ AcDb3dPolyline
   0
 VERTEX
   5
+709
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+23.94
+ 20
+12.75
+ 30
+1.85
+ 70
+32
+  0
+VERTEX
+  5
 70A
 330
 17
@@ -69211,11 +69299,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-21.92
+23.94
  20
-12.53
+12.75
  30
-1.85
+2.62
  70
 32
   0
@@ -69233,9 +69321,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-21.92
+23.94
  20
-12.53
+11.4
  30
 2.62
  70
@@ -69257,7 +69345,7 @@ AcDb3dPolylineVertex
  10
 24.88
  20
-12.53
+11.4
  30
 2.62
  70
@@ -69281,13 +69369,133 @@ AcDb3dPolylineVertex
  20
 11.4
  30
+2.55
+ 70
+32
+  0
+SEQEND
+  5
+708
+330
+707
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+  0
+POLYLINE
+  5
+70E
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDb3dPolyline
+ 66
+1
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+ 70
+8
+  0
+VERTEX
+  5
+710
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+21.92
+ 20
+12.53
+ 30
+1.85
+ 70
+32
+  0
+VERTEX
+  5
+711
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+21.92
+ 20
+12.53
+ 30
 2.62
  70
 32
   0
 VERTEX
   5
-70E
+712
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+24.88
+ 20
+12.53
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+713
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+24.88
+ 20
+11.4
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+714
 330
 17
 100
@@ -69309,9 +69517,9 @@ AcDb3dPolylineVertex
   0
 SEQEND
   5
-709
+70F
 330
-708
+70E
 100
 AcDbEntity
   8
@@ -69319,7 +69527,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-70F
+715
 330
 17
 100
@@ -69341,7 +69549,7 @@ AcDb3dPolyline
   0
 VERTEX
   5
-711
+717
 330
 17
 100
@@ -69363,7 +69571,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-712
+718
 330
 17
 100
@@ -69385,7 +69593,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-713
+719
 330
 17
 100
@@ -69407,126 +69615,6 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-714
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-20.88
- 20
-3.6
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-715
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-20.88
- 20
-3.6
- 30
-2.55
- 70
-32
-  0
-SEQEND
-  5
-710
-330
-70F
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-  0
-POLYLINE
-  5
-716
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDb3dPolyline
- 66
-1
- 10
-0.0
- 20
-0.0
- 30
-0.0
- 70
-8
-  0
-VERTEX
-  5
-718
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-25.616
- 20
-4.0
- 30
-1.3
- 70
-32
-  0
-VERTEX
-  5
-719
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-25.616
- 20
-4.0
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
 71A
 330
 17
@@ -69541,7 +69629,7 @@ AcDb3dPolylineVertex
  10
 20.88
  20
-4.0
+3.6
  30
 2.62
  70
@@ -69565,37 +69653,15 @@ AcDb3dPolylineVertex
  20
 3.6
  30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-71C
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-20.88
- 20
-3.6
- 30
 2.55
  70
 32
   0
 SEQEND
   5
-717
-330
 716
+330
+715
 100
 AcDbEntity
   8
@@ -69603,7 +69669,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-71D
+71C
 330
 17
 100
@@ -69625,6 +69691,28 @@ AcDb3dPolyline
   0
 VERTEX
   5
+71E
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+25.616
+ 20
+4.0
+ 30
+1.3
+ 70
+32
+  0
+VERTEX
+  5
 71F
 330
 17
@@ -69637,11 +69725,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-18.872
+25.616
  20
-0.55
+4.0
  30
-1.2
+2.62
  70
 32
   0
@@ -69659,9 +69747,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-18.872
+20.88
  20
-0.55
+4.0
  30
 2.62
  70
@@ -69681,7 +69769,7 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-18.872
+20.88
  20
 3.6
  30
@@ -69707,37 +69795,15 @@ AcDb3dPolylineVertex
  20
 3.6
  30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-723
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-20.88
- 20
-3.6
- 30
 2.55
  70
 32
   0
 SEQEND
   5
-71E
-330
 71D
+330
+71C
 100
 AcDbEntity
   8
@@ -69745,7 +69811,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-724
+723
 330
 17
 100
@@ -69767,6 +69833,28 @@ AcDb3dPolyline
   0
 VERTEX
   5
+725
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+18.872
+ 20
+0.55
+ 30
+1.2
+ 70
+32
+  0
+VERTEX
+  5
 726
 330
 17
@@ -69779,11 +69867,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-15.786
+18.872
  20
-2.88
+0.55
  30
-1.2
+2.62
  70
 32
   0
@@ -69801,9 +69889,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-15.786
+18.872
  20
-2.88
+3.6
  30
 2.62
  70
@@ -69825,7 +69913,7 @@ AcDb3dPolylineVertex
  10
 20.88
  20
-2.88
+3.6
  30
 2.62
  70
@@ -69849,37 +69937,15 @@ AcDb3dPolylineVertex
  20
 3.6
  30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-72A
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-20.88
- 20
-3.6
- 30
 2.55
  70
 32
   0
 SEQEND
   5
-725
-330
 724
+330
+723
 100
 AcDbEntity
   8
@@ -69887,7 +69953,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-72B
+72A
 330
 17
 100
@@ -69909,6 +69975,28 @@ AcDb3dPolyline
   0
 VERTEX
   5
+72C
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+15.786
+ 20
+2.88
+ 30
+1.2
+ 70
+32
+  0
+VERTEX
+  5
 72D
 330
 17
@@ -69921,11 +70009,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-22.45
+15.786
  20
-6.198
+2.88
  30
-1.85
+2.62
  70
 32
   0
@@ -69943,9 +70031,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-22.45
+20.88
  20
-6.198
+2.88
  30
 2.62
  70
@@ -69965,7 +70053,7 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-22.45
+20.88
  20
 3.6
  30
@@ -69991,37 +70079,15 @@ AcDb3dPolylineVertex
  20
 3.6
  30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-731
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-20.88
- 20
-3.6
- 30
 2.55
  70
 32
   0
 SEQEND
   5
-72C
-330
 72B
+330
+72A
 100
 AcDbEntity
   8
@@ -70029,7 +70095,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-732
+731
 330
 17
 100
@@ -70051,6 +70117,28 @@ AcDb3dPolyline
   0
 VERTEX
   5
+733
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+22.45
+ 20
+6.198
+ 30
+1.85
+ 70
+32
+  0
+VERTEX
+  5
 734
 330
 17
@@ -70063,11 +70151,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-21.43
+22.45
  20
 6.198
  30
-1.85
+2.62
  70
 32
   0
@@ -70085,9 +70173,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-21.43
+22.45
  20
-6.198
+3.6
  30
 2.62
  70
@@ -70107,7 +70195,7 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-21.43
+20.88
  20
 3.6
  30
@@ -70133,37 +70221,15 @@ AcDb3dPolylineVertex
  20
 3.6
  30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-738
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-20.88
- 20
-3.6
- 30
 2.55
  70
 32
   0
 SEQEND
   5
-733
-330
 732
+330
+731
 100
 AcDbEntity
   8
@@ -70171,7 +70237,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-739
+738
 330
 17
 100
@@ -70193,6 +70259,28 @@ AcDb3dPolyline
   0
 VERTEX
   5
+73A
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+21.43
+ 20
+6.198
+ 30
+1.85
+ 70
+32
+  0
+VERTEX
+  5
 73B
 330
 17
@@ -70205,11 +70293,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-19.32
+21.43
  20
-4.103
+6.198
  30
-1.85
+2.62
  70
 32
   0
@@ -70227,9 +70315,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-19.32
+21.43
  20
-4.103
+3.6
  30
 2.62
  70
@@ -70251,7 +70339,7 @@ AcDb3dPolylineVertex
  10
 20.88
  20
-4.103
+3.6
  30
 2.62
  70
@@ -70275,37 +70363,15 @@ AcDb3dPolylineVertex
  20
 3.6
  30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-73F
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-20.88
- 20
-3.6
- 30
 2.55
  70
 32
   0
 SEQEND
   5
-73A
-330
 739
+330
+738
 100
 AcDbEntity
   8
@@ -70313,7 +70379,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-740
+73F
 330
 17
 100
@@ -70335,6 +70401,28 @@ AcDb3dPolyline
   0
 VERTEX
   5
+741
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+19.32
+ 20
+4.103
+ 30
+1.85
+ 70
+32
+  0
+VERTEX
+  5
 742
 330
 17
@@ -70347,11 +70435,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-20.053
+19.32
  20
-5.5
+4.103
  30
-1.85
+2.62
  70
 32
   0
@@ -70369,9 +70457,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-20.053
+20.88
  20
-5.5
+4.103
  30
 2.62
  70
@@ -70391,7 +70479,7 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-20.053
+20.88
  20
 3.6
  30
@@ -70417,37 +70505,15 @@ AcDb3dPolylineVertex
  20
 3.6
  30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-746
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-20.88
- 20
-3.6
- 30
 2.55
  70
 32
   0
 SEQEND
   5
-741
-330
 740
+330
+73F
 100
 AcDbEntity
   8
@@ -70455,7 +70521,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-747
+746
 330
 17
 100
@@ -70477,6 +70543,28 @@ AcDb3dPolyline
   0
 VERTEX
   5
+748
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+20.053
+ 20
+5.5
+ 30
+1.85
+ 70
+32
+  0
+VERTEX
+  5
 749
 330
 17
@@ -70489,11 +70577,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-7.799
+20.053
  20
-8.75
+5.5
  30
-1.4
+2.62
  70
 32
   0
@@ -70511,9 +70599,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-7.799
+20.053
  20
-8.75
+3.6
  30
 2.62
  70
@@ -70533,7 +70621,7 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-7.799
+20.88
  20
 3.6
  30
@@ -70555,29 +70643,7 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-10.5
- 20
-3.6
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-74D
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-10.5
+20.88
  20
 3.6
  30
@@ -70587,9 +70653,9 @@ AcDb3dPolylineVertex
   0
 SEQEND
   5
-748
-330
 747
+330
+746
 100
 AcDbEntity
   8
@@ -70597,7 +70663,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-74E
+74D
 330
 17
 100
@@ -70619,6 +70685,28 @@ AcDb3dPolyline
   0
 VERTEX
   5
+74F
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+7.799
+ 20
+8.75
+ 30
+1.4
+ 70
+32
+  0
+VERTEX
+  5
 750
 330
 17
@@ -70631,11 +70719,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-7.607
+7.799
  20
-6.3
+8.75
  30
-1.3
+2.62
  70
 32
   0
@@ -70653,9 +70741,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-7.607
+7.799
  20
-6.3
+3.6
  30
 2.62
  70
@@ -70677,7 +70765,7 @@ AcDb3dPolylineVertex
  10
 10.5
  20
-6.3
+3.6
  30
 2.62
  70
@@ -70701,37 +70789,15 @@ AcDb3dPolylineVertex
  20
 3.6
  30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-754
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-10.5
- 20
-3.6
- 30
 2.55
  70
 32
   0
 SEQEND
   5
-74F
-330
 74E
+330
+74D
 100
 AcDbEntity
   8
@@ -70739,7 +70805,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-755
+754
 330
 17
 100
@@ -70761,6 +70827,28 @@ AcDb3dPolyline
   0
 VERTEX
   5
+756
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+7.607
+ 20
+6.3
+ 30
+1.3
+ 70
+32
+  0
+VERTEX
+  5
 757
 330
 17
@@ -70773,11 +70861,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-12.497
+7.607
  20
-2.42
+6.3
  30
-1.2
+2.62
  70
 32
   0
@@ -70795,9 +70883,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-12.497
+10.5
  20
-2.42
+6.3
  30
 2.62
  70
@@ -70819,7 +70907,7 @@ AcDb3dPolylineVertex
  10
 10.5
  20
-2.42
+3.6
  30
 2.62
  70
@@ -70843,37 +70931,15 @@ AcDb3dPolylineVertex
  20
 3.6
  30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-75B
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-10.5
- 20
-3.6
- 30
 2.55
  70
 32
   0
 SEQEND
   5
-756
-330
 755
+330
+754
 100
 AcDbEntity
   8
@@ -70881,7 +70947,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-75C
+75B
 330
 17
 100
@@ -70903,6 +70969,28 @@ AcDb3dPolyline
   0
 VERTEX
   5
+75D
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+12.497
+ 20
+2.42
+ 30
+1.2
+ 70
+32
+  0
+VERTEX
+  5
 75E
 330
 17
@@ -70915,11 +71003,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-15.596
+12.497
  20
-2.67
+2.42
  30
-1.2
+2.62
  70
 32
   0
@@ -70937,9 +71025,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-15.596
+10.5
  20
-2.67
+2.42
  30
 2.62
  70
@@ -70961,7 +71049,7 @@ AcDb3dPolylineVertex
  10
 10.5
  20
-2.67
+3.6
  30
 2.62
  70
@@ -70985,37 +71073,15 @@ AcDb3dPolylineVertex
  20
 3.6
  30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-762
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-10.5
- 20
-3.6
- 30
 2.55
  70
 32
   0
 SEQEND
   5
-75D
-330
 75C
+330
+75B
 100
 AcDbEntity
   8
@@ -71023,7 +71089,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-763
+762
 330
 17
 100
@@ -71045,6 +71111,28 @@ AcDb3dPolyline
   0
 VERTEX
   5
+764
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+15.596
+ 20
+2.67
+ 30
+1.2
+ 70
+32
+  0
+VERTEX
+  5
 765
 330
 17
@@ -71057,11 +71145,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-9.107
+15.596
  20
-4.94
+2.67
  30
-1.85
+2.62
  70
 32
   0
@@ -71079,9 +71167,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-9.107
+10.5
  20
-4.94
+2.67
  30
 2.62
  70
@@ -71103,7 +71191,7 @@ AcDb3dPolylineVertex
  10
 10.5
  20
-4.94
+3.6
  30
 2.62
  70
@@ -71127,37 +71215,15 @@ AcDb3dPolylineVertex
  20
 3.6
  30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-769
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-10.5
- 20
-3.6
- 30
 2.55
  70
 32
   0
 SEQEND
   5
-764
-330
 763
+330
+762
 100
 AcDbEntity
   8
@@ -71165,7 +71231,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-76A
+769
 330
 17
 100
@@ -71187,6 +71253,28 @@ AcDb3dPolyline
   0
 VERTEX
   5
+76B
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+9.107
+ 20
+4.94
+ 30
+1.85
+ 70
+32
+  0
+VERTEX
+  5
 76C
 330
 17
@@ -71199,11 +71287,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-10.55
+9.107
  20
-5.691
+4.94
  30
-1.85
+2.62
  70
 32
   0
@@ -71221,9 +71309,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-10.55
+10.5
  20
-5.691
+4.94
  30
 2.62
  70
@@ -71243,7 +71331,7 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-10.55
+10.5
  20
 3.6
  30
@@ -71269,37 +71357,15 @@ AcDb3dPolylineVertex
  20
 3.6
  30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-770
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-10.5
- 20
-3.6
- 30
 2.55
  70
 32
   0
 SEQEND
   5
-76B
-330
 76A
+330
+769
 100
 AcDbEntity
   8
@@ -71307,7 +71373,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-771
+770
 330
 17
 100
@@ -71329,6 +71395,28 @@ AcDb3dPolyline
   0
 VERTEX
   5
+772
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+10.55
+ 20
+5.691
+ 30
+1.85
+ 70
+32
+  0
+VERTEX
+  5
 773
 330
 17
@@ -71341,11 +71429,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-14.161
+10.55
  20
-5.08
+5.691
  30
-1.85
+2.62
  70
 32
   0
@@ -71363,9 +71451,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-14.161
+10.55
  20
-5.08
+3.6
  30
 2.62
  70
@@ -71387,7 +71475,7 @@ AcDb3dPolylineVertex
  10
 10.5
  20
-5.08
+3.6
  30
 2.62
  70
@@ -71411,37 +71499,15 @@ AcDb3dPolylineVertex
  20
 3.6
  30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-777
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-10.5
- 20
-3.6
- 30
 2.55
  70
 32
   0
 SEQEND
   5
-772
-330
 771
+330
+770
 100
 AcDbEntity
   8
@@ -71449,7 +71515,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-778
+777
 330
 17
 100
@@ -71471,6 +71537,28 @@ AcDb3dPolyline
   0
 VERTEX
   5
+779
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+14.161
+ 20
+5.08
+ 30
+1.85
+ 70
+32
+  0
+VERTEX
+  5
 77A
 330
 17
@@ -71483,11 +71571,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-12.34
+14.161
  20
-4.167
+5.08
  30
-1.85
+2.62
  70
 32
   0
@@ -71505,9 +71593,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-12.34
+10.5
  20
-4.167
+5.08
  30
 2.62
  70
@@ -71529,7 +71617,7 @@ AcDb3dPolylineVertex
  10
 10.5
  20
-4.167
+3.6
  30
 2.62
  70
@@ -71553,37 +71641,15 @@ AcDb3dPolylineVertex
  20
 3.6
  30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-77E
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-10.5
- 20
-3.6
- 30
 2.55
  70
 32
   0
 SEQEND
   5
-779
-330
 778
+330
+777
 100
 AcDbEntity
   8
@@ -71591,7 +71657,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-77F
+77E
 330
 17
 100
@@ -71613,7 +71679,149 @@ AcDb3dPolyline
   0
 VERTEX
   5
+780
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+12.34
+ 20
+4.167
+ 30
+1.85
+ 70
+32
+  0
+VERTEX
+  5
 781
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+12.34
+ 20
+4.167
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+782
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+10.5
+ 20
+4.167
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+783
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+10.5
+ 20
+3.6
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+784
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+10.5
+ 20
+3.6
+ 30
+2.55
+ 70
+32
+  0
+SEQEND
+  5
+77F
+330
+77E
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+  0
+POLYLINE
+  5
+785
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDb3dPolyline
+ 66
+1
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+ 70
+8
+  0
+VERTEX
+  5
+787
 330
 17
 100
@@ -71635,7 +71843,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-782
+788
 330
 17
 100
@@ -71657,7 +71865,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-783
+789
 330
 17
 100
@@ -71679,126 +71887,6 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-784
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-9.0
- 20
-8.7
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-785
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-9.0
- 20
-8.7
- 30
-2.55
- 70
-32
-  0
-SEQEND
-  5
-780
-330
-77F
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-  0
-POLYLINE
-  5
-786
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDb3dPolyline
- 66
-1
- 10
-0.0
- 20
-0.0
- 30
-0.0
- 70
-8
-  0
-VERTEX
-  5
-788
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-8.8
- 20
-9.02
- 30
-2.25
- 70
-32
-  0
-VERTEX
-  5
-789
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-8.8
- 20
-9.02
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
 78A
 330
 17
@@ -71811,9 +71899,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-8.8
+9.0
  20
-9.6
+8.7
  30
 2.62
  70
@@ -71835,6 +71923,104 @@ AcDb3dPolylineVertex
  10
 9.0
  20
+8.7
+ 30
+2.55
+ 70
+32
+  0
+SEQEND
+  5
+786
+330
+785
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+  0
+POLYLINE
+  5
+78C
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDb3dPolyline
+ 66
+1
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+ 70
+8
+  0
+VERTEX
+  5
+78E
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+8.8
+ 20
+9.02
+ 30
+2.25
+ 70
+32
+  0
+VERTEX
+  5
+78F
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+8.8
+ 20
+9.02
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+790
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+8.8
+ 20
 9.6
  30
 2.62
@@ -71843,7 +72029,29 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-78C
+791
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+9.0
+ 20
+9.6
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+792
 330
 17
 100
@@ -71865,7 +72073,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-78D
+793
 330
 17
 100
@@ -71887,9 +72095,9 @@ AcDb3dPolylineVertex
   0
 SEQEND
   5
-787
+78D
 330
-786
+78C
 100
 AcDbEntity
   8
@@ -71897,7 +72105,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-78E
+794
 330
 17
 100
@@ -71919,7 +72127,7 @@ AcDb3dPolyline
   0
 VERTEX
   5
-790
+796
 330
 17
 100
@@ -71941,7 +72149,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-791
+797
 330
 17
 100
@@ -71956,138 +72164,6 @@ AcDb3dPolylineVertex
 6.5
  20
 11.4
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-792
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-6.5
- 20
-11.05
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-793
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-7.3
- 20
-11.05
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-794
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-7.65
- 20
-11.05
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-795
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-7.65
- 20
-10.55
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-796
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-7.65
- 20
-9.5
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-797
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-7.3
- 20
-9.5
  30
 2.62
  70
@@ -72107,6 +72183,138 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
+6.5
+ 20
+11.05
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+799
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+7.3
+ 20
+11.05
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+79A
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+7.65
+ 20
+11.05
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+79B
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+7.65
+ 20
+10.55
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+79C
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+7.65
+ 20
+9.5
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+79D
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+7.3
+ 20
+9.5
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+79E
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
 6.6
  20
 9.5
@@ -72117,7 +72325,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-799
+79F
 330
 17
 100
@@ -72139,7 +72347,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-79A
+7A0
 330
 17
 100
@@ -72161,7 +72369,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-79B
+7A1
 330
 17
 100
@@ -72183,9 +72391,9 @@ AcDb3dPolylineVertex
   0
 SEQEND
   5
-78F
+795
 330
-78E
+794
 100
 AcDbEntity
   8
@@ -72193,7 +72401,7 @@ C-CAT6-CAT7-CADENA-LCOM
   0
 POLYLINE
   5
-79C
+7A2
 330
 17
 100
@@ -72215,7 +72423,7 @@ AcDb3dPolyline
   0
 VERTEX
   5
-79E
+7A4
 330
 17
 100
@@ -72237,7 +72445,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-79F
+7A5
 330
 17
 100
@@ -72259,7 +72467,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-7A0
+7A6
 330
 17
 100
@@ -72281,7 +72489,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-7A1
+7A7
 330
 17
 100
@@ -72303,7 +72511,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-7A2
+7A8
 330
 17
 100
@@ -72325,7 +72533,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-7A3
+7A9
 330
 17
 100
@@ -72347,7 +72555,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-7A4
+7AA
 330
 17
 100
@@ -72369,7 +72577,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-7A5
+7AB
 330
 17
 100
@@ -72391,7 +72599,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-7A6
+7AC
 330
 17
 100
@@ -72413,126 +72621,6 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-7A7
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-24.78
- 20
-3.6
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-7A8
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-20.88
- 20
-3.6
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-7A9
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-20.88
- 20
-3.6
- 30
-2.55
- 70
-32
-  0
-SEQEND
-  5
-79D
-330
-79C
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-  0
-POLYLINE
-  5
-7AA
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-100
-AcDb3dPolyline
- 66
-1
- 10
-0.0
- 20
-0.0
- 30
-0.0
- 70
-8
-  0
-VERTEX
-  5
-7AC
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-10.5
- 20
-3.6
- 30
-2.55
- 70
-32
-  0
-VERTEX
-  5
 7AD
 330
 17
@@ -72545,7 +72633,7 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-10.5
+24.78
  20
 3.6
  30
@@ -72567,7 +72655,7 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-6.6
+20.88
  20
 3.6
  30
@@ -72589,6 +72677,126 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
+20.88
+ 20
+3.6
+ 30
+2.55
+ 70
+32
+  0
+SEQEND
+  5
+7A3
+330
+7A2
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+  0
+POLYLINE
+  5
+7B0
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+100
+AcDb3dPolyline
+ 66
+1
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+ 70
+8
+  0
+VERTEX
+  5
+7B2
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+10.5
+ 20
+3.6
+ 30
+2.55
+ 70
+32
+  0
+VERTEX
+  5
+7B3
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+10.5
+ 20
+3.6
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+7B4
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+6.6
+ 20
+3.6
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+7B5
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
 6.6
  20
 9.5
@@ -72599,7 +72807,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-7B0
+7B6
 330
 17
 100
@@ -72621,7 +72829,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-7B1
+7B7
 330
 17
 100
@@ -72643,7 +72851,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-7B2
+7B8
 330
 17
 100
@@ -72665,7 +72873,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-7B3
+7B9
 330
 17
 100
@@ -72687,126 +72895,6 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-7B4
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-9.0
- 20
-9.6
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-7B5
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-9.0
- 20
-8.7
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-7B6
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-9.0
- 20
-8.7
- 30
-2.55
- 70
-32
-  0
-SEQEND
-  5
-7AB
-330
-7AA
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-  0
-POLYLINE
-  5
-7B7
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-100
-AcDb3dPolyline
- 66
-1
- 10
-0.0
- 20
-0.0
- 30
-0.0
- 70
-8
-  0
-VERTEX
-  5
-7B9
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-9.0
- 20
-8.7
- 30
-2.55
- 70
-32
-  0
-VERTEX
-  5
 7BA
 330
 17
@@ -72821,7 +72909,7 @@ AcDb3dPolylineVertex
  10
 9.0
  20
-8.7
+9.6
  30
 2.62
  70
@@ -72843,7 +72931,7 @@ AcDb3dPolylineVertex
  10
 9.0
  20
-9.6
+8.7
  30
 2.62
  70
@@ -72865,127 +72953,17 @@ AcDb3dPolylineVertex
  10
 9.0
  20
-10.55
+8.7
  30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-7BD
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-14.55
- 20
-10.55
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-7BE
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-14.55
- 20
-6.65
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-7BF
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-14.65
- 20
-6.65
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-7C0
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-14.65
- 20
-6.65
- 30
-1.62
- 70
-32
-  0
-VERTEX
-  5
-7C1
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-14.65
- 20
-6.37
- 30
-1.62
+2.55
  70
 32
   0
 SEQEND
   5
-7B8
+7B1
 330
-7B7
+7B0
 100
 AcDbEntity
   8
@@ -72993,7 +72971,7 @@ C-CAT6-CAT7-CADENA-LCOM
   0
 POLYLINE
   5
-7C2
+7BD
 330
 17
 100
@@ -73015,7 +72993,215 @@ AcDb3dPolyline
   0
 VERTEX
   5
+7BF
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+9.0
+ 20
+8.7
+ 30
+2.55
+ 70
+32
+  0
+VERTEX
+  5
+7C0
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+9.0
+ 20
+8.7
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+7C1
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+9.0
+ 20
+9.6
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+7C2
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+9.0
+ 20
+10.55
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+7C3
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+14.55
+ 20
+10.55
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
 7C4
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+14.55
+ 20
+6.76
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+7C5
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+14.3
+ 20
+6.76
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+7C6
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+14.3
+ 20
+6.76
+ 30
+2.55
+ 70
+32
+  0
+SEQEND
+  5
+7BE
+330
+7BD
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+  0
+POLYLINE
+  5
+7C7
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+100
+AcDb3dPolyline
+ 66
+1
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+ 70
+8
+  0
+VERTEX
+  5
+7C9
 330
 17
 100
@@ -73037,7 +73223,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-7C5
+7CA
 330
 17
 100
@@ -73059,7 +73245,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-7C6
+7CB
 330
 17
 100
@@ -73081,7 +73267,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-7C7
+7CC
 330
 17
 100
@@ -73103,7 +73289,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-7C8
+7CD
 330
 17
 100
@@ -73125,7 +73311,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-7C9
+7CE
 330
 17
 100
@@ -73147,7 +73333,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-7CA
+7CF
 330
 17
 100
@@ -73169,7 +73355,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-7CB
+7D0
 330
 17
 100
@@ -73191,7 +73377,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-7CC
+7D1
 330
 17
 100
@@ -73205,109 +73391,11 @@ AcDb3dPolylineVertex
  10
 14.79
  20
-6.65
+6.76
  30
 2.62
  70
 32
-  0
-VERTEX
-  5
-7CD
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-14.65
- 20
-6.65
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-7CE
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-14.65
- 20
-6.65
- 30
-1.52
- 70
-32
-  0
-VERTEX
-  5
-7CF
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-14.65
- 20
-6.37
- 30
-1.52
- 70
-32
-  0
-SEQEND
-  5
-7C3
-330
-7C2
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-  0
-POLYLINE
-  5
-7D0
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6A-CAT7-RED-MONTANTE
-100
-AcDb3dPolyline
- 66
-1
- 10
-0.0
- 20
-0.0
- 30
-0.0
- 70
-8
   0
 VERTEX
   5
@@ -73317,17 +73405,17 @@ VERTEX
 100
 AcDbEntity
   8
-C-CAT6A-CAT7-RED-MONTANTE
+C-CAT6-CAT7-CADENA-LCOM
 100
 AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-14.65
+15.0
  20
-6.37
+6.76
  30
-1.62
+2.62
  70
 32
   0
@@ -73339,77 +73427,33 @@ VERTEX
 100
 AcDbEntity
   8
-C-CAT6A-CAT7-RED-MONTANTE
+C-CAT6-CAT7-CADENA-LCOM
 100
 AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-14.65
+15.0
  20
-6.45
+6.76
  30
-1.62
- 70
-32
-  0
-VERTEX
-  5
-7D4
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6A-CAT7-RED-MONTANTE
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-14.65
- 20
-6.45
- 30
-1.4
- 70
-32
-  0
-VERTEX
-  5
-7D5
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6A-CAT7-RED-MONTANTE
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-14.65
- 20
-6.37
- 30
-1.4
+2.55
  70
 32
   0
 SEQEND
   5
-7D1
+7C8
 330
-7D0
+7C7
 100
 AcDbEntity
   8
-C-CAT6A-CAT7-RED-MONTANTE
+C-CAT6-CAT7-CADENA-LCOM
   0
 POLYLINE
   5
-7D6
+7D4
 330
 17
 100
@@ -73428,6 +73472,50 @@ AcDb3dPolyline
 0.0
  70
 8
+  0
+VERTEX
+  5
+7D6
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6A-CAT7-RED-MONTANTE
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+14.3
+ 20
+6.76
+ 30
+2.55
+ 70
+32
+  0
+VERTEX
+  5
+7D7
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6A-CAT7-RED-MONTANTE
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+14.3
+ 20
+6.76
+ 30
+2.62
+ 70
+32
   0
 VERTEX
   5
@@ -73443,11 +73531,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-14.65
+14.45
  20
-6.37
+6.76
  30
-1.52
+2.62
  70
 32
   0
@@ -73465,11 +73553,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-14.65
+14.45
  20
-6.45
+6.35
  30
-1.52
+2.62
  70
 32
   0
@@ -73487,9 +73575,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-14.65
+14.45
  20
-6.45
+6.35
  30
 1.4
  70
@@ -73511,7 +73599,7 @@ AcDb3dPolylineVertex
  10
 14.65
  20
-6.37
+6.35
  30
 1.4
  70
@@ -73519,9 +73607,9 @@ AcDb3dPolylineVertex
   0
 SEQEND
   5
-7D7
+7D5
 330
-7D6
+7D4
 100
 AcDbEntity
   8
@@ -73563,11 +73651,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-14.65
+15.0
  20
-6.37
+6.76
  30
-1.4
+2.55
  70
 32
   0
@@ -73585,11 +73673,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-15.1
+15.0
  20
-6.37
+6.76
  30
-1.4
+2.62
  70
 32
   0
@@ -73607,11 +73695,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-15.1
+14.85
  20
-6.3
+6.76
  30
-1.4
+2.62
  70
 32
   0
@@ -73629,11 +73717,55 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-15.1
+14.85
  20
-6.3
+6.35
  30
-0.0
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+7E2
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6A-CAT7-RED-MONTANTE
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+14.85
+ 20
+6.35
+ 30
+1.4
+ 70
+32
+  0
+VERTEX
+  5
+7E3
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6A-CAT7-RED-MONTANTE
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+14.65
+ 20
+6.35
+ 30
+1.4
  70
 32
   0
@@ -73649,7 +73781,7 @@ C-CAT6A-CAT7-RED-MONTANTE
   0
 POLYLINE
   5
-7E2
+7E4
 330
 17
 100
@@ -73671,7 +73803,51 @@ AcDb3dPolyline
   0
 VERTEX
   5
-7E4
+7E6
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6A-CAT7-RED-MONTANTE
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+14.65
+ 20
+6.37
+ 30
+1.4
+ 70
+32
+  0
+VERTEX
+  5
+7E7
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6A-CAT7-RED-MONTANTE
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+15.1
+ 20
+6.37
+ 30
+1.4
+ 70
+32
+  0
+VERTEX
+  5
+7E8
 330
 17
 100
@@ -73693,7 +73869,83 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
+7E9
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6A-CAT7-RED-MONTANTE
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+15.1
+ 20
+6.3
+ 30
+0.0
+ 70
+32
+  0
+SEQEND
+  5
 7E5
+330
+7E4
+100
+AcDbEntity
+  8
+C-CAT6A-CAT7-RED-MONTANTE
+  0
+POLYLINE
+  5
+7EA
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6A-CAT7-RED-MONTANTE
+100
+AcDb3dPolyline
+ 66
+1
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+ 70
+8
+  0
+VERTEX
+  5
+7EC
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6A-CAT7-RED-MONTANTE
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+15.1
+ 20
+6.3
+ 30
+1.4
+ 70
+32
+  0
+VERTEX
+  5
+7ED
 330
 17
 100
@@ -73715,9 +73967,9 @@ AcDb3dPolylineVertex
   0
 SEQEND
   5
-7E3
+7EB
 330
-7E2
+7EA
 100
 AcDbEntity
   8
@@ -73725,7 +73977,7 @@ C-CAT6A-CAT7-RED-MONTANTE
   0
 POLYLINE
   5
-7E6
+7EE
 330
 17
 100
@@ -73744,170 +73996,6 @@ AcDb3dPolyline
 0.0
  70
 8
-  0
-VERTEX
-  5
-7E8
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-59.96
- 20
-5.6
- 30
-1.85
- 70
-32
-  0
-VERTEX
-  5
-7E9
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-59.96
- 20
-5.6
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-7EA
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-59.96
- 20
-3.4
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-7EB
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-60.0
- 20
-3.4
- 30
-2.62
- 70
-32
-  0
-VERTEX
-  5
-7EC
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-60.0
- 20
-3.4
- 30
-2.55
- 70
-32
-  0
-SEQEND
-  5
-7E7
-330
-7E6
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-  0
-POLYLINE
-  5
-7ED
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDb3dPolyline
- 66
-1
- 10
-0.0
- 20
-0.0
- 30
-0.0
- 70
-8
-  0
-VERTEX
-  5
-7EF
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-62.4
- 20
-5.6
- 30
-1.85
- 70
-32
   0
 VERTEX
   5
@@ -73923,11 +74011,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-62.4
+59.96
  20
 5.6
  30
-2.62
+1.85
  70
 32
   0
@@ -73945,7 +74033,7 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-60.0
+59.96
  20
 5.6
  30
@@ -73967,7 +74055,7 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-60.0
+59.96
  20
 3.4
  30
@@ -73993,15 +74081,37 @@ AcDb3dPolylineVertex
  20
 3.4
  30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+7F4
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+60.0
+ 20
+3.4
+ 30
 2.55
  70
 32
   0
 SEQEND
   5
-7EE
+7EF
 330
-7ED
+7EE
 100
 AcDbEntity
   8
@@ -74009,7 +74119,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-7F4
+7F5
 330
 17
 100
@@ -74031,28 +74141,6 @@ AcDb3dPolyline
   0
 VERTEX
   5
-7F6
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-58.6
- 20
-4.15
- 30
-2.3
- 70
-32
-  0
-VERTEX
-  5
 7F7
 330
 17
@@ -74065,11 +74153,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-58.6
+62.4
  20
-4.15
+5.6
  30
-2.62
+1.85
  70
 32
   0
@@ -74087,9 +74175,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-60.0
+62.4
  20
-4.15
+5.6
  30
 2.62
  70
@@ -74111,7 +74199,7 @@ AcDb3dPolylineVertex
  10
 60.0
  20
-3.4
+5.6
  30
 2.62
  70
@@ -74135,15 +74223,37 @@ AcDb3dPolylineVertex
  20
 3.4
  30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+7FB
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+60.0
+ 20
+3.4
+ 30
 2.55
  70
 32
   0
 SEQEND
   5
-7F5
+7F6
 330
-7F4
+7F5
 100
 AcDbEntity
   8
@@ -74151,7 +74261,7 @@ C-CAT6-RADIAL-DEPTO
   0
 POLYLINE
   5
-7FB
+7FC
 330
 17
 100
@@ -74173,28 +74283,6 @@ AcDb3dPolyline
   0
 VERTEX
   5
-7FD
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-61.05
- 20
-4.15
- 30
-2.3
- 70
-32
-  0
-VERTEX
-  5
 7FE
 330
 17
@@ -74207,11 +74295,11 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-61.05
+58.6
  20
 4.15
  30
-2.62
+2.3
  70
 32
   0
@@ -74229,7 +74317,7 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-60.0
+58.6
  20
 4.15
  30
@@ -74253,7 +74341,7 @@ AcDb3dPolylineVertex
  10
 60.0
  20
-3.4
+4.15
  30
 2.62
  70
@@ -74277,21 +74365,11 @@ AcDb3dPolylineVertex
  20
 3.4
  30
-2.55
+2.62
  70
 32
   0
-SEQEND
-  5
-7FC
-330
-7FB
-100
-AcDbEntity
-  8
-C-CAT6-RADIAL-DEPTO
-  0
-POLYLINE
+VERTEX
   5
 802
 330
@@ -74299,7 +74377,39 @@ POLYLINE
 100
 AcDbEntity
   8
-C-CAT6-CAT7-CADENA-LCOM
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+60.0
+ 20
+3.4
+ 30
+2.55
+ 70
+32
+  0
+SEQEND
+  5
+7FD
+330
+7FC
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+  0
+POLYLINE
+  5
+803
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
 100
 AcDb3dPolyline
  66
@@ -74315,45 +74425,23 @@ AcDb3dPolyline
   0
 VERTEX
   5
-804
-330
-17
-100
-AcDbEntity
-  8
-C-CAT6-CAT7-CADENA-LCOM
-100
-AcDbVertex
-100
-AcDb3dPolylineVertex
- 10
-60.0
- 20
-3.4
- 30
-2.55
- 70
-32
-  0
-VERTEX
-  5
 805
 330
 17
 100
 AcDbEntity
   8
-C-CAT6-CAT7-CADENA-LCOM
+C-CAT6-RADIAL-DEPTO
 100
 AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-60.0
+61.05
  20
-3.4
+4.15
  30
-2.62
+2.3
  70
 32
   0
@@ -74365,15 +74453,15 @@ VERTEX
 100
 AcDbEntity
   8
-C-CAT6-CAT7-CADENA-LCOM
+C-CAT6-RADIAL-DEPTO
 100
 AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-55.0
+61.05
  20
-3.4
+4.15
  30
 2.62
  70
@@ -74387,6 +74475,170 @@ VERTEX
 100
 AcDbEntity
   8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+60.0
+ 20
+4.15
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+808
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+60.0
+ 20
+3.4
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+809
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+60.0
+ 20
+3.4
+ 30
+2.55
+ 70
+32
+  0
+SEQEND
+  5
+804
+330
+803
+100
+AcDbEntity
+  8
+C-CAT6-RADIAL-DEPTO
+  0
+POLYLINE
+  5
+80A
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+100
+AcDb3dPolyline
+ 66
+1
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+ 70
+8
+  0
+VERTEX
+  5
+80C
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+60.0
+ 20
+3.4
+ 30
+2.55
+ 70
+32
+  0
+VERTEX
+  5
+80D
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+60.0
+ 20
+3.4
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+80E
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6-CAT7-CADENA-LCOM
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+55.0
+ 20
+3.4
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+80F
+330
+17
+100
+AcDbEntity
+  8
 C-CAT6-CAT7-CADENA-LCOM
 100
 AcDbVertex
@@ -74403,7 +74655,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-808
+810
 330
 17
 100
@@ -74415,7 +74667,7 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-49.75
+50.2
  20
 3.9
  30
@@ -74425,7 +74677,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-809
+811
 330
 17
 100
@@ -74437,9 +74689,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-49.75
+50.2
  20
-5.5
+5.0
  30
 2.62
  70
@@ -74447,7 +74699,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-80A
+812
 330
 17
 100
@@ -74459,19 +74711,19 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-49.75
+50.2
  20
-5.5
+5.0
  30
-1.5
+2.55
  70
 32
   0
 SEQEND
   5
-803
+80B
 330
-802
+80A
 100
 AcDbEntity
   8
@@ -74479,7 +74731,7 @@ C-CAT6-CAT7-CADENA-LCOM
   0
 POLYLINE
   5
-80B
+813
 330
 17
 100
@@ -74501,7 +74753,7 @@ AcDb3dPolyline
   0
 VERTEX
   5
-80D
+815
 330
 17
 100
@@ -74513,9 +74765,151 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-52.35
+50.2
  20
-2.35
+5.0
+ 30
+2.55
+ 70
+32
+  0
+VERTEX
+  5
+816
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6A-CAT7-RED-MONTANTE
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+50.2
+ 20
+5.0
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+817
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6A-CAT7-RED-MONTANTE
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+49.6
+ 20
+5.0
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+818
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6A-CAT7-RED-MONTANTE
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+49.6
+ 20
+5.5
+ 30
+2.62
+ 70
+32
+  0
+VERTEX
+  5
+819
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6A-CAT7-RED-MONTANTE
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+49.6
+ 20
+5.5
+ 30
+1.2
+ 70
+32
+  0
+SEQEND
+  5
+814
+330
+813
+100
+AcDbEntity
+  8
+C-CAT6A-CAT7-RED-MONTANTE
+  0
+POLYLINE
+  5
+81A
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6A-CAT7-RED-MONTANTE
+100
+AcDb3dPolyline
+ 66
+1
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+ 70
+8
+  0
+VERTEX
+  5
+81C
+330
+17
+100
+AcDbEntity
+  8
+C-CAT6A-CAT7-RED-MONTANTE
+100
+AcDbVertex
+100
+AcDb3dPolylineVertex
+ 10
+52.0
+ 20
+2.3
  30
 1.07
  70
@@ -74523,7 +74917,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-80E
+81D
 330
 17
 100
@@ -74535,9 +74929,9 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-52.35
+52.0
  20
-2.35
+2.3
  30
 0.05
  70
@@ -74545,7 +74939,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-80F
+81E
 330
 17
 100
@@ -74557,7 +74951,7 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-52.35
+52.0
  20
 3.75
  30
@@ -74567,7 +74961,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-810
+81F
 330
 17
 100
@@ -74579,7 +74973,7 @@ AcDbVertex
 100
 AcDb3dPolylineVertex
  10
-52.35
+52.0
  20
 3.75
  30
@@ -74589,7 +74983,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-811
+820
 330
 17
 100
@@ -74611,7 +75005,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-812
+821
 330
 17
 100
@@ -74633,7 +75027,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-813
+822
 330
 17
 100
@@ -74655,9 +75049,9 @@ AcDb3dPolylineVertex
   0
 SEQEND
   5
-80C
+81B
 330
-80B
+81A
 100
 AcDbEntity
   8
@@ -74665,7 +75059,7 @@ C-CAT6A-CAT7-RED-MONTANTE
   0
 POLYLINE
   5
-814
+823
 330
 17
 100
@@ -74687,7 +75081,7 @@ AcDb3dPolyline
   0
 VERTEX
   5
-816
+825
 330
 17
 100
@@ -74709,7 +75103,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-817
+826
 330
 17
 100
@@ -74731,7 +75125,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-818
+827
 330
 17
 100
@@ -74753,7 +75147,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-819
+828
 330
 17
 100
@@ -74775,7 +75169,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-81A
+829
 330
 17
 100
@@ -74797,7 +75191,7 @@ AcDb3dPolylineVertex
   0
 VERTEX
   5
-81B
+82A
 330
 17
 100
@@ -74819,9 +75213,9 @@ AcDb3dPolylineVertex
   0
 SEQEND
   5
-815
+824
 330
-814
+823
 100
 AcDbEntity
   8
@@ -74829,7 +75223,7 @@ C-CAT6A-CAT7-RED-MONTANTE
   0
 TEXT
   5
-81C
+82B
 330
 17
 100
@@ -74859,7 +75253,7 @@ AcDbText
   0
 TEXT
   5
-81D
+82C
 330
 17
 100
@@ -75977,7 +76371,7 @@ CREATED_BY_EZDXF
   3
 WRITTEN_BY_EZDXF
 350
-821
+830
   0
 DICTIONARYVAR
   5
@@ -75989,7 +76383,7 @@ DictionaryVariables
 280
 0
   1
-1.4.4 @ 2026-10-15T17:19:46.104996+00:00
+1.4.4 @ 2026-10-15T19:13:18.001260+00:00
   0
 VISUALSTYLE
   5
@@ -82543,7 +82937,7 @@ strokes_ogs.tif
   0
 DICTIONARYVAR
   5
-821
+830
 330
 2D
 100
@@ -82551,7 +82945,7 @@ DictionaryVariables
 280
 0
   1
-1.4.4 @ 2026-10-15T17:19:46.177636+00:00
+1.4.4 @ 2026-10-15T19:13:18.077786+00:00
   0
 ENDSEC
   0
