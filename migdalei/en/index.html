@@ -97,6 +97,29 @@ body.fpmode .info{bottom:auto;top:96px}
 body.capture .bar,body.capture .legend,body.capture .info,body.capture .pad,body.capture .docpanel,body.capture .docview{display:none!important}
 @media (max-width:720px){.legend{display:none}.bar{gap:6px}.brand span{display:none}button,select{font-size:13px;padding:4px 8px}}
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+.menubtn{display:none}
+body.compact .bar{left:8px;right:8px;top:calc(8px + env(safe-area-inset-top,0px));padding:6px 8px;gap:6px 8px;max-height:calc(100vh - 24px);overflow:auto;flex-wrap:wrap}
+body.compact .menubtn{display:inline-block;font-size:15px;padding:6px 12px;background:var(--ink);color:#fff;border-color:var(--ink)}
+body.compact .menubtn.doc{background:var(--accent);border-color:var(--accent);padding:6px 10px}
+body.compact .brand{flex:1;min-width:0}
+body.compact .brand b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.compact .brand span{display:none}
+body.compact .bar .grp{display:none}
+body.compact.menu-open .bar .grp{display:flex;width:100%;margin-left:0!important}
+body.compact.menu-open .bar .grp select{flex:1;min-width:0;font-size:15px;padding:7px 8px}
+body.compact.menu-open .bar .grp button{font-size:15px;padding:7px 10px}
+body.compact.menu-open .menubtn.doc{display:none}
+body.compact .legend{display:none}
+body.compact .info{left:8px;right:8px;width:auto;bottom:calc(8px + env(safe-area-inset-bottom,0px));max-height:42vh;overflow:auto;padding:8px 10px}
+body.compact .info .iph{max-height:110px}
+body.compact .docpanel{left:8px;right:8px;width:auto;top:calc(60px + env(safe-area-inset-top,0px));max-height:calc(100vh - 80px);overflow:auto}
+body.compact .docpanel ul{max-height:none}
+body.compact .drow{grid-template-columns:40px 1fr;}
+body.compact .dact{grid-column:1/3;justify-content:flex-end}
+body.compact .timeline{font-size:12px;bottom:calc(8px + env(safe-area-inset-bottom,0px))}
+body.compact .pad{right:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));grid-template-columns:repeat(3,48px);grid-template-rows:48px 48px auto}
+body.compact .tag{font-size:10px}
+body.compact .tag.room{font-size:10.5px}
 </style>
 
 <div id="stage"><div class="loading" id="loading">Cargando modelo 3D…</div></div>
@@ -1002,8 +1025,26 @@ addEventListener("keydown", e => { if (e.key === "Escape") closeView(); });
 docsUI();
 const _du = docsUI; docsUI = function () { _du(); const b = $("dv-back"); if (b) b.textContent = BACK[LANG]; }; docsUI();
 if (QS.has("docs")) $("docpanel").hidden = false;
+// ---- pantallas chicas (celular / tablet): barra plegable con botón Menú
+{
+  const bar = document.querySelector(".bar"), mb = document.createElement("button");
+  mb.id = "menu"; mb.className = "menubtn"; mb.setAttribute("aria-expanded", "false");
+  const ML = { es: ["☰ Menú", "✕ Cerrar"], en: ["☰ Menu", "✕ Close"], he: ["☰ תפריט", "✕ סגירה"] };
+  const lab = () => { mb.textContent = ML[LANG][document.body.classList.contains("menu-open") ? 1 : 0]; };
+  const setOpen = v => { document.body.classList.toggle("menu-open", v); mb.setAttribute("aria-expanded", String(v)); lab(); };
+  mb.onclick = () => setOpen(!document.body.classList.contains("menu-open"));
+  bar.prepend(mb);
+  const dq = document.createElement("button"); dq.id = "docs-q"; dq.className = "menubtn doc"; dq.textContent = "📄"; dq.setAttribute("aria-label", "Documentos");
+  dq.onclick = () => { $("docpanel").hidden = !$("docpanel").hidden; }; bar.append(dq);
+  const fit = () => { document.body.classList.toggle("compact", innerWidth <= 1100 || (matchMedia("(pointer:coarse)").matches && innerWidth <= 1366)); lab(); };
+  addEventListener("resize", fit); fit();
+  bar.querySelectorAll(".grp select").forEach(s => s.addEventListener("change", () => { if (document.body.classList.contains("compact")) setOpen(false); }));
+  ["walk", "fp", "docs"].forEach(id => $(id) && $(id).addEventListener("click", () => { if (document.body.classList.contains("compact")) setOpen(false); }));
+  $("doc-list").addEventListener("click", e => { if (e.target.closest("[data-act]")) setOpen(false); });
+  document.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", () => setTimeout(lab, 0)));
+}
 
-function resize() { const w = stage.clientWidth, h = stage.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+function resize() { const w = stage.clientWidth, h = stage.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; const a_ = w / h; camera.fov = a_ < 1.3 ? Math.min(85, 2 * Math.atan(Math.tan(25 * Math.PI / 180) * 1.3 / a_) * 180 / Math.PI) : 50; camera.updateProjectionMatrix(); }
 addEventListener("resize", resize); resize();
 applyMode(); applyWalls(); applyScenario(); renderUI(); setView("iso");
 if (location.hash === "#cableado") { wiring = true; applyMode(); }
