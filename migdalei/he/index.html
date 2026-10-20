@@ -225,12 +225,12 @@ controls.enableDamping = !CAPTURE; controls.dampingFactor = 0.08; controls.maxPo
 
 const AO = CAPTURE || !matchMedia('(pointer:coarse)').matches; let composer = null, gtao = null;
 if (AO) { composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(16, 16, { samples: CAPTURE ? 2 : 4, type: THREE.HalfFloatType })); composer.addPass(new RenderPass(scene, camera)); gtao = new GTAOPass(scene, camera, 16, 16); gtao.updateGtaoMaterial({ radius: 0.45, distanceExponent: 1.4, thickness: 1.0, scale: 1.25, samples: CAPTURE ? 8 : 16 }); gtao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 6, rings: 2, samples: CAPTURE ? 6 : 16 }); gtao.blendIntensity = 1.0; composer.addPass(gtao); composer.addPass(new OutputPass()); }
-const RENDER = () => { if (composer) composer.render(); else RENDER(); };
+const RENDER = () => { if (composer) composer.render(); else renderer["render"](scene, camera); };
 const pmrem = new THREE.PMREMGenerator(renderer); scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 0.85;
 scene.add(new THREE.HemisphereLight(0xfffaf2, 0xd9d4cc, 0.55));
 const sun = new THREE.DirectionalLight(0xfff0dc, 2.4);
 sun.position.set(22, 42, 16); sun.target.position.set(35.7, 0, -9.2);
-sun.castShadow = true; sun.shadow.mapSize.set(CAPTURE ? 2048 : 4096, CAPTURE ? 2048 : 4096);
+sun.castShadow = true; { const ss = CAPTURE || matchMedia('(pointer:coarse)').matches ? 2048 : 4096; sun.shadow.mapSize.set(ss, ss); }
 Object.assign(sun.shadow.camera, { left: -42, right: 42, top: 26, bottom: -26, near: 1, far: 120 });
 sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02;
 scene.add(sun, sun.target);
@@ -272,8 +272,9 @@ const PLAN_IMG = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAU
 // ======= realismo: texturas procedurales (madera, cerámica, tela, revoque, mármol)
 let __pend = 1; const TEXDONE = () => { if (--__pend <= 0 && CAPTURE) window.__texReady = true; };
 function rnd(s) { let x = Math.sin(s) * 43758.5453; return x - Math.floor(x); }
+const LOWMEM = matchMedia('(pointer:coarse)').matches && !CAPTURE;
 function ctex(w, h, draw, rep = [1, 1], srgb = true) {
-  const c = document.createElement("canvas"); c.width = w; c.height = h; draw(c.getContext("2d"), w, h);
+  const c = document.createElement("canvas"); if (LOWMEM && w > 512) { c.width = w / 2; c.height = h / 2; c.getContext('2d').scale(0.5, 0.5); } else { c.width = w; c.height = h; } draw(c.getContext("2d"), w, h);
   const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(...rep); t.anisotropy = 8;
   if (srgb) t.colorSpace = THREE.SRGBColorSpace; return t;
 }
@@ -324,11 +325,14 @@ const TX = {
 };
 const FLOORTEX = { living: ["parquet", 1.4], bed: ["parquet", 1.4], hall: ["parquet", 1.4], kitchen: ["tile", 1.2], bath: ["bathtile", 1.2], corridor: ["tile", 1.2],
   core: ["tile", 1.2], comms: ["tile", 1.2], common: ["parquet", 1.4], nurse: ["parquet", 1.4], office: ["parquet", 1.4] };
+const FLOORMAT = {};
 function texFloor(r, z0) {
   const xs = r.poly.map(p => p[0]), ys = r.poly.map(p => p[1]); const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
-  const [k, s] = FLOORTEX[r.kind] || ["tile", 1.2]; const t = TX[k].clone(); t.needsUpdate = true; t.repeat.set((x1 - x0) / s, (y1 - y0) / s);
-  const m = new THREE.MeshStandardMaterial({ map: t, roughness: k === "parquet" ? 0.55 : 0.35, metalness: 0, envMapIntensity: 0.9 });
-  const p = new THREE.Mesh(new THREE.PlaneGeometry(x1 - x0, y1 - y0), m); p.rotation.x = -Math.PI / 2; p.position.copy(V((x0 + x1) / 2, (y0 + y1) / 2, z0)); p.receiveShadow = true; groups.arch.add(p); return p;
+  const [k, s] = FLOORTEX[r.kind] || ["tile", 1.2];
+  FLOORMAT[k] = FLOORMAT[k] || new THREE.MeshStandardMaterial({ map: TX[k], roughness: k === "parquet" ? 0.55 : 0.35, metalness: 0, envMapIntensity: 0.9 });
+  const geo = new THREE.PlaneGeometry(x1 - x0, y1 - y0), uv = geo.attributes.uv;   // repetición por UV: una sola textura compartida (memoria baja en iPhone)
+  for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * (x1 - x0) / s, uv.getY(i) * (y1 - y0) / s);
+  const p = new THREE.Mesh(geo, FLOORMAT[k]); p.rotation.x = -Math.PI / 2; p.position.copy(V((x0 + x1) / 2, (y0 + y1) / 2, z0)); p.receiveShadow = true; groups.arch.add(p); return p;
 }
 const FLOOR = { living: 0xEFE6D6, kitchen: 0xEAE5DC, bed: 0xE5D8C2, bath: 0xDDE9EB, hall: 0xE8E2D6, corridor: 0xDCE1E6, core: 0xD9DCE0, comms: 0xEFE3D6, common: 0xE9E3D3, nurse: 0xEFE3CF, office: 0xE6E8EA };
 {
