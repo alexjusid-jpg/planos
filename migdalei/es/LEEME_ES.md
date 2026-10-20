@@ -5,9 +5,10 @@ Rev. B · 15/10/2026 · Telab International · sobre el plano de arquitectura L5
 ## Archivos
 | Archivo | Qué es | Cómo se abre |
 |---|---|---|
-| `planos_2D_ES.pdf` | 11 láminas A1: piso tipo (llamada y cableado), equipos con sus fotos, marcas del cliente en el plano L2, depto. 1 habitación, depto. 2 habitaciones, planta baja con desk de enfermería, esquema vertical, lista de materiales y vistas 3D | Cualquier lector PDF; imprimir en A1 |
-| `presentacion_ES.pptx` | Presentación de 13 diapositivas | PowerPoint, Keynote, Google Slides |
+| `planos_2D_ES.pdf` | 12 láminas A1 (incluye renders fotorrealistas): piso tipo (llamada y cableado), equipos con sus fotos, marcas del cliente en el plano L2, depto. 1 habitación, depto. 2 habitaciones, planta baja con desk de enfermería, esquema vertical, lista de materiales y vistas 3D | Cualquier lector PDF; imprimir en A1 |
+| `presentacion_ES.pptx` | Presentación de 14 diapositivas | PowerPoint, Keynote, Google Slides |
 | `recorrido_ES.mp4` | Video del recorrido con leyendas | Cualquier reproductor |
+| `visita_guiada_ES.mp4` | Visita guiada fotorrealista (renders con luz real) | Cualquier reproductor |
 | `plano_CAD_ES.dxf` | CAD: piso tipo y PB con capas por sistema; equipos como bloques con ID / DESCRIPCION / ALTURA_M / CODIGO | AutoCAD → Guardar como → **DWG** |
 | `modelo_BIM_ES.ifc` | BIM IFC4: PB + 8 pisos con muros, ventanas, muebles, equipos y cables | **Revit**: Abrir → IFC → guardar como **RVT** |
 | `visor_3d_ES.html` | Visor 3D con **🚶 Caminar**, **Ir a…** y **📄 Documentos** (ver y bajar todos los archivos) | En línea: https://alexjusid-jpg.github.io/planos/migdalei/es/ |

@@ -5,9 +5,10 @@ Rev. B · 15/10/2026 · Telab International · on architectural plan L5 (typical
 ## Files
 | File | What it is | How to open |
 |---|---|---|
-| `plans_2D_EN.pdf` | 11 A1 sheets: typical floor (nurse call and wiring), devices with photos, client marks on plan L2, 1-bedroom apt., 2-bedroom apt., ground floor with nurse desk, riser diagram, bill of materials and 3D views | Any PDF reader; print on A1 |
-| `presentation_EN.pptx` | 13-slide presentation | PowerPoint, Keynote, Google Slides |
+| `plans_2D_EN.pdf` | 12 A1 sheets (incl. photorealistic renders): typical floor (nurse call and wiring), devices with photos, client marks on plan L2, 1-bedroom apt., 2-bedroom apt., ground floor with nurse desk, riser diagram, bill of materials and 3D views | Any PDF reader; print on A1 |
+| `presentation_EN.pptx` | 14-slide presentation | PowerPoint, Keynote, Google Slides |
 | `walkthrough_EN.mp4` | Walkthrough video with captions | Any player |
+| `guided_tour_EN.mp4` | Photorealistic guided tour (real-light renders) | Any player |
 | `drawing_CAD_EN.dxf` | CAD: typical floor and GF with layers per system; devices as blocks with ID / DESCRIPCION / ALTURA_M / CODIGO | AutoCAD → Save as → **DWG** |
 | `model_BIM_EN.ifc` | IFC4 BIM: GF + 8 floors with walls, windows, furniture, devices and cables | **Revit**: Open → IFC → save as **RVT** |
 | `viewer_3d_EN.html` | 3D viewer with **🚶 Walk**, **Go to…** and **📄 Documents** (view and download every file) | Online: https://alexjusid-jpg.github.io/planos/migdalei/en/ |
