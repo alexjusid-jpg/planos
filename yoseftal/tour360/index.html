@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Yoseftal · 360°</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1F2630;--muted:#6B7480;--line:#DDE1E6;--accent:#C9662A;--bg:#FFFFFF;--font:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--font);overflow:hidden;-webkit-user-select:none;user-select:none}
+#c{position:fixed;inset:0;touch-action:none}
+.top{position:fixed;left:8px;right:8px;top:calc(8px + env(safe-area-inset-top,0px));display:flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);padding:6px 8px;z-index:5;box-shadow:0 2px 10px rgba(30,40,55,.08)}
+.top b{flex:1;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+button{font-family:var(--font);font-size:15px;font-weight:600;color:var(--ink);background:#F4F5F6;border:1px solid var(--line);padding:7px 11px;border-radius:4px;cursor:pointer}
+button.pri{background:var(--ink);color:#fff;border-color:var(--ink)}button.acc{background:var(--accent);color:#fff;border-color:var(--accent)}
+.seg{display:flex}.seg button{border-radius:0}.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.chips{position:fixed;left:0;right:0;bottom:calc(8px + env(safe-area-inset-bottom,0px));display:flex;gap:6px;overflow-x:auto;padding:0 8px;z-index:5;scrollbar-width:none}
+.chips button{flex:none;background:rgba(255,255,255,.95);box-shadow:0 2px 8px rgba(30,40,55,.12)}
+.chips button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.hs{position:fixed;transform:translate(-50%,-50%);z-index:4;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
+.hs .ring{width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.88);border:3px solid #fff;box-shadow:0 3px 14px rgba(0,0,0,.25);display:grid;place-items:center;font-size:26px;color:var(--accent)}
+.hs .lb{background:rgba(255,255,255,.95);padding:3px 8px;font-size:14px;font-weight:600;border-radius:3px;white-space:nowrap;box-shadow:0 1px 6px rgba(0,0,0,.15)}
+.dv{position:fixed;transform:translate(-50%,-50%);z-index:4;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;border:3px solid #fff;font-weight:700;display:grid;place-items:center;box-shadow:0 2px 10px rgba(0,0,0,.3);cursor:pointer;font-size:15px}
+.dv::after{content:"";position:absolute;inset:-8px;border-radius:50%;border:2px solid var(--accent);animation:pl 1.8s infinite}
+@keyframes pl{from{opacity:.9;transform:scale(.7)}to{opacity:0;transform:scale(1.5)}}
+.card{position:fixed;left:50%;bottom:calc(64px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(420px,calc(100% - 16px));background:#fff;border:1px solid var(--line);border-top:3px solid var(--accent);padding:10px;z-index:6;display:flex;gap:10px;align-items:center;box-shadow:0 6px 24px rgba(0,0,0,.18)}
+.card[hidden]{display:none}.card img{width:120px;flex:none}.card b{font-size:16px}.card small{display:block;color:var(--muted);margin-top:4px}
+#fade{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .35s;z-index:3}
+.hint{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(255,255,255,.95);padding:10px 14px;border:1px solid var(--line);font-size:16px;z-index:6;text-align:center;pointer-events:none;transition:opacity .6s}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="fade"></div>
+<div class="top"><button class="pri" id="back"></button><b id="title"></b><button class="acc" id="gyro" hidden></button>
+<div class="seg"><button data-l="es">ES</button><button data-l="en">EN</button><button data-l="he">עב</button></div></div>
+<div id="hs"></div>
+<div class="card" id="card" hidden><img id="cimg" alt=""><div><b id="ct"></b><small id="cs"></small></div></div>
+<div class="chips" id="chips"></div>
+<div class="hint" id="hint"></div>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"}}</script>
+<script type="module">
+import * as THREE from "three";
+const N = {"corridor": {"img": "p_corridor.jpg", "name": ["Pasillo del servicio", "Ward corridor", "מסדרון המחלקה"], "links": [{"to": "room", "u": 0.735, "v": 0.515}, {"to": "wc", "u": 0.7749, "v": 0.5248}, {"to": "ns", "u": 0.8628, "v": 0.6001}], "devs": [{"u": 0.7362, "v": 0.4826, "n": ["Luz de pasillo · EOP004", "Corridor light · EOP004", "מנורת מסדרון · EOP004"], "ph": "luz"}, {"u": 0.7247, "v": 0.4682, "n": ["Luz de pasillo · EOP004", "Corridor light · EOP004", "מנורת מסדרון · EOP004"], "ph": "luz"}, {"u": 0.3029, "v": 0.4353, "n": ["Luz de pasillo · EOP004", "Corridor light · EOP004", "מנורת מסדרון · EOP004"], "ph": "luz"}, {"u": 0.2694, "v": 0.4756, "n": ["Luz de pasillo · EOP004", "Corridor light · EOP004", "מנורת מסדרון · EOP004"], "ph": "luz"}], "u0": 0.75}, "room": {"img": "p_room.jpg", "name": ["Habitación 1 – 3 camas", "Room 1 – 3 beds", "חדר 1 – 3 מיטות"], "links": [{"to": "corridor", "u": 0.4349, "v": 0.5578}], "devs": [{"u": 0.8801, "v": 0.5311, "n": ["Panel de llamada rojo + pera · ACE82012153", "Red call panel + pear · ACE82012153", "פנל קריאה אדום + אגס · ACE82012153"], "ph": "call"}, {"u": 0.7776, "v": 0.5446, "n": ["Panel de llamada rojo + pera · ACE82012153", "Red call panel + pear · ACE82012153", "פנל קריאה אדום + אגס · ACE82012153"], "ph": "call"}, {"u": 0.651, "v": 0.5369, "n": ["Panel de llamada rojo + pera · ACE82012153", "Red call panel + pear · ACE82012153", "פנל קריאה אדום + אגס · ACE82012153"], "ph": "call"}, {"u": 0.4602, "v": 0.5262, "n": ["Presencia / cancelar · ACE82082137", "Presence / cancel · ACE82082137", "נוכחות / ביטול · ACE82082137"], "ph": "pres"}], "u0": 0.8801}, "wc": {"img": "p_wc.jpg", "name": ["Baño B2", "WC B2", "שירותים B2"], "links": [{"to": "corridor", "u": 0.5, "v": 0.5974}], "devs": [{"u": 0.8896, "v": 0.4514, "n": ["Tirador de emergencia · ACE40320303", "Emergency pull-cord · ACE40320303", "לחצן מצוקה עם חבל משיכה · ACE40320303"], "ph": "sos"}], "u0": 0.8896}, "ns": {"img": "p_ns.jpg", "name": ["Puesto de enfermería", "Nurse station", "עמדת אחיות"], "links": [{"to": "corridor", "u": 0.5771, "v": 0.5867}], "devs": [{"u": 0.3872, "v": 0.6264, "n": ["iPad de enfermería · EOP002", "Nurse iPad · EOP002", "iPad לעמדת האחות · EOP002"], "ph": "ipad"}], "u0": 0.3872}};
+const ORDER = ["corridor", "room", "wc", "ns"];
+const QS = new URLSearchParams(location.search);
+let L = ({ es: 0, en: 1, he: 2 })[QS.get("lang") || "es"] ?? 0;
+const T = [["← App", "📱 Mover el iPad", "Arrastra para mirar alrededor · toca las flechas para caminar · toca los puntos naranjas para ver cada equipo", "Equipo ACE BG · Advantecnia"],
+  ["← App", "📱 Move the iPad", "Drag to look around · tap the arrows to walk · tap the orange dots to see each device", "ACE BG · Advantecnia device"],
+  ["← אפליקציה", "📱 הזיזו את האייפד", "גררו כדי להסתכל מסביב · הקישו על החצים כדי ללכת · הקישו על הנקודות הכתומות לראות כל התקן", "התקן ACE BG · Advantecnia"]];
+const $ = id => document.getElementById(id);
+const renderer = new THREE.WebGLRenderer({ canvas: $("c"), antialias: true }); renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.outputColorSpace = THREE.SRGBColorSpace;
+const scene = new THREE.Scene(); const cam = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+const geo = new THREE.SphereGeometry(500, 96, 48); geo.scale(-1, 1, 1);
+const mat = new THREE.MeshBasicMaterial({ color: 0xffffff }); const sph = new THREE.Mesh(geo, mat); scene.add(sph);
+const loader = new THREE.TextureLoader(); const cache = {};
+const tex = n => cache[n] || (cache[n] = new Promise(r => loader.load(N[n].img, t => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); r(t); })));
+const dir = (u, v) => { const phi = u * 2 * Math.PI, th = v * Math.PI; return new THREE.Vector3(Math.cos(phi) * Math.sin(th), Math.cos(th), Math.sin(phi) * Math.sin(th)); };
+let lon = 0, lat = 0, cur = null, gyro = false, alpha0 = null;
+function look() { const d = dir(lon, 0.5 - lat / 180); cam.lookAt(d); }
+async function go(n, first) {
+  $("fade").style.opacity = 1; const t = await tex(n); await new Promise(r => setTimeout(r, first ? 0 : 320));
+  mat.map = t; mat.needsUpdate = true; cur = n; lon = N[n].u0; lat = 0; $("card").hidden = true; ui(); $("fade").style.opacity = 0;
+  for (const l of N[n].links) tex(l.to);
+}
+function ui() {
+  const nm = N[cur].name[L]; $("title").textContent = nm; document.title = "Yoseftal · " + nm;
+  $("back").textContent = T[L][0]; document.documentElement.dir = L === 2 ? "rtl" : "ltr";
+  document.querySelectorAll("[data-l]").forEach(b => b.setAttribute("aria-pressed", String(["es", "en", "he"][L] === b.dataset.l)));
+  $("chips").innerHTML = ORDER.map(k => `<button data-n="${k}" class="${k === cur ? "on" : ""}">${N[k].name[L]}</button>`).join("");
+  $("chips").querySelectorAll("button").forEach(b => b.onclick = () => go(b.dataset.n));
+  const on = $("chips").querySelector(".on"); if (on) on.scrollIntoView({ inline: "center", block: "nearest" });
+  $("hs").innerHTML = N[cur].links.map((l, i) => `<div class="hs" data-i="${i}"><div class="ring">⬆</div><div class="lb">${N[l.to].name[L]}</div></div>`).join("") +
+    N[cur].devs.map((d, i) => `<div class="dv" data-d="${i}">i</div>`).join("");
+  $("hs").querySelectorAll(".hs").forEach(e => e.onclick = ev => { ev.stopPropagation(); go(N[cur].links[+e.dataset.i].to); });
+  $("hs").querySelectorAll(".dv").forEach(e => e.onclick = ev => { ev.stopPropagation(); const d = N[cur].devs[+e.dataset.d]; $("cimg").src = "f_" + d.ph + ".jpg"; $("ct").textContent = d.n[L]; $("cs").textContent = T[L][3]; $("card").hidden = false; });
+}
+function place() {
+  const W = innerWidth, H = innerHeight; const els = $("hs").children; let k = 0;
+  const put = (el, u, v) => { const p = dir(u, v).multiplyScalar(400).project(cam); const vis = p.z < 1 && Math.abs(p.x) < 1.2 && Math.abs(p.y) < 1.2;
+    el.style.display = vis ? "" : "none"; el.style.left = ((p.x + 1) / 2 * W) + "px"; el.style.top = ((1 - p.y) / 2 * H) + "px"; };
+  for (const l of N[cur].links) put(els[k++], l.u, Math.max(l.v, 0.56));
+  for (const d of N[cur].devs) put(els[k++], d.u, d.v);
+}
+function resize() { renderer.setSize(innerWidth, innerHeight); cam.aspect = innerWidth / innerHeight; cam.fov = cam.aspect < 1 ? 85 : 72; cam.updateProjectionMatrix(); }
+addEventListener("resize", resize); resize();
+// arrastrar / pellizcar / rueda
+const pts = new Map(); let pd = 0;
+$("c").addEventListener("pointerdown", e => { pts.set(e.pointerId, [e.clientX, e.clientY]); $("c").setPointerCapture(e.pointerId); $("hint").style.opacity = 0; });
+$("c").addEventListener("pointermove", e => {
+  if (!pts.has(e.pointerId)) return; const [x, y] = pts.get(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]);
+  if (pts.size === 2) { const [a, b] = [...pts.values()]; const d = Math.hypot(a[0] - b[0], a[1] - b[1]); if (pd) { cam.fov = Math.max(35, Math.min(95, cam.fov * pd / d)); cam.updateProjectionMatrix(); } pd = d; return; }
+  const k = cam.fov / innerHeight; lon -= (e.clientX - x) * k / 360; lat = Math.max(-80, Math.min(80, lat + (e.clientY - y) * k));
+});
+const up = e => { pts.delete(e.pointerId); if (pts.size < 2) pd = 0; };
+$("c").addEventListener("pointerup", up); $("c").addEventListener("pointercancel", up);
+$("c").addEventListener("wheel", e => { cam.fov = Math.max(35, Math.min(95, cam.fov + e.deltaY * 0.03)); cam.updateProjectionMatrix(); }, { passive: true });
+$("c").addEventListener("click", () => { $("card").hidden = true; });
+// giroscopio (iPad / iPhone)
+if (window.DeviceOrientationEvent && matchMedia("(pointer:coarse)").matches) {
+  $("gyro").hidden = false;
+  $("gyro").onclick = async () => {
+    try { if (DeviceOrientationEvent.requestPermission) { const r = await DeviceOrientationEvent.requestPermission(); if (r !== "granted") return; } } catch (e) { return; }
+    gyro = !gyro; alpha0 = null; $("gyro").style.opacity = gyro ? 1 : 0.7;
+  };
+  addEventListener("deviceorientation", e => { if (!gyro || e.alpha == null) return; if (alpha0 === null) alpha0 = [e.alpha, lon]; lon = alpha0[1] - (e.alpha - alpha0[0]) / 360; lat = Math.max(-80, Math.min(80, (e.beta - 90))); });
+}
+$("back").onclick = () => { if (history.length > 1) history.back(); else location.href = `../${["es", "en", "he"][L]}/`; };
+document.querySelectorAll("[data-l]").forEach(b => b.onclick = () => { L = ({ es: 0, en: 1, he: 2 })[b.dataset.l]; $("gyro").textContent = T[L][1]; $("hint").textContent = T[L][2]; ui(); });
+$("gyro").textContent = T[L][1]; $("hint").textContent = T[L][2]; setTimeout(() => $("hint").style.opacity = 0, 6000);
+(function loop() { if (cur) { look(); place(); renderer.render(scene, cam); } requestAnimationFrame(loop); })();
+go(QS.get("n") && N[QS.get("n")] ? QS.get("n") : "corridor", true);
+</script>
+</body>
+</html>
