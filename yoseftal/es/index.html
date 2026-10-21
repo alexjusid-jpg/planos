@@ -82,12 +82,15 @@ body.fpmode .info{bottom:auto;top:96px}
 body.capture .bar,body.capture .legend,body.capture .info,body.capture .pad,body.capture .docpanel,body.capture .docview{display:none!important}
 @media (max-width:720px){.legend{display:none}.bar{gap:6px}.brand span{display:none}button,select{font-size:13px;padding:4px 8px}}
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+.menu-t{display:none}
+@media (max-width:700px){.menu-t{display:block;position:fixed;top:calc(8px + env(safe-area-inset-top,0px));inset-inline-start:8px;z-index:12;font-size:20px;padding:6px 14px;background:#2B2759;color:#fff;border:0;border-radius:8px}
+ body:not(.menu-open) .bar{display:none!important} body.menu-open .bar{top:calc(52px + env(safe-area-inset-top,0px));max-height:70vh;overflow:auto}}
 </style>
 
 <div id="stage"><div class="loading" id="loading">Cargando modelo 3D…</div></div>
 <div id="tags"></div>
 
-<div class="bar" role="toolbar" aria-label="Controles">
+<button id="menu-t" class="menu-t" aria-expanded="false">☰</button><div class="bar" role="toolbar" aria-label="Controles">
   <div class="brand"><b id="t-title">Pabellón · Llamada de enfermería</b><span id="t-sub">ACE BG · Advantecnia · Modelo 3D</span></div>
   <div class="grp"><div class="seg" role="group">
     <button id="m-eq" aria-pressed="true"></button><button id="m-wi" aria-pressed="false"></button></div></div>
@@ -888,6 +891,8 @@ $("docview").addEventListener("click", e => { if (e.target.id === "docview") $("
 addEventListener("keydown", e => { if (e.key === "Escape") { $("dv-x").onclick(); $("docpanel").hidden = true; if ($("info")) $("info").hidden = true; } });
 const _xl = { es: "✕ Cerrar", en: "✕ Close", he: "✕ סגירה" }; const _xu = () => ["info-x", "doc-x", "dv-x"].forEach(i => { if ($(i)) $(i).textContent = _xl[LANG]; });
 _xu(); document.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", () => setTimeout(_xu, 0)));
+const _mt = $("menu-t"); if (_mt) { _mt.onclick = () => { const o = document.body.classList.toggle("menu-open"); _mt.setAttribute("aria-expanded", o); _mt.textContent = o ? "✕" : "☰"; };
+  document.querySelectorAll(".bar select").forEach(s => s.addEventListener("change", () => { if (innerWidth <= 700) { document.body.classList.remove("menu-open"); _mt.textContent = "☰"; } })); }
 docsUI();
 
 // ---- Modo FOTOS: la app abre con las fotos fotorrealistas; botón para pasar al 3D
@@ -931,7 +936,7 @@ docsUI();
   $("docs").parentNode.insertBefore(ob, $("docs"));
   const lab = () => { ob.textContent = TXT[LANG][0]; if (!el.hidden) show(); };
   document.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", () => setTimeout(lab, 0)));
-  lab(); el.hidden = CAPTURE || QS.has("3d"); if (!el.hidden) show();
+  lab(); el.hidden = CAPTURE || !QS.has("fotos"); if (!el.hidden) show();
 }
 // ---- Caminar = visita 360° fotorrealista · Recorrido = video fotorrealista (no el 3D de dibujo)
 {

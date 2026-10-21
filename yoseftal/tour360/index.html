@@ -47,9 +47,9 @@ const N = {"corridor": {"img": "p_corridor.jpg", "name": ["Pasillo del servicio"
 const ORDER = ["corridor", "room", "wc", "ns"];
 const QS = new URLSearchParams(location.search);
 let L = ({ es: 0, en: 1, he: 2 })[QS.get("lang") || "es"] ?? 0;
-const T = [["← App", "📱 Mover el iPad", "Arrastra para mirar alrededor · toca las flechas para caminar · toca los puntos naranjas para ver cada equipo", "Equipo ACE BG · Advantecnia"],
-  ["← App", "📱 Move the iPad", "Drag to look around · tap the arrows to walk · tap the orange dots to see each device", "ACE BG · Advantecnia device"],
-  ["← אפליקציה", "📱 הזיזו את האייפד", "גררו כדי להסתכל מסביב · הקישו על החצים כדי ללכת · הקישו על הנקודות הכתומות לראות כל התקן", "התקן ACE BG · Advantecnia"]];
+const T = [["← App", "📱 Mover el dispositivo", "Arrastra para mirar alrededor · toca las flechas para caminar · toca los puntos naranjas para ver cada equipo", "Equipo ACE BG · Advantecnia"],
+  ["← App", "📱 Move the device", "Drag to look around · tap the arrows to walk · tap the orange dots to see each device", "ACE BG · Advantecnia device"],
+  ["← אפליקציה", "📱 הזיזו את המכשיר", "גררו כדי להסתכל מסביב · הקישו על החצים כדי ללכת · הקישו על הנקודות הכתומות לראות כל התקן", "התקן ACE BG · Advantecnia"]];
 const $ = id => document.getElementById(id);
 const renderer = new THREE.WebGLRenderer({ canvas: $("c"), antialias: true }); renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.outputColorSpace = THREE.SRGBColorSpace;
 const scene = new THREE.Scene(); const cam = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
