@@ -7,7 +7,8 @@ Rev. B · 15/10/2026 · Telab International · on architectural plan L5 (typical
 |---|---|---|
 | `plans_2D_EN.pdf` | 12 A1 sheets (incl. photorealistic renders): typical floor (nurse call and wiring), devices with photos, client marks on plan L2, 1-bedroom apt., 2-bedroom apt., ground floor with nurse desk, riser diagram, bill of materials and 3D views | Any PDF reader; print on A1 |
 | `presentation_EN.pptx` | 14-slide presentation | PowerPoint, Keynote, Google Slides |
-| `walkthrough_EN.mp4` | Walkthrough video with captions | Any player |
+| `walkthrough_EN.mp4` | Photorealistic walkthrough (360° real-light images) | Any player |
+| 360° tour | https://alexjusid-jpg.github.io/planos/migdalei/tour360/?lang=en (walk the building with 360° photos) | Browser |
 | `guided_tour_EN.mp4` | Photorealistic guided tour (real-light renders) | Any player |
 | `drawing_CAD_EN.dxf` | CAD: typical floor and GF with layers per system; devices as blocks with ID / DESCRIPCION / ALTURA_M / CODIGO | AutoCAD → Save as → **DWG** |
 | `model_BIM_EN.ifc` | IFC4 BIM: GF + 8 floors with walls, windows, furniture, devices and cables | **Revit**: Open → IFC → save as **RVT** |

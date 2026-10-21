@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Migdalei Yam a Tijon · Visita 360°</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1F2630;--muted:#6B7480;--line:#DDE1E6;--accent:#C9662A;--bg:#FFFFFF;--font:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--font);overflow:hidden;-webkit-user-select:none;user-select:none}
+#c{position:fixed;inset:0;touch-action:none}
+.top{position:fixed;left:8px;right:8px;top:calc(8px + env(safe-area-inset-top,0px));display:flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);padding:6px 8px;z-index:5;box-shadow:0 2px 10px rgba(30,40,55,.08)}
+.top b{flex:1;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+button{font-family:var(--font);font-size:15px;font-weight:600;color:var(--ink);background:#F4F5F6;border:1px solid var(--line);padding:7px 11px;border-radius:4px;cursor:pointer}
+button.pri{background:var(--ink);color:#fff;border-color:var(--ink)}button.acc{background:var(--accent);color:#fff;border-color:var(--accent)}
+.seg{display:flex}.seg button{border-radius:0}.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.chips{position:fixed;left:0;right:0;bottom:calc(8px + env(safe-area-inset-bottom,0px));display:flex;gap:6px;overflow-x:auto;padding:0 8px;z-index:5;scrollbar-width:none}
+.chips button{flex:none;background:rgba(255,255,255,.95);box-shadow:0 2px 8px rgba(30,40,55,.12)}
+.chips button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.hs{position:fixed;transform:translate(-50%,-50%);z-index:4;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
+.hs .ring{width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.88);border:3px solid #fff;box-shadow:0 3px 14px rgba(0,0,0,.25);display:grid;place-items:center;font-size:26px;color:var(--accent)}
+.hs .lb{background:rgba(255,255,255,.95);padding:3px 8px;font-size:14px;font-weight:600;border-radius:3px;white-space:nowrap;box-shadow:0 1px 6px rgba(0,0,0,.15)}
+.dv{position:fixed;transform:translate(-50%,-50%);z-index:4;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;border:3px solid #fff;font-weight:700;display:grid;place-items:center;box-shadow:0 2px 10px rgba(0,0,0,.3);cursor:pointer;font-size:15px}
+.dv::after{content:"";position:absolute;inset:-8px;border-radius:50%;border:2px solid var(--accent);animation:pl 1.8s infinite}
+@keyframes pl{from{opacity:.9;transform:scale(.7)}to{opacity:0;transform:scale(1.5)}}
+.card{position:fixed;left:50%;bottom:calc(64px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(420px,calc(100% - 16px));background:#fff;border:1px solid var(--line);border-top:3px solid var(--accent);padding:10px;z-index:6;display:flex;gap:10px;align-items:center;box-shadow:0 6px 24px rgba(0,0,0,.18)}
+.card[hidden]{display:none}.card img{width:120px;flex:none}.card b{font-size:16px}.card small{display:block;color:var(--muted);margin-top:4px}
+#fade{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .35s;z-index:3}
+.hint{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(255,255,255,.95);padding:10px 14px;border:1px solid var(--line);font-size:16px;z-index:6;text-align:center;pointer-events:none;transition:opacity .6s}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="fade"></div>
+<div class="top"><button class="pri" id="back"></button><b id="title"></b><button class="acc" id="gyro" hidden></button>
+<div class="seg"><button data-l="es">ES</button><button data-l="en">EN</button><button data-l="he">עב</button></div></div>
+<div id="hs"></div>
+<div class="card" id="card" hidden><img id="cimg" alt=""><div><b id="ct"></b><small id="cs"></small></div></div>
+<div class="chips" id="chips"></div>
+<div class="hint" id="hint"></div>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"}}</script>
+<script type="module">
+import * as THREE from "three";
+const N = {"lobby": {"img": "p_lobby.jpg", "name": ["Lobby de ascensores", "Lift lobby", "לובי מעליות"], "links": [{"to": "puerta01", "u": 0.2553, "v": 0.6301}, {"to": "common", "u": 0.9796, "v": 0.6255}, {"to": "rack", "u": 0.8569, "v": 0.5866}, {"to": "pb_lobby", "u": 0.8238, "v": 0.6279}], "devs": [], "u0": 0.2553}, "puerta01": {"img": "p_puerta01.jpg", "name": ["Entrada al depto. x01 · tablet", "Apartment x01 entrance · tablet", "כניסה לדירה x01 · טאבלט"], "links": [{"to": "lobby", "u": 0.7553, "v": 0.6301}, {"to": "hall01", "u": 0.3389, "v": 0.692}], "devs": [{"u": 0.458, "v": 0.5614, "n": ["Tablet de la puerta", "Door tablet", "טאבלט בדלת"], "ph": "tablet"}, {"u": 0.328, "v": 0.3307, "n": ["LCom – concentrador", "LCom – hub", "LCom – מרכז"], "ph": "lcom"}], "u0": 0.458}, "hall01": {"img": "p_hall01.jpg", "name": ["Hall del departamento", "Apartment hall", "מבואת הדירה"], "links": [{"to": "puerta01", "u": 0.8389, "v": 0.692}, {"to": "living01", "u": 0.3459, "v": 0.6878}, {"to": "bath02", "u": 0.6844, "v": 0.7037}], "devs": [{"u": 0.7791, "v": 0.5334, "n": ["Tablet de la puerta", "Door tablet", "טאבלט בדלת"], "ph": "tablet"}, {"u": 0.9262, "v": 0.07, "n": ["LCom – concentrador", "LCom – hub", "LCom – מרכז"], "ph": "lcom"}], "u0": 0.7791}, "living01": {"img": "p_living01.jpg", "name": ["Salón y cocina", "Living room and kitchen", "סלון ומטבח"], "links": [{"to": "hall01", "u": 0.8459, "v": 0.6878}, {"to": "bed01", "u": 0.5889, "v": 0.5856}], "devs": [{"u": 0.3248, "v": 0.5215, "n": ["Panel de llamada con voz", "Voice call panel", "פנל קריאה קולי"], "ph": "panel"}], "u0": 0.327}, "bed01": {"img": "p_bed01.jpg", "name": ["Dormitorio", "Bedroom", "חדר שינה"], "links": [{"to": "living01", "u": 0.0889, "v": 0.5856}, {"to": "bath01", "u": 0.9498, "v": 0.6487}], "devs": [{"u": 0.8265, "v": 0.5457, "n": ["Panel de llamada con voz", "Voice call panel", "פנל קריאה קולי"], "ph": "panel"}], "u0": 0.8265}, "bath01": {"img": "p_bath01.jpg", "name": ["Baño en suite", "En-suite bathroom", "חדר רחצה צמוד"], "links": [{"to": "bed01", "u": 0.4498, "v": 0.6487}], "devs": [{"u": 0.7893, "v": 0.4324, "n": ["Tirador de baño SOS", "SOS pull-cord", "משיכת SOS"], "ph": "tirador"}, {"u": 0.3326, "v": 0.4226, "n": ["Tirador de baño SOS", "SOS pull-cord", "משיכת SOS"], "ph": "tirador"}], "u0": 0.7893}, "bath02": {"img": "p_bath02.jpg", "name": ["Baño 2", "Bathroom 2", "חדר רחצה 2"], "links": [{"to": "hall01", "u": 0.1844, "v": 0.7037}], "devs": [{"u": 0.3691, "v": 0.3696, "n": ["Tirador de baño SOS", "SOS pull-cord", "משיכת SOS"], "ph": "tirador"}, {"u": 0.7282, "v": 0.4356, "n": ["Tirador de baño SOS", "SOS pull-cord", "משיכת SOS"], "ph": "tirador"}], "u0": 0.3691}, "common": {"img": "p_common.jpg", "name": ["Sala común · baño público", "Common room · public WC", "חדר משותף · שירותים ציבוריים"], "links": [{"to": "lobby", "u": 0.4796, "v": 0.6255}], "devs": [{"u": 0.6608, "v": 0.4561, "n": ["Tirador de baño SOS", "SOS pull-cord", "משיכת SOS"], "ph": "tirador"}, {"u": 0.3387, "v": 0.4285, "n": ["Luz de pasillo", "Corridor light", "מנורת מסדרון"], "ph": "luz"}, {"u": 0.329, "v": 0.3882, "n": ["LCom – concentrador", "LCom – hub", "LCom – מרכז"], "ph": "lcom"}], "u0": 0.6608}, "rack": {"img": "p_rack.jpg", "name": ["Gabinete de piso", "Floor rack", "ארון קומה"], "links": [{"to": "lobby", "u": 0.3569, "v": 0.5866}], "devs": [{"u": 0.0, "v": 0.5986, "n": ["Gabinete con switch PoE", "Rack with PoE switch", "ארון עם מתג PoE"], "ph": "switch"}, {"u": 0.0628, "v": 0.235, "n": ["BoxCom – concentrador en bus", "BoxCom – bus hub", "BoxCom – מרכז באס"], "ph": "boxcom"}, {"u": 0.9372, "v": 0.235, "n": ["BoxCom – concentrador en bus", "BoxCom – bus hub", "BoxCom – מרכז באס"], "ph": "boxcom"}, {"u": 0.0, "v": 0.5386, "n": ["Switch PoE D-Link", "D-Link PoE switch", "מתג PoE D-Link"], "ph": "switch"}], "u0": 0.0}, "pb_lobby": {"img": "p_pb_lobby.jpg", "name": ["Planta baja · hall de entrada", "Ground floor · entrance hall", "קומת קרקע · לובי כניסה"], "links": [{"to": "lobby", "u": 0.8238, "v": 0.6279}, {"to": "pb_desk", "u": 0.2801, "v": 0.5667}], "devs": [{"u": 0.5433, "v": 0.3968, "n": ["Luz de pasillo", "Corridor light", "מנורת מסדרון"], "ph": "luz"}, {"u": 0.6523, "v": 0.4369, "n": ["Luz de pasillo", "Corridor light", "מנורת מסדרון"], "ph": "luz"}, {"u": 0.6528, "v": 0.3763, "n": ["LCom – concentrador", "LCom – hub", "LCom – מרכז"], "ph": "lcom"}], "u0": 0.5433}, "pb_desk": {"img": "p_pb_desk.jpg", "name": ["Desk de enfermería", "Nurse desk", "עמדת אחות"], "links": [{"to": "pb_lobby", "u": 0.7801, "v": 0.5667}], "devs": [{"u": 0.0, "v": 0.6636, "n": ["Teléfono Grandstream: rojo alarma · verde presencia · azul médico · naranja voz", "Grandstream phone: red alarm · green presence · blue doctor · orange voice", "טלפון Grandstream: אדום אזעקה · ירוק נוכחות · כחול רופא · כתום שיחה"], "ph": "telefono"}], "u0": 0.0}};
+const ORDER = ["lobby", "puerta01", "hall01", "living01", "bed01", "bath01", "bath02", "common", "rack", "pb_lobby", "pb_desk"];
+const QS = new URLSearchParams(location.search);
+let L = ({ es: 0, en: 1, he: 2 })[QS.get("lang") || "es"] ?? 0;
+const T = [["← App", "📱 Mover el iPad", "Arrastrá para mirar alrededor · tocá las flechas para caminar · tocá los puntos naranjas para ver cada equipo ACE BG", "Equipo ACE BG · Advantecnia"],
+  ["← App", "📱 Move the iPad", "Drag to look around · tap the arrows to walk · tap the orange dots to see each ACE BG device", "ACE BG · Advantecnia device"],
+  ["← אפליקציה", "📱 הזיזו את האייפד", "גררו כדי להסתכל מסביב · הקישו על החצים כדי ללכת · הקישו על הנקודות הכתומות לראות כל התקן ACE BG", "התקן ACE BG · Advantecnia"]];
+const $ = id => document.getElementById(id);
+const renderer = new THREE.WebGLRenderer({ canvas: $("c"), antialias: true }); renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.outputColorSpace = THREE.SRGBColorSpace;
+const scene = new THREE.Scene(); const cam = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+const geo = new THREE.SphereGeometry(500, 96, 48); geo.scale(-1, 1, 1);
+const mat = new THREE.MeshBasicMaterial({ color: 0xffffff }); const sph = new THREE.Mesh(geo, mat); scene.add(sph);
+const loader = new THREE.TextureLoader(); const cache = {};
+const tex = n => cache[n] || (cache[n] = new Promise(r => loader.load(N[n].img, t => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); r(t); })));
+const dir = (u, v) => { const phi = u * 2 * Math.PI, th = v * Math.PI; return new THREE.Vector3(Math.cos(phi) * Math.sin(th), Math.cos(th), Math.sin(phi) * Math.sin(th)); };
+let lon = 0, lat = 0, cur = null, gyro = false, alpha0 = null;
+function look() { const d = dir(lon, 0.5 - lat / 180); cam.lookAt(d); }
+async function go(n, first) {
+  $("fade").style.opacity = 1; const t = await tex(n); await new Promise(r => setTimeout(r, first ? 0 : 320));
+  mat.map = t; mat.needsUpdate = true; cur = n; lon = N[n].u0; lat = 0; $("card").hidden = true; ui(); $("fade").style.opacity = 0;
+  for (const l of N[n].links) tex(l.to);
+}
+function ui() {
+  const nm = N[cur].name[L]; $("title").textContent = nm; document.title = "Migdalei Yam a Tijon · " + nm;
+  $("back").textContent = T[L][0]; document.documentElement.dir = L === 2 ? "rtl" : "ltr";
+  document.querySelectorAll("[data-l]").forEach(b => b.setAttribute("aria-pressed", String(["es", "en", "he"][L] === b.dataset.l)));
+  $("chips").innerHTML = ORDER.map(k => `<button data-n="${k}" class="${k === cur ? "on" : ""}">${N[k].name[L]}</button>`).join("");
+  $("chips").querySelectorAll("button").forEach(b => b.onclick = () => go(b.dataset.n));
+  const on = $("chips").querySelector(".on"); if (on) on.scrollIntoView({ inline: "center", block: "nearest" });
+  $("hs").innerHTML = N[cur].links.map((l, i) => `<div class="hs" data-i="${i}"><div class="ring">⬆</div><div class="lb">${N[l.to].name[L]}</div></div>`).join("") +
+    N[cur].devs.map((d, i) => `<div class="dv" data-d="${i}">i</div>`).join("");
+  $("hs").querySelectorAll(".hs").forEach(e => e.onclick = ev => { ev.stopPropagation(); go(N[cur].links[+e.dataset.i].to); });
+  $("hs").querySelectorAll(".dv").forEach(e => e.onclick = ev => { ev.stopPropagation(); const d = N[cur].devs[+e.dataset.d]; $("cimg").src = "f_" + d.ph + ".jpg"; $("ct").textContent = d.n[L]; $("cs").textContent = T[L][3]; $("card").hidden = false; });
+}
+function place() {
+  const W = innerWidth, H = innerHeight; const els = $("hs").children; let k = 0;
+  const put = (el, u, v) => { const p = dir(u, v).multiplyScalar(400).project(cam); const vis = p.z < 1 && Math.abs(p.x) < 1.2 && Math.abs(p.y) < 1.2;
+    el.style.display = vis ? "" : "none"; el.style.left = ((p.x + 1) / 2 * W) + "px"; el.style.top = ((1 - p.y) / 2 * H) + "px"; };
+  for (const l of N[cur].links) put(els[k++], l.u, Math.max(l.v, 0.56));
+  for (const d of N[cur].devs) put(els[k++], d.u, d.v);
+}
+function resize() { renderer.setSize(innerWidth, innerHeight); cam.aspect = innerWidth / innerHeight; cam.fov = cam.aspect < 1 ? 85 : 72; cam.updateProjectionMatrix(); }
+addEventListener("resize", resize); resize();
+// arrastrar / pellizcar / rueda
+const pts = new Map(); let pd = 0;
+$("c").addEventListener("pointerdown", e => { pts.set(e.pointerId, [e.clientX, e.clientY]); $("c").setPointerCapture(e.pointerId); $("hint").style.opacity = 0; });
+$("c").addEventListener("pointermove", e => {
+  if (!pts.has(e.pointerId)) return; const [x, y] = pts.get(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]);
+  if (pts.size === 2) { const [a, b] = [...pts.values()]; const d = Math.hypot(a[0] - b[0], a[1] - b[1]); if (pd) { cam.fov = Math.max(35, Math.min(95, cam.fov * pd / d)); cam.updateProjectionMatrix(); } pd = d; return; }
+  const k = cam.fov / innerHeight; lon -= (e.clientX - x) * k / 360; lat = Math.max(-80, Math.min(80, lat + (e.clientY - y) * k));
+});
+const up = e => { pts.delete(e.pointerId); if (pts.size < 2) pd = 0; };
+$("c").addEventListener("pointerup", up); $("c").addEventListener("pointercancel", up);
+$("c").addEventListener("wheel", e => { cam.fov = Math.max(35, Math.min(95, cam.fov + e.deltaY * 0.03)); cam.updateProjectionMatrix(); }, { passive: true });
+$("c").addEventListener("click", () => { $("card").hidden = true; });
+// giroscopio (iPad / iPhone)
+if (window.DeviceOrientationEvent && matchMedia("(pointer:coarse)").matches) {
+  $("gyro").hidden = false;
+  $("gyro").onclick = async () => {
+    try { if (DeviceOrientationEvent.requestPermission) { const r = await DeviceOrientationEvent.requestPermission(); if (r !== "granted") return; } } catch (e) { return; }
+    gyro = !gyro; alpha0 = null; $("gyro").style.opacity = gyro ? 1 : 0.7;
+  };
+  addEventListener("deviceorientation", e => { if (!gyro || e.alpha == null) return; if (alpha0 === null) alpha0 = [e.alpha, lon]; lon = alpha0[1] - (e.alpha - alpha0[0]) / 360; lat = Math.max(-80, Math.min(80, (e.beta - 90))); });
+}
+$("back").onclick = () => { if (history.length > 1) history.back(); else location.href = `../${["es", "en", "he"][L]}/`; };
+document.querySelectorAll("[data-l]").forEach(b => b.onclick = () => { L = ({ es: 0, en: 1, he: 2 })[b.dataset.l]; $("gyro").textContent = T[L][1]; $("hint").textContent = T[L][2]; ui(); });
+$("gyro").textContent = T[L][1]; $("hint").textContent = T[L][2]; setTimeout(() => $("hint").style.opacity = 0, 6000);
+(function loop() { if (cur) { look(); place(); renderer.render(scene, cam); } requestAnimationFrame(loop); })();
+go(QS.get("n") && N[QS.get("n")] ? QS.get("n") : "puerta01", true);
+</script>
+</body>
+</html>
