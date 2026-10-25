@@ -981,5 +981,70 @@ window.__DUR = DUR;
 if (CAPTURE) renderer.shadowMap.autoUpdate = false;
 window.__render = (t) => { applyPose(t); updateCeil(); renderer.render(scene, camera); placeTags(); return true; };
 window.__still = (view, mode, scen, cut) => { tl.hidden = true; wiring = mode === "wi"; applyMode(); scenario = scen || "mix"; applyScenario(); lowWalls = !!cut; applyWalls(); setView(view); camera.lookAt(controls.target); updateCeil(); renderer.shadowMap.needsUpdate = true; renderer.render(scene, camera); placeTags(); return true; };
+/* ------------------------------------------------------------------ simulación en vivo: llamada (rojo) · presencia/cancelación (verde, on/off) · código azul */
+(() => {
+  const ROOMS = ["H1", "H2", "H3", "H4", "B2", "B3"];
+  const LIVE = {}; SCEN.live = {};
+  const RN = { H1: "Room 1", H2: "Room 2", H3: "Room 3", H4: "Room 4", B2: "WC B2", B3: "WC B3" };
+  for (const r of ROOMS) EVENTS[r + "-LP"] = Object.assign({ call: [RN[r], "Patient call"], pres: [RN[r], "Nurse presence"], blue: [RN[r], "CODE BLUE"] }, EVENTS[r + "-LP"] || {});
+  const TX = { es: { scen: "Simulación en vivo (clic en los equipos)", t: "Simulación", call: "Llamada", pres: "Presencia / cancelar", blue: "Código azul", off: "Apagar todo" },
+    en: { scen: "Live simulation (click the devices)", t: "Simulation", call: "Call", pres: "Presence / cancel", blue: "Code blue", off: "All off" },
+    he: { scen: "סימולציה חיה (לחיצה על ההתקנים)", t: "סימולציה", call: "קריאה", pres: "נוכחות / ביטול", blue: "קוד כחול", off: "כיבוי הכול" } };
+  for (const L of ["es", "en", "he"]) T[L].scen = Object.assign({ live: TX[L].scen }, T[L].scen);
+  let sel = "H2";
+  function sync() {
+    for (const k of Object.keys(SCEN.live)) delete SCEN.live[k];
+    for (const r of ROOMS) if (LIVE[r]) SCEN.live[r + "-LP"] = LIVE[r];
+    scenario = "live"; const s = document.getElementById("scen"); if (s) s.value = "live";
+    applyScenario(); draw();
+  }
+  const HALO = {}; const hg = new THREE.SphereGeometry(0.22, 20, 14);
+  for (const [id, o] of Object.entries(lpMeshes)) { const h = new THREE.Mesh(hg, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.45, depthWrite: false })); scene.updateMatrixWorld(true);
+    const wp = new THREE.Vector3(); o.light.parent.getWorldPosition(wp); h.position.set(wp.x, o.light.position.y + 0.1, wp.z); h.visible = false; scene.add(h); HALO[id] = h; }
+  setInterval(() => { const t = Date.now() / 1000; for (const h of Object.values(HALO)) if (h.visible) { h.scale.setScalar(1 + 0.25 * Math.sin(t * 5)); h.material.opacity = h.userData.blink ? ((t * 2.2 | 0) % 2 ? 0.55 : 0.12) : 0.45; } }, 50);
+  const _ap = applyScenario;
+  applyScenario = function () { _ap(); for (const [id, h] of Object.entries(HALO)) { const st = SCEN[scenario][id === "B3-LP2" ? "B3-LP" : id]; h.visible = !!st; if (st) { h.material.color.setHex(LP_COL[st]); h.userData.blink = st !== "pres"; } }
+    const o = lpMeshes["B3-LP2"], st = SCEN[scenario]["B3-LP"]; if (o) { const c = st ? LP_COL[st] : null;
+    o.mat.color.setHex(c ?? 0xE9ECEF); o.mat.emissive.setHex(c ?? 0x000000); o.light.color.setHex(c ?? 0xffffff); o.light.intensity = c ? 1.6 : 0; } };
+  function act(r, a) {
+    if (a === "pres") LIVE[r] = LIVE[r] === "pres" ? null : "pres";
+    else if (a === "off") { for (const k of ROOMS) LIVE[k] = null; }
+    else LIVE[r] = a;
+    sync();
+  }
+  const st = document.createElement("style");
+  st.textContent = `.livebar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:6;display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;background:#fff;border:1px solid var(--line,#d5d9df);padding:6px 10px;max-width:calc(100% - 20px)}
+.livebar b{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#5E6675;font-weight:600}
+.livebar button{font-size:13px;padding:6px 10px;border:1px solid #c9ced6;background:#fff;color:#1F2430;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.livebar button.r[aria-pressed="true"]{background:#1F2430;color:#fff}
+.livebar i{width:12px;height:12px;border-radius:50%;display:inline-block}
+.livebar .sep{width:1px;height:22px;background:#d5d9df}
+body.fpmode .livebar{display:none}`;
+  document.head.appendChild(st);
+  const bar = document.createElement("div"); bar.className = "livebar"; bar.id = "livebar"; document.body.appendChild(bar);
+  function draw() {
+    const L = TX[LANG] || TX.es;
+    bar.innerHTML = `<b>${L.t}</b>` + ROOMS.map(r => `<button class="r" data-r="${r}" aria-pressed="${r === sel}">${r}${LIVE[r] ? ` <i style="background:${ST_COL[LIVE[r]]}"></i>` : ""}</button>`).join("") +
+      `<span class="sep"></span><button data-a="call"><i style="background:#E53935"></i>${L.call}</button><button data-a="pres"><i style="background:#2E9F4F"></i>${L.pres}</button><button data-a="blue"><i style="background:#1E6BD6"></i>${L.blue}</button><button data-a="off"><i style="background:#E3E7EB;border:1px solid #aaa"></i>${L.off}</button>`;
+    bar.querySelectorAll("[data-r]").forEach(b => b.onclick = () => { sel = b.dataset.r; draw(); });
+    bar.querySelectorAll("[data-a]").forEach(b => b.onclick = () => act(sel, b.dataset.a));
+  }
+  // clic en los equipos del modelo 3D
+  renderer.domElement.addEventListener("pointerup", e => {
+    if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 5) return;
+    const r = renderer.domElement.getBoundingClientRect(); mouse.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
+    ray.setFromCamera(mouse, camera);
+    const hits = ray.intersectObjects(pickables.filter(o => { let p = o; while (p) { if (!p.visible) return false; p = p.parent; } return true; }), false);
+    if (!hits.length) return; const info = hits[0].object.userData.info; if (!info || info.cable) return;
+    const room = info.room; if (!ROOMS.includes(room)) return; sel = room;
+    if (info.type === "presence") act(room, "pres");
+    else if (["pull_cord", "bed_call", "headwall"].includes(info.type)) act(room, "call");
+    else draw();
+  });
+  document.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", () => setTimeout(() => { draw(); const s = document.getElementById("scen"); if (s) s.value = scenario; }, 0)));
+  const _ru = renderUI; renderUI = function () { _ru(); draw(); };
+  renderUI(); draw();
+  if (!CAPTURE) { for (const r of ROOMS) LIVE[r] = null; }
+})();
 window.__ready = true;
 </script>
