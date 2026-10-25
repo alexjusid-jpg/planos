@@ -584,7 +584,7 @@ for (const d of M.devices) {
   } else if (t === "elec_panel") {
     lbox(g, 0, z, 0.05, 0.6, 0.9, 0.1, mat(0xF0F2F5, { r: 0.5 })); lbox(g, 0, z, 0.105, 0.5, 0.75, 0.01, mat(0xE2E6EA)); lbox(g, 0.22, z, 0.115, 0.02, 0.1, 0.02, D.dark);
   }
-  if (d.code && PHOTO[d.code] && PH_SZ[d.code] && t !== "ipad") { const s = PH_SZ[d.code];
+  if (d.code && PHOTO[d.code] && PH_SZ[d.code] && t !== "ipad" && t !== "corridor_light") { const s = PH_SZ[d.code];
     const pp = new THREE.Mesh(new THREE.PlaneGeometry(s, s), new THREE.MeshStandardMaterial({ map: photoTex(d.code), roughness: 0.5 }));
     if (t === "rc") { pp.rotation.x = Math.PI / 2; pp.position.set(0, z - 0.084, 0); } else pp.position.set(0, z, t === "corridor_light" ? 0.052 : 0.03);
     g.add(pp); }
