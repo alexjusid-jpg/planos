@@ -555,7 +555,7 @@ for (const d of M.devices) {
   } else if (t === "ipad") {
     lbox(g, 0, z + 0.008, -0.02, 0.17, 0.016, 0.17, D.black); lbox(g, 0, z + 0.1, -0.03, 0.03, 0.18, 0.03, D.black);
     const ib = lbox(g, 0, z + 0.3, 0, 0.29, 0.21, 0.02, D.white); ib.rotation.x = -0.25;
-    const ip = new THREE.Mesh(new THREE.PlaneGeometry(0.28, 0.19), new THREE.MeshBasicMaterial({ map: photoTex("EOP002"), toneMapped: false }));
+    const ip = new THREE.Mesh(new THREE.PlaneGeometry(0.28, 0.19), new THREE.MeshBasicMaterial({ map: screenTex(1024, 700, false), toneMapped: false }));
     ip.position.set(0, z + 0.3, 0.012); ip.rotation.x = -0.25; ip.position.z += 0.0; g.add(ip);
   } else if (t === "aio_pc") {
     const tex = screenTex(1024, 640, false);
