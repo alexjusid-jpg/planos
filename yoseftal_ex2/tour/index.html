@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="he">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Yoseftal · Walk</title>
+<style>
+:root{--ink:#1F2630;--muted:#6B7480;--line:#DDE1E6;--accent:#C9662A;--bg:#FFFFFF;--font:"Barlow Semi Condensed","Arial Narrow",system-ui,Arial,sans-serif}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--font);overflow:hidden;-webkit-user-select:none;user-select:none}
+#st{position:fixed;inset:0;overflow:hidden;touch-action:none;cursor:grab;background:#FFFFFF}#st.drag{cursor:grabbing}
+#st img{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;pointer-events:none;max-width:none}
+#img2{opacity:0}
+.top{position:fixed;left:8px;right:8px;top:calc(8px + env(safe-area-inset-top,0px));display:flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);padding:6px 8px;z-index:5;box-shadow:0 2px 10px rgba(30,40,55,.08);flex-wrap:wrap}
+.top b{flex:1;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:140px}
+button{font-family:var(--font);font-size:15px;font-weight:600;color:var(--ink);background:#F4F5F6;border:1px solid var(--line);padding:7px 11px;border-radius:4px;cursor:pointer}
+button.pri{background:var(--ink);color:#fff;border-color:var(--ink)}button.acc{background:var(--accent);color:#fff;border-color:var(--accent)}
+.seg{display:flex}.seg button{border-radius:0}.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.chips{position:fixed;left:0;right:0;bottom:calc(8px + env(safe-area-inset-bottom,0px));display:flex;gap:6px;overflow-x:auto;padding:0 8px;z-index:5;scrollbar-width:none;justify-content:safe center}
+.chips button{flex:none;background:rgba(255,255,255,.96);box-shadow:0 2px 8px rgba(30,40,55,.12)}
+.chips button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+#ov{position:fixed;inset:0;z-index:4;pointer-events:none}
+.hs{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;pointer-events:auto}
+.hs .ring{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.92);border:3px solid #fff;box-shadow:0 3px 14px rgba(0,0,0,.28);display:grid;place-items:center;font-size:26px;color:var(--accent);transition:transform .2s}
+.hs:hover .ring{transform:scale(1.12)}.hs.back .ring{width:44px;height:44px;font-size:20px;color:var(--ink)}
+.hs .lb{background:rgba(255,255,255,.96);padding:3px 9px;font-size:14px;font-weight:600;border-radius:3px;white-space:nowrap;box-shadow:0 1px 6px rgba(0,0,0,.15)}
+.dv{position:absolute;transform:translate(-50%,-50%);width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;border:3px solid #fff;font-weight:700;display:grid;place-items:center;box-shadow:0 2px 10px rgba(0,0,0,.3);cursor:pointer;font-size:15px;pointer-events:auto}
+.dv::after{content:"";position:absolute;inset:-8px;border-radius:50%;border:2px solid var(--accent);animation:pl 1.8s infinite}
+.dv.big{width:auto;height:34px;border-radius:17px;padding:0 12px;font-size:14px;white-space:nowrap}
+@keyframes pl{from{opacity:.9;transform:scale(.7)}to{opacity:0;transform:scale(1.5)}}
+@media (prefers-reduced-motion:reduce){.dv::after{animation:none}}
+.card{position:fixed;left:50%;bottom:calc(64px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(440px,calc(100% - 16px));background:#fff;border:1px solid var(--line);border-top:3px solid var(--accent);padding:10px;z-index:6;display:flex;gap:10px;align-items:center;box-shadow:0 6px 24px rgba(0,0,0,.18)}
+.card[hidden]{display:none}.card img{width:110px;flex:none}.card b{font-size:16px}.card small{display:block;color:var(--muted);margin-top:4px}
+.cap{position:fixed;left:50%;top:calc(66px + env(safe-area-inset-top,0px));transform:translateX(-50%);background:rgba(255,255,255,.95);padding:6px 14px;font-size:16px;font-weight:600;z-index:4;border-left:4px solid var(--accent);max-width:calc(100% - 20px);box-shadow:0 2px 10px rgba(0,0,0,.1)}
+#fade{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .45s;z-index:3}
+.hint{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(255,255,255,.96);padding:10px 14px;border:1px solid var(--line);font-size:16px;z-index:6;text-align:center;pointer-events:none;transition:opacity .6s;max-width:90%}
+.zoom{position:fixed;right:10px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;z-index:5}
+.zoom button{width:44px;height:44px;padding:0;font-size:22px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.bar{position:fixed;left:0;right:0;bottom:0;height:3px;z-index:6}.bar i{display:block;height:100%;width:0;background:var(--accent)}
+#cm{position:fixed;inset:0;z-index:20;background:#fff;display:grid;grid-template-rows:auto 1fr}#cm[hidden]{display:none}
+#cm .h{display:flex;gap:8px;align-items:center;padding:calc(8px + env(safe-area-inset-top,0px)) 10px 8px;border-bottom:1px solid var(--line)}#cm .h b{flex:1;font-size:17px}
+#cm iframe{width:100%;height:100%;border:0}
+</style>
+</head>
+<body>
+<div id="st"><img id="img1" alt=""><img id="img2" alt=""></div>
+<div id="fade"></div>
+<div id="ov"></div>
+<div class="top"><button class="pri" id="back"></button><b id="title"></b><button class="acc" id="auto"></button><button id="m3d"></button>
+<div class="seg"><button data-l="es">ES</button><button data-l="en">EN</button><button data-l="he">עב</button></div></div>
+<div class="cap" id="cap"></div>
+<div class="zoom"><button id="zin" aria-label="zoom in">+</button><button id="zout" aria-label="zoom out">−</button></div>
+<div class="card" id="card" hidden><img id="cimg" alt=""><div><b id="ct"></b><small id="cs"></small></div></div>
+<div class="chips" id="chips"></div>
+<div class="bar"><i id="prog"></i></div>
+<div class="hint" id="hint"></div>
+<div id="cm" hidden><div class="h"><b>Consola Monitor · AdvantCare</b><button class="pri" id="cmx">✕</button></div><iframe id="cmf" title="Consola Monitor"></iframe></div>
+<script>
+const NM3 = (es, en, he) => ({ es, en, he });
+const S = {
+  corridor: { n: NM3("Pasillo", "Corridor", "מסדרון"), c: NM3("Pasillo del servicio – luz de color sobre cada puerta", "Ward corridor – a colour light above every door", "מסדרון המחלקה – מנורה צבעונית מעל כל דלת"),
+    l: [["door", 1180, 560], ["light", 1133, 130], ["ns", 170, 700, 1]], d: [[1133, 50, "EOP004"], [810, 193, "EOP004"], [648, 268, "EOP004"]] },
+  light: { n: NM3("Luz de pasillo", "Corridor light", "מנורת מסדרון"), c: NM3("Rojo = llamada · Verde = enfermera en la sala · Azul = código azul", "Red = call · Green = nurse in the room · Blue = code blue", "אדום = קריאה · ירוק = אחות בחדר · כחול = קוד כחול"),
+    l: [["corridor", 800, 700, 1]], d: [[709, 83, "EOP004"]] },
+  door: { n: NM3("Entrada", "Room entrance", "כניסה לחדר"), c: NM3("Presencia / cancelar junto a la puerta", "Presence / cancel by the door", "נוכחות / ביטול ליד הדלת"),
+    l: [["room", 500, 560], ["corridor", 1300, 700, 1]], d: [[1136, 782, "ACE82082137"], [378, 680, "ACE82012153"], [584, 30, "EOP004"]] },
+  room: { n: NM3("Habitación", "Patient room", "חדר אשפוז"), c: NM3("Habitación de 3 camas con cortinas", "3-bed room with curtains", "חדר 3 מיטות עם וילונות"),
+    l: [["bed", 330, 470], ["wc", 1530, 470], ["door", 800, 700, 1]], d: [[60, 342, "ACE82012153"], [93, 342, "ACE82082137"], [260, 486, "ACE39060521"], [872, 360, "ACE82012153"], [1402, 421, "ACE82082137"], [1581, 421, "ACE40320303"]] },
+  bed: { n: NM3("Cama", "Bed", "מיטה"), c: NM3("Panel de llamada y pera en cada cama · CarePad opcional", "Call panel and pear at every bed · optional CarePad", "פנל קריאה ואגס ליד כל מיטה · CarePad אופציונלי"),
+    l: [["room", 1300, 700, 1]], d: [[128, 231, "ACE82012153"], [199, 231, "ACE82082137"], [555, 539, "ACE39060521"], [364, 373, "CAREPAD"]] },
+  wc: { n: NM3("Baño", "Toilet", "שירותים"), c: NM3("Baño de pacientes – tirador de emergencia", "Patient toilet – emergency pull-cord", "שירותי מטופלים – חבל מצוקה"),
+    l: [["shower", 200, 520], ["room", 1300, 700, 1]], d: [[122, 417, "ACE40320303"], [487, 490, "ACE82082137"], [727, 405, "ACE82012153"]] },
+  shower: { n: NM3("Ducha", "Shower", "מקלחת"), c: NM3("Ducha accesible – tirador al alcance", "Accessible shower – pull-cord within reach", "מקלחת נגישה – חבל מצוקה בהישג יד"),
+    l: [["wc", 1300, 700, 1]], d: [[365, 515, "ACE40320303"], [750, 472, "ACE40320303"]] },
+  ns: { n: NM3("Enfermería", "Nurse station", "עמדת אחיות"), c: NM3("Puesto de enfermería – fuera de la habitación", "Nurse station – outside the room", "עמדת אחיות – מחוץ לחדר"),
+    l: [["ipad", 930, 720], ["corridor", 1330, 300], ["rack", 120, 430]], d: [[542, 450, "EOP002"], [1290, 375, "CONSOLA"]] },
+  ipad: { n: NM3("Consola Monitor", "Consola Monitor", "Consola Monitor"), c: NM3("Consola Monitor – todas las llamadas, historial y estadísticas", "Consola Monitor – every call, history and statistics", "Consola Monitor – כל הקריאות, היסטוריה וסטטיסטיקה"),
+    l: [["ns", 300, 700, 1]], d: [[554, 468, "EOP002"], [1226, 470, "CONSOLA"]] },
+  rack: { n: NM3("Rack", "Rack", "ארון תקשורת"), c: NM3("SmartHub y servidor LVNS en el rack", "SmartHub and LVNS server in the rack", "SmartHub ושרת LVNS בארון התקשורת"),
+    l: [["ns", 300, 700, 1]], d: [[780, 420, "EVV049"], [700, 660, "EOP006"]] } };
+const ORDER = ["corridor", "light", "door", "room", "bed", "wc", "shower", "ns", "ipad", "rack"];
+const DEV = { ACE82012153: NM3("Panel de llamada + bayoneta para pera", "Call panel + pear socket", "פנל קריאה + שקע לאגס"), ACE82082137: NM3("Presencia / cancelación", "Presence / cancel", "נוכחות / ביטול"),
+  ACE39060521: NM3("Pera de llamada", "Pear handset", "אגס קריאה"), ACE40320303: NM3("Tirador de emergencia", "Emergency pull-cord", "משיכת חבל מצוקה"),
+  EOP004: NM3("Luz de pasillo (rojo · verde · azul)", "Corridor light (red · green · blue)", "מנורת מסדרון (אדום · ירוק · כחול)"), EOP002: NM3("Tablet / iPad con la Consola", "Tablet / iPad with the Consola", "טאבלט / iPad עם הקונסולה"),
+  CAREPAD: NM3("CarePad – tablet opcional para el paciente", "CarePad – optional patient tablet", "CarePad – טאבלט אופציונלי למטופל"), EVV049: NM3("SmartHub", "SmartHub", "SmartHub"), EOP006: NM3("Servidor LVNS", "LVNS server", "שרת LVNS") };
+const PIC = { ACE82012153: "f_ACE82012153.jpg", ACE82082137: "f_ACE82082137.jpg", EOP004: "f_EOP004.jpg", ACE40320303: "f_ACE40320303.jpg", EOP002: "f_EOP002.jpg", CAREPAD: "f_EOP002.jpg", EVV049: "f_EVV049.jpg", EOP006: "f_EOP006.jpg", ACE39060521: "" };
+const T = { es: { back: "← Planos", auto: ["▶ Caminar solo", "■ Detener"], m3d: "🧊 Modelo 3D", hint: "Arrastra para mirar · rueda o +/− para acercar · toca las flechas para caminar · puntos naranjas = equipos", sub: "Equipo ACE BG · Advantecnia", cons: "▶ Consola en vivo", title: "Recorrido · Yoseftal" },
+  en: { back: "← Plans", auto: ["▶ Auto walk", "■ Stop"], m3d: "🧊 3D model", hint: "Drag to look · wheel or +/− to zoom · tap the arrows to walk · orange dots = devices", sub: "ACE BG · Advantecnia device", cons: "▶ Live Consola", title: "Walk · Yoseftal" },
+  he: { back: "← לתוכניות", auto: ["▶ הליכה אוטומטית", "■ עצירה"], m3d: "🧊 מודל תלת-ממד", hint: "גררו כדי להסתכל · גלגלת או +/− להגדלה · הקישו על החצים כדי ללכת · נקודות כתומות = התקנים", sub: "התקן ACE BG · Advantecnia", cons: "▶ קונסולה חיה", title: "סיור · יוספטל" } };
+const QS = new URLSearchParams(location.search); let L = ["es", "en", "he"].includes(QS.get("lang")) ? QS.get("lang") : "he";
+const $ = id => document.getElementById(id); const st = $("st"); let A = $("img1"), B = $("img2");
+const IW = 1600, IH = 900; let cur = null, z = 1, cx = 800, cy = 450, busy = false;
+const TOP = 62, BOT = 58; const VW = () => innerWidth, VH = () => Math.max(200, innerHeight - TOP - BOT), VCY = () => TOP + VH() / 2;
+const base = () => Math.min(VW() / IW, VH() / IH);          // foto entera visible (sin recortar)
+function clamp() { const s = base() * z, hw = VW() / 2 / s, hh = VH() / 2 / s;
+  cx = hw * 2 >= IW ? IW / 2 : Math.min(IW - hw, Math.max(hw, cx)); cy = hh * 2 >= IH ? IH / 2 : Math.min(IH - hh, Math.max(hh, cy)); }
+function apply(img = A, zz = z, x = cx, y = cy) { const s = base() * zz; img.style.width = IW + "px"; img.style.height = IH + "px"; img.style.transform = `translate(${VW() / 2 - x * s}px,${VCY() - y * s}px) scale(${s})`; }
+function toScr(x, y) { const s = base() * z; return [VW() / 2 + (x - cx) * s, VCY() + (y - cy) * s]; }
+function place() { for (const e of $("ov").children) { const [x, y] = toScr(+e.dataset.x, +e.dataset.y); const vis = x > 4 && x < innerWidth - 4 && y > TOP + 4 && y < innerHeight - BOT - 4; e.style.display = vis ? "" : "none"; e.style.left = x + "px"; e.style.top = y + "px"; } }
+function frame() { clamp(); apply(); place(); }
+const ease = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+function anim(ms, f) { return new Promise(r => { const t0 = performance.now(); const k = now => { const t = Math.min(1, (now - t0) / ms); f(ease(t)); if (t < 1) requestAnimationFrame(k); else r(); }; requestAnimationFrame(k); }); }
+const load = src => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(i); i.src = src; });
+const src = n => `../assets/renders/${n}.jpg`;
+async function go(n, from) {
+  if (busy || n === cur) return; busy = true; $("card").hidden = true; $("ov").innerHTML = "";
+  const pre = load(src(n));
+  if (cur) { // caminar hacia el punto: acercamiento + fundido
+    const p = from || [cx, cy]; const z0 = z, x0 = cx, y0 = cy;
+    await anim(650, t => { z = z0 + (1.3 - z0) * t; cx = x0 + (p[0] - x0) * t; cy = y0 + (p[1] - y0) * t; clamp(); apply(); });
+  }
+  await pre; B.src = src(n); z = 1.06; cx = 800; cy = 450; clamp(); apply(B); B.style.transition = "none"; B.style.opacity = 0;
+  await new Promise(r => requestAnimationFrame(r)); B.style.transition = "opacity .5s"; B.style.opacity = 1; A.style.transition = "opacity .5s"; A.style.opacity = 0;
+  [A, B] = [B, A]; cur = n; ui();
+  await anim(900, t => { z = 1.06 - 0.06 * t; clamp(); apply(); place(); });
+  z = 1; frame(); busy = false;
+  for (const l of S[n].l) load(src(l[0]));
+}
+function ui() {
+  const t = T[L]; document.documentElement.dir = L === "he" ? "rtl" : "ltr"; document.documentElement.lang = L;
+  $("title").textContent = t.title; $("back").textContent = t.back; $("m3d").textContent = t.m3d; $("auto").textContent = t.auto[auto ? 1 : 0]; $("hint").textContent = t.hint;
+  document.querySelectorAll("[data-l]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.l === L)));
+  $("chips").innerHTML = ORDER.map(k => `<button data-n="${k}" class="${k === cur ? "on" : ""}">${S[k].n[L]}</button>`).join("");
+  $("chips").querySelectorAll("button").forEach(b => b.onclick = () => { stopAuto(); go(b.dataset.n); });
+  const on = $("chips").querySelector(".on"); if (on) on.scrollIntoView({ inline: "center", block: "nearest" });
+  if (!cur) return; $("cap").textContent = S[cur].c[L]; document.title = "Yoseftal · " + S[cur].n[L];
+  $("ov").innerHTML = S[cur].l.map(([to, x, y, bk], i) => `<div class="hs ${bk ? "back" : ""}" data-i="${i}" data-x="${x}" data-y="${y}"><div class="ring">${bk ? "↩" : "⬆"}</div><div class="lb">${S[to].n[L]}</div></div>`).join("") +
+    S[cur].d.map(([x, y, c], i) => c === "CONSOLA" ? `<div class="dv big" data-d="${i}" data-x="${x}" data-y="${y}">${t.cons}</div>` : `<div class="dv" data-d="${i}" data-x="${x}" data-y="${y}">i</div>`).join("");
+  $("ov").querySelectorAll(".hs").forEach(e => e.onclick = ev => { ev.stopPropagation(); stopAuto(); const l = S[cur].l[+e.dataset.i]; go(l[0], [l[1], l[2]]); });
+  $("ov").querySelectorAll(".dv").forEach(e => e.onclick = ev => { ev.stopPropagation(); const [, , c] = S[cur].d[+e.dataset.d];
+    if (c === "CONSOLA") { stopAuto(); return openConsola(); }
+    $("cimg").hidden = !PIC[c]; if (PIC[c]) $("cimg").src = PIC[c]; $("ct").textContent = DEV[c][L]; $("cs").textContent = (c === "CAREPAD" ? "" : c + " · ") + t.sub; $("card").hidden = false; });
+  place();
+}
+function openConsola() { if (!$("cmf").src) $("cmf").src = "../consola/"; $("cm").hidden = false; }
+$("cmx").onclick = () => { $("cm").hidden = true; };
+// arrastrar / pellizcar / rueda
+const pts = new Map(); let pd = 0;
+st.addEventListener("pointerdown", e => { pts.set(e.pointerId, [e.clientX, e.clientY]); st.setPointerCapture(e.pointerId); st.classList.add("drag"); $("hint").style.opacity = 0; stopAuto(); });
+st.addEventListener("pointermove", e => { if (!pts.has(e.pointerId) || busy) return; const [x, y] = pts.get(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]);
+  if (pts.size === 2) { const [a, b] = [...pts.values()]; const d = Math.hypot(a[0] - b[0], a[1] - b[1]); if (pd) { z = Math.max(1, Math.min(3.5, z * d / pd)); frame(); } pd = d; return; }
+  const s = base() * z; cx -= (e.clientX - x) / s; cy -= (e.clientY - y) / s; frame(); });
+const up = e => { pts.delete(e.pointerId); if (pts.size < 2) pd = 0; if (!pts.size) st.classList.remove("drag"); };
+st.addEventListener("pointerup", up); st.addEventListener("pointercancel", up);
+st.addEventListener("click", () => { $("card").hidden = true; });
+const zoomBy = (f, px = innerWidth / 2, py = innerHeight / 2) => { if (busy) return; const s0 = base() * z; const ix = cx + (px - innerWidth / 2) / s0, iy = cy + (py - innerHeight / 2) / s0;
+  z = Math.max(1, Math.min(3.5, z * f)); const s1 = base() * z; cx = ix - (px - innerWidth / 2) / s1; cy = iy - (py - innerHeight / 2) / s1; frame(); };
+st.addEventListener("wheel", e => { e.preventDefault(); zoomBy(e.deltaY < 0 ? 1.15 : 1 / 1.15, e.clientX, e.clientY); }, { passive: false });
+$("zin").onclick = () => zoomBy(1.3); $("zout").onclick = () => zoomBy(1 / 1.3);
+addEventListener("keydown", e => { if (!$("cm").hidden) return; const i = ORDER.indexOf(cur); const rtl = L === "he";
+  if (e.key === (rtl ? "ArrowLeft" : "ArrowRight")) { stopAuto(); go(ORDER[(i + 1) % ORDER.length]); } if (e.key === (rtl ? "ArrowRight" : "ArrowLeft")) { stopAuto(); go(ORDER[(i + ORDER.length - 1) % ORDER.length]); } });
+addEventListener("resize", frame);
+// caminata automática: mira alrededor en cada lugar y camina al siguiente
+let auto = false, autoId = 0;
+function stopAuto() { if (!auto) return; auto = false; autoId++; $("prog").style.width = 0; ui(); }
+async function runAuto() {
+  auto = true; const id = ++autoId; ui();
+  if (cur !== "corridor") await go("corridor");
+  while (auto && id === autoId) {
+    // mirada lenta de un lado a otro
+    z = 1; cx = 800; cy = 450;
+    await anim(5200, t => { if (id !== autoId) return; $("prog").style.width = ((ORDER.indexOf(cur) + t) / ORDER.length * 100) + "%"; frame(); });
+    if (id !== autoId) return;
+    const i = ORDER.indexOf(cur); if (i === ORDER.length - 1) { stopAuto(); return; }
+    const nx = ORDER[i + 1]; const l = S[cur].l.find(q => q[0] === nx); await go(nx, l ? [l[1], l[2]] : null);
+  }
+}
+$("auto").onclick = () => { if (auto) stopAuto(); else runAuto(); };
+$("back").onclick = () => { location.href = `../${L}/`; };
+$("m3d").onclick = () => { location.href = `../${L}/?3d`; };
+document.querySelectorAll("[data-l]").forEach(b => b.onclick = () => { L = b.dataset.l; ui(); });
+ui(); setTimeout(() => $("hint").style.opacity = 0, 6000);
+go(S[QS.get("n")] ? QS.get("n") : "corridor").then(() => { if (QS.has("auto")) runAuto(); });
+</script>
+</body>
+</html>
