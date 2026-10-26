@@ -45,7 +45,7 @@ table{border-collapse:collapse;width:100%;font-size:12px}td,th{border-bottom:1px
 <div class="mon"><div class="ic">📢🔒</div><div class="lb">Consola Monitor</div></div><div class="alarm">!</div></div>
 <div class="desk" id="desk">Nurse Desk · Surgery</div>
 <div id="main"></div><div class="hint">F1 Calls · F2 Alarms · F6 History · F7 Statistics by area · click a call: 1st = PRESENCE, 2nd = CANCEL · ⓘ = bed history</div><div class="toast" id="toast"></div></div>
-<div id="dock"><b>DEMO</b>
+<div id="dock"><button id="backb" style="background:#1F2430" onclick="goBack()"></button><b>DEMO</b>
 <select id="room"><option>Room 1</option><option>Room 2</option><option selected>Room 3</option><option>Room 4</option></select>
 <select id="bed"><option selected>BED 1</option><option>BED 2</option><option>BED 3</option></select>
 <button style="background:#d93025" onclick="newCall('bed')">🔔 Patient call / קריאה</button>
@@ -56,6 +56,8 @@ table{border-collapse:collapse;width:100%;font-size:12px}td,th{border-bottom:1px
 <button style="background:#e2631a" id="auto" onclick="toggleAuto()">▶ Auto demo</button>
 </div>
 <script>
+const LQ=(new URLSearchParams(location.search).get("lang"))||"he";document.getElementById("backb").textContent={es:"← Volver al plano",en:"← Back to the plans",he:"← חזרה לתוכנית"}[LQ]||"← Back";
+function goBack(){if(document.referrer&&history.length>1)history.back();else location.href="../"+LQ+"/";}
 const app=document.getElementById("app"),main=document.getElementById("main");
 function fit(){const dh=document.getElementById("dock").offsetHeight;const s=Math.min(innerWidth/1366,(innerHeight-dh)/768);app.style.transform=`scale(${s})`;app.style.left=((innerWidth-1366*s)/2)+"px"}
 addEventListener("resize",fit);

@@ -8,7 +8,7 @@
 <style>
 :root{--ink:#1F2630;--muted:#6B7480;--line:#DDE1E6;--accent:#C9662A;--bg:#FFFFFF;--font:"Barlow Semi Condensed","Arial Narrow",system-ui,Arial,sans-serif}
 *{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--font);overflow:hidden;-webkit-user-select:none;user-select:none}
-#st{position:fixed;inset:0;overflow:hidden;touch-action:none;cursor:grab;background:#F4F5F6}#st.drag{cursor:grabbing}
+#st{position:fixed;inset:0;overflow:hidden;touch-action:none;cursor:grab;background:#FFFFFF}#st.drag{cursor:grabbing}
 #st img{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;pointer-events:none;max-width:none}
 #img2{opacity:0}
 .top{position:fixed;left:8px;right:8px;top:calc(8px + env(safe-area-inset-top,0px));display:flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);padding:6px 8px;z-index:5;box-shadow:0 2px 10px rgba(30,40,55,.08);flex-wrap:wrap}
@@ -90,11 +90,13 @@ const T = { es: { back: "← Planos", auto: ["▶ Caminar solo", "■ Detener"],
 const QS = new URLSearchParams(location.search); let L = ["es", "en", "he"].includes(QS.get("lang")) ? QS.get("lang") : "he";
 const $ = id => document.getElementById(id); const st = $("st"); let A = $("img1"), B = $("img2");
 const IW = 1600, IH = 900; let cur = null, z = 1, cx = 800, cy = 450, busy = false;
-const base = () => Math.max(innerWidth / IW, innerHeight / IH);
-function clamp() { const s = base() * z, hw = innerWidth / 2 / s, hh = innerHeight / 2 / s; cx = Math.min(IW - hw, Math.max(hw, cx)); cy = Math.min(IH - hh, Math.max(hh, cy)); }
-function apply(img = A, zz = z, x = cx, y = cy) { const s = base() * zz; img.style.width = IW + "px"; img.style.height = IH + "px"; img.style.transform = `translate(${innerWidth / 2 - x * s}px,${innerHeight / 2 - y * s}px) scale(${s})`; }
-function toScr(x, y) { const s = base() * z; return [innerWidth / 2 + (x - cx) * s, innerHeight / 2 + (y - cy) * s]; }
-function place() { for (const e of $("ov").children) { const [x, y] = toScr(+e.dataset.x, +e.dataset.y); const vis = x > -20 && x < innerWidth + 20 && y > 50 && y < innerHeight - 40; e.style.display = vis ? "" : "none"; e.style.left = x + "px"; e.style.top = y + "px"; } }
+const TOP = 62, BOT = 58; const VW = () => innerWidth, VH = () => Math.max(200, innerHeight - TOP - BOT), VCY = () => TOP + VH() / 2;
+const base = () => Math.min(VW() / IW, VH() / IH);          // foto entera visible (sin recortar)
+function clamp() { const s = base() * z, hw = VW() / 2 / s, hh = VH() / 2 / s;
+  cx = hw * 2 >= IW ? IW / 2 : Math.min(IW - hw, Math.max(hw, cx)); cy = hh * 2 >= IH ? IH / 2 : Math.min(IH - hh, Math.max(hh, cy)); }
+function apply(img = A, zz = z, x = cx, y = cy) { const s = base() * zz; img.style.width = IW + "px"; img.style.height = IH + "px"; img.style.transform = `translate(${VW() / 2 - x * s}px,${VCY() - y * s}px) scale(${s})`; }
+function toScr(x, y) { const s = base() * z; return [VW() / 2 + (x - cx) * s, VCY() + (y - cy) * s]; }
+function place() { for (const e of $("ov").children) { const [x, y] = toScr(+e.dataset.x, +e.dataset.y); const vis = x > 4 && x < innerWidth - 4 && y > TOP + 4 && y < innerHeight - BOT - 4; e.style.display = vis ? "" : "none"; e.style.left = x + "px"; e.style.top = y + "px"; } }
 function frame() { clamp(); apply(); place(); }
 const ease = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 function anim(ms, f) { return new Promise(r => { const t0 = performance.now(); const k = now => { const t = Math.min(1, (now - t0) / ms); f(ease(t)); if (t < 1) requestAnimationFrame(k); else r(); }; requestAnimationFrame(k); }); }
@@ -105,12 +107,12 @@ async function go(n, from) {
   const pre = load(src(n));
   if (cur) { // caminar hacia el punto: acercamiento + fundido
     const p = from || [cx, cy]; const z0 = z, x0 = cx, y0 = cy;
-    await anim(650, t => { z = z0 + (1.6 - z0) * t; cx = x0 + (p[0] - x0) * t; cy = y0 + (p[1] - y0) * t; clamp(); apply(); });
+    await anim(650, t => { z = z0 + (1.3 - z0) * t; cx = x0 + (p[0] - x0) * t; cy = y0 + (p[1] - y0) * t; clamp(); apply(); });
   }
-  await pre; B.src = src(n); z = 1.35; cx = 800; cy = 450; clamp(); apply(B); B.style.transition = "none"; B.style.opacity = 0;
+  await pre; B.src = src(n); z = 1.06; cx = 800; cy = 450; clamp(); apply(B); B.style.transition = "none"; B.style.opacity = 0;
   await new Promise(r => requestAnimationFrame(r)); B.style.transition = "opacity .5s"; B.style.opacity = 1; A.style.transition = "opacity .5s"; A.style.opacity = 0;
   [A, B] = [B, A]; cur = n; ui();
-  await anim(900, t => { z = 1.35 - 0.35 * t; clamp(); apply(); place(); });
+  await anim(900, t => { z = 1.06 - 0.06 * t; clamp(); apply(); place(); });
   z = 1; frame(); busy = false;
   for (const l of S[n].l) load(src(l[0]));
 }
@@ -156,9 +158,8 @@ async function runAuto() {
   if (cur !== "corridor") await go("corridor");
   while (auto && id === autoId) {
     // mirada lenta de un lado a otro
-    const s = base(); const hw = innerWidth / 2 / s; const xl = Math.max(hw, 800 - 300), xr = Math.min(IW - hw, 800 + 300);
-    z = 1.08; const x0 = L === "he" ? xr : xl, x1 = L === "he" ? xl : xr; cx = x0;
-    await anim(5200, t => { if (id !== autoId) return; cx = x0 + (x1 - x0) * t; $("prog").style.width = ((ORDER.indexOf(cur) + t) / ORDER.length * 100) + "%"; frame(); });
+    z = 1; cx = 800; cy = 450;
+    await anim(5200, t => { if (id !== autoId) return; $("prog").style.width = ((ORDER.indexOf(cur) + t) / ORDER.length * 100) + "%"; frame(); });
     if (id !== autoId) return;
     const i = ORDER.indexOf(cur); if (i === ORDER.length - 1) { stopAuto(); return; }
     const nx = ORDER[i + 1]; const l = S[cur].l.find(q => q[0] === nx); await go(nx, l ? [l[1], l[2]] : null);
