@@ -8,6 +8,7 @@
 | Archivo | Qué es |
 |---|---|
 | `index.html` | Visor interactivo 2D por planta (L00–L13), ES/EN/HE, modo revisión (✕ quitar punto), exportar CSV, resumen, documentos |
+| `3d/es|en|he/` | Maqueta 3D de la planta típica L09 (12 cuartos, 32 camas, 11 baños): recorrido, caminar, cableado, simulación de llamadas, documentos |
 | `assets/plan/Lxx.jpg` | Plano base de cada planta (aclarado) |
 | `assets/eq/*.jpg` | Fotos reales de equipos ACE |
 | `docs/Nesher_Plan2D_EN.pdf` | Planos 2D ACE estilo Yoseftal (17 hojas A3) |
@@ -17,6 +18,10 @@
 ## Números
 - Verde (cama / sillón): 1–535 · Azul (baño): 1–213, de la planta más baja a la más alta. B02 sin puntos. L02 vino duplicado: se usó una copia.
 - Cuartos: L03 14, L04 14, L07 22, L08 20 (de los rótulos); resto estimado = camas ÷ 2,3.
+
+## 3D
+- Motor: el mismo de Yoseftal (three.js), con el modelo de Nesher generado desde los puntos del plano L09 (posiciones de camas y baños reales; muros y mobiliario aproximados).
+- URL: https://alexjusid-jpg.github.io/planos/nesher/3d/es/ (también /en/ y /he/).
 
 ## Cómo modificar
 1. **Quitar/agregar puntos:** en el Excel BOQ, hoja `Points`, columna `Confirmed` = N; todo el BOQ se recalcula. En el visor: Modo revisión → tocar punto → Exportar revisión (CSV) y mandarlo al chat.
