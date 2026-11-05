@@ -82,6 +82,12 @@ body.fpmode .info{bottom:auto;top:96px}
 body.capture .bar,body.capture .legend,body.capture .info,body.capture .pad,body.capture .docpanel,body.capture .docview{display:none!important}
 @media (max-width:720px){.legend{display:none}.bar{gap:6px}.brand span{display:none}button,select{font-size:13px;padding:4px 8px}}
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+/* responsive: teléfono / tablet / PC */
+@media (max-width:700px){body.menu-open .bar{left:8px;right:8px;max-height:calc(100vh - 140px)}
+ .info{left:8px;right:8px;width:auto;bottom:calc(70px + env(safe-area-inset-bottom,0px));max-height:40vh;overflow:auto}
+ .pad{right:8px;grid-template-columns:repeat(3,52px);grid-template-rows:52px 52px auto}
+ .tag.dev{font-size:9.5px}.tag.room{font-size:11px}}
+@media (min-width:701px) and (max-width:1100px){.bar{gap:6px 8px;padding:6px 8px}button,select{font-size:13px;padding:4px 8px}.brand b{font-size:15px}}
 .menu-t{display:none}
 @media (max-width:700px){.menu-t{display:block;position:fixed;top:calc(8px + env(safe-area-inset-top,0px));inset-inline-start:8px;z-index:12;font-size:20px;padding:6px 14px;background:#2B2759;color:#fff;border:0;border-radius:8px}
  body:not(.menu-open) .bar{display:none!important} body.menu-open .bar{top:calc(52px + env(safe-area-inset-top,0px));max-height:70vh;overflow:auto}}
@@ -104,7 +110,7 @@ body.capture .bar,body.capture .legend,body.capture .info,body.capture .pad,body
     <button id="cut" aria-pressed="false"></button>
     <button id="fp" class="play" aria-pressed="false"></button>
     <select id="goto" aria-label="Ir a"></select>
-    <button id="docs" hidden></button><a id="consola-demo" href="../consola/?lang=en" style="position:fixed;left:16px;top:calc(74px + env(safe-area-inset-top,0px));z-index:30;background:#27306b;color:#fff;font:600 13px Arial,sans-serif;padding:8px 14px;border-radius:18px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.3)">🖥 Nurse station demo</a>
+    <button id="docs" hidden></button><a id="consola-demo" href="../consola/?lang=en" style="display:inline-block;background:#27306b;color:#fff;font:600 13px Arial,sans-serif;padding:5px 12px;border-radius:16px;text-decoration:none;white-space:nowrap">🖥 Nurse station demo</a>
   </div>
   <div class="grp" style="margin-left:auto"><div class="seg" role="group" aria-label="Idioma">
     <button data-lang="es" aria-pressed="true">ES</button><button data-lang="en" aria-pressed="false">EN</button><button data-lang="he" aria-pressed="false">עב</button></div></div>
@@ -917,6 +923,9 @@ fpStep = function (dt) { if (gyro && gy) { const turn = (keys.L ? 1 : 0) - (keys
     yaw = gy.yaw + gyOff; _fpStep(dt); keys.L = keys._L; keys.R = keys._R; yaw = gy.yaw + gyOff; pitch = gy.pitch; fpLook(); } else _fpStep(dt); };
 addEventListener("pointermove", e => { if (fp && gyro && gy && lookAt0) { gyOff = yaw - gy.yaw; } });
 $("fp").onclick = () => { const on = !fp; setFp(on); if (TOUCH) setGyro(on); };
+const closeMenu = () => { if (innerWidth <= 700 && document.body.classList.contains("menu-open")) { document.body.classList.remove("menu-open"); const m = $("menu-t"); if (m) { m.setAttribute("aria-expanded", "false"); m.textContent = "☰"; } } };
+["walk", "fp", "docs", "lbl", "cut"].forEach(id => $(id) && $(id).addEventListener("click", () => setTimeout(closeMenu, 0)));
+["goto", "view", "scen"].forEach(id => $(id) && $(id).addEventListener("change", () => setTimeout(closeMenu, 0)));
 $("goto").onchange = e => { const v = e.target.value; if (v !== "") gotoDev(GOTO[+v]); e.target.value = ""; e.target.blur(); };
 fpUI();
 /* ------------------------------------------------------------------ documentos del proyecto */

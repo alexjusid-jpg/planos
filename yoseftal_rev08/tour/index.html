@@ -40,13 +40,15 @@ button.pri{background:var(--ink);color:#fff;border-color:var(--ink)}button.acc{b
 #cm{position:fixed;inset:0;z-index:20;background:#fff;display:grid;grid-template-rows:auto 1fr}#cm[hidden]{display:none}
 #cm .h{display:flex;gap:8px;align-items:center;padding:calc(8px + env(safe-area-inset-top,0px)) 10px 8px;border-bottom:1px solid var(--line)}#cm .h b{flex:1;font-size:17px}
 #cm iframe{width:100%;height:100%;border:0}
+#gyro[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+@media (max-width:600px){.top{gap:5px;padding:5px 6px}.top b{font-size:14px;min-width:0;flex:1 1 100%;order:-1}button{font-size:13px;padding:6px 8px}.cap{font-size:13px;padding:4px 10px}.chips button{font-size:13px}.zoom button{width:40px;height:40px}}
 </style>
 </head>
 <body>
 <div id="st"><img id="img1" alt=""><img id="img2" alt=""></div>
 <div id="fade"></div>
 <div id="ov"></div>
-<div class="top"><button class="pri" id="back"></button><b id="title"></b><button class="acc" id="auto"></button><button id="m3d"></button>
+<div class="top"><button class="pri" id="back"></button><b id="title"></b><button class="acc" id="auto"></button><button id="m3d"></button><button id="gyro" aria-pressed="false" hidden>📱</button>
 <div class="seg"><button data-l="es">ES</button><button data-l="en">EN</button><button data-l="he">עב</button></div></div>
 <div class="cap" id="cap"></div>
 <div class="zoom"><button id="zin" aria-label="zoom in">+</button><button id="zout" aria-label="zoom out">−</button></div>
@@ -90,14 +92,14 @@ const T = { es: { back: "← Planos", auto: ["▶ Caminar solo", "■ Detener"],
 const QS = new URLSearchParams(location.search); let L = ["es", "en", "he"].includes(QS.get("lang")) ? QS.get("lang") : "he";
 const $ = id => document.getElementById(id); const st = $("st"); let A = $("img1"), B = $("img2");
 const IW = 1600, IH = 900; let cur = null, z = 1, cx = 800, cy = 450, busy = false;
-const TOP = 62, BOT = 58; const VW = () => innerWidth, VH = () => Math.max(200, innerHeight - TOP - BOT), VCY = () => TOP + VH() / 2;
-const base = () => Math.min(VW() / IW, VH() / IH);          // foto entera visible (sin recortar)
+let TOP = 62; const BOT = 58; const measure = () => { const t = document.querySelector(".top"); TOP = t ? Math.ceil(t.getBoundingClientRect().bottom) + 4 : 62; const c = $("cap"); if (c) c.style.top = TOP + "px"; }; const VW = () => innerWidth, VH = () => Math.max(200, innerHeight - TOP - BOT), VCY = () => TOP + VH() / 2;
+const base = () => VH() > VW() ? VH() / IH : Math.min(VW() / IW, VH() / IH); // vertical: la foto llena el alto (se mira moviendo)          // foto entera visible (sin recortar)
 function clamp() { const s = base() * z, hw = VW() / 2 / s, hh = VH() / 2 / s;
   cx = hw * 2 >= IW ? IW / 2 : Math.min(IW - hw, Math.max(hw, cx)); cy = hh * 2 >= IH ? IH / 2 : Math.min(IH - hh, Math.max(hh, cy)); }
 function apply(img = A, zz = z, x = cx, y = cy) { const s = base() * zz; img.style.width = IW + "px"; img.style.height = IH + "px"; img.style.transform = `translate(${VW() / 2 - x * s}px,${VCY() - y * s}px) scale(${s})`; }
 function toScr(x, y) { const s = base() * z; return [VW() / 2 + (x - cx) * s, VCY() + (y - cy) * s]; }
 function place() { for (const e of $("ov").children) { const [x, y] = toScr(+e.dataset.x, +e.dataset.y); const vis = x > 4 && x < innerWidth - 4 && y > TOP + 4 && y < innerHeight - BOT - 4; e.style.display = vis ? "" : "none"; e.style.left = x + "px"; e.style.top = y + "px"; } }
-function frame() { clamp(); apply(); place(); }
+function frame() { measure(); clamp(); apply(); place(); }
 const ease = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 function anim(ms, f) { return new Promise(r => { const t0 = performance.now(); const k = now => { const t = Math.min(1, (now - t0) / ms); f(ease(t)); if (t < 1) requestAnimationFrame(k); else r(); }; requestAnimationFrame(k); }); }
 const load = src => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(i); i.src = src; });
@@ -113,12 +115,12 @@ async function go(n, from) {
   await new Promise(r => requestAnimationFrame(r)); B.style.transition = "opacity .5s"; B.style.opacity = 1; A.style.transition = "opacity .5s"; A.style.opacity = 0;
   [A, B] = [B, A]; cur = n; ui();
   await anim(900, t => { z = 1.06 - 0.06 * t; clamp(); apply(); place(); });
-  z = 1; frame(); busy = false;
+  z = 1; frame(); busy = false; g0 = null;
   for (const l of S[n].l) load(src(l[0]));
 }
 function ui() {
   const t = T[L]; document.documentElement.dir = L === "he" ? "rtl" : "ltr"; document.documentElement.lang = L;
-  $("title").textContent = t.title; $("back").textContent = t.back; $("m3d").textContent = t.m3d; $("auto").textContent = t.auto[auto ? 1 : 0]; $("hint").textContent = t.hint;
+  $("title").textContent = t.title; $("back").textContent = t.back; $("m3d").textContent = t.m3d; $("auto").textContent = t.auto[auto ? 1 : 0]; $("hint").textContent = (typeof TOUCH !== "undefined" && TOUCH ? ({ es: "📱 Mueve el teléfono para mirar · ", en: "📱 Move the phone to look around · ", he: "📱 הזיזו את הטלפון כדי להסתכל · " })[L] : "") + t.hint;
   document.querySelectorAll("[data-l]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.l === L)));
   $("chips").innerHTML = ORDER.map(k => `<button data-n="${k}" class="${k === cur ? "on" : ""}">${S[k].n[L]}</button>`).join("");
   $("chips").querySelectorAll("button").forEach(b => b.onclick = () => { stopAuto(); go(b.dataset.n); });
@@ -165,6 +167,17 @@ async function runAuto() {
     const nx = ORDER[i + 1]; const l = S[cur].l.find(q => q[0] === nx); await go(nx, l ? [l[1], l[2]] : null);
   }
 }
+const TOUCH = matchMedia("(pointer: coarse)").matches || "ontouchstart" in window; let gyro = false, g0 = null;
+if (TOUCH) $("gyro").hidden = false;
+async function setGyro(on) { if (on && typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") { try { on = (await DeviceOrientationEvent.requestPermission()) === "granted"; } catch (_) { on = false; } }
+  gyro = on; g0 = null; $("gyro").setAttribute("aria-pressed", String(on)); }
+const wrapD = d => ((d + 540) % 360) - 180;
+addEventListener("deviceorientation", e => { if (!gyro || busy || e.alpha == null || pts.size) return;
+  if (!g0) { g0 = [e.alpha, e.beta, cx, cy]; return; } const k = IW / 70; // 70° de giro = ancho de la foto
+  cx = g0[2] - wrapD(e.alpha - g0[0]) * k; cy = g0[3] - (e.beta - g0[1]) * k * 0.9; frame(); });
+st.addEventListener("pointerup", () => { g0 = null; });
+$("gyro").onclick = () => setGyro(!gyro);
+let askedG = false; st.addEventListener("click", () => { if (TOUCH && !askedG) { askedG = true; setGyro(true); } });
 $("auto").onclick = () => { if (auto) stopAuto(); else runAuto(); };
 $("back").onclick = () => { location.href = `../${L}/`; };
 $("m3d").onclick = () => { location.href = `../${L}/?3d`; };
