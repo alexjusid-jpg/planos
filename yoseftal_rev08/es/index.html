@@ -898,7 +898,25 @@ function fpUI() {
   $("fp").textContent = fp ? FPT[LANG].off : FPT[LANG].on; $("fphint").textContent = FPT[LANG].hint;
   $("goto").innerHTML = `<option value="">${FPT[LANG].go}</option>` + GOTO.map((d, i) => `<option value="${i}">${d.id} · ${TYPE_NAME[LANG][d.type] || d.type}</option>`).join("");
 }
-$("fp").onclick = () => setFp(!fp);
+/* giroscopio: mover el teléfono/iPad para mirar (360°, techo y piso) */
+let gyro = false, gy = null, gyOff = 0; const TOUCH = matchMedia("(pointer: coarse)").matches || "ontouchstart" in window;
+const gq = new THREE.Quaternion(), gq1 = new THREE.Quaternion(-Math.sqrt(0.5), 0, 0, Math.sqrt(0.5)), gq0 = new THREE.Quaternion(), gE = new THREE.Euler(), gZ = new THREE.Vector3(0, 0, 1);
+addEventListener("deviceorientation", e => { if (!gyro || e.alpha == null) return; const R = Math.PI / 180, so = ((screen.orientation && screen.orientation.angle) || window.orientation || 0) * R;
+  gE.set(e.beta * R, e.alpha * R, -e.gamma * R, "YXZ"); gq.setFromEuler(gE).multiply(gq1).multiply(gq0.setFromAxisAngle(gZ, -so));
+  const d = new THREE.Vector3(0, 0, -1).applyQuaternion(gq); const ny = Math.atan2(d.x, d.z), np = Math.max(-1.45, Math.min(1.45, Math.asin(Math.max(-1, Math.min(1, d.y)))));
+  if (!gy) gyOff = yaw - ny; gy = { yaw: ny, pitch: np }; });
+async function setGyro(on) {
+  if (on && typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") { try { on = (await DeviceOrientationEvent.requestPermission()) === "granted"; } catch (_) { on = false; } }
+  gyro = on; gy = null; const b = $("gyro"); if (b) b.setAttribute("aria-pressed", String(on));
+}
+{ const b = document.createElement("button"); b.id = "gyro"; b.textContent = "📱"; b.setAttribute("aria-label", "Gyro"); b.setAttribute("aria-pressed", "false"); b.hidden = !TOUCH;
+  b.style.cssText = "grid-column:3;grid-row:2"; $("pad").appendChild(b); b.onclick = () => setGyro(!gyro);
+  const st = document.createElement("style"); st.textContent = "#gyro[aria-pressed=true]{background:#C9662A!important;color:#fff!important}"; document.head.appendChild(st); }
+const _fpStep = fpStep;
+fpStep = function (dt) { if (gyro && gy) { const turn = (keys.L ? 1 : 0) - (keys.R ? 1 : 0); gyOff += turn * 1.6 * dt; keys._L = keys.L; keys._R = keys.R; keys.L = keys.R = false;
+    yaw = gy.yaw + gyOff; _fpStep(dt); keys.L = keys._L; keys.R = keys._R; yaw = gy.yaw + gyOff; pitch = gy.pitch; fpLook(); } else _fpStep(dt); };
+addEventListener("pointermove", e => { if (fp && gyro && gy && lookAt0) { gyOff = yaw - gy.yaw; } });
+$("fp").onclick = () => { const on = !fp; setFp(on); if (TOUCH) setGyro(on); };
 $("goto").onchange = e => { const v = e.target.value; if (v !== "") gotoDev(GOTO[+v]); e.target.value = ""; e.target.blur(); };
 fpUI();
 /* ------------------------------------------------------------------ documentos del proyecto */
@@ -1123,7 +1141,9 @@ window.__still = (view, mode, scen, cut) => { tl.hidden = true; wiring = mode ==
   applyScenario = function () { _ap(); for (const [id, h] of Object.entries(HALO)) { const st = SCEN[scenario][id === "B3-LP2" ? "B3-LP" : id]; h.visible = !!st; if (st) { h.material.color.setHex(LP_COL[st]); h.userData.blink = st !== "pres"; } }
     const o = lpMeshes["B3-LP2"], st = SCEN[scenario]["B3-LP"]; if (o) { const c = st ? LP_COL[st] : null;
     o.mat.color.setHex(c ?? 0xE9ECEF); o.mat.emissive.setHex(c ?? 0x000000); o.light.color.setHex(c ?? 0xffffff); o.light.intensity = c ? 1.6 : 0; } };
+  function seed() { if (scenario === "live") return; for (const [k, v] of Object.entries(SCEN[scenario] || {})) { const r = k.replace(/-LP2?$/, ""); if (ROOMS.includes(r) && !LIVE[r]) LIVE[r] = v; } }
   function act(r, a) {
+    seed();
     if (a === "pres") LIVE[r] = LIVE[r] === "pres" ? null : "pres";
     else if (a === "off") { for (const k of ROOMS) LIVE[k] = null; }
     else LIVE[r] = a;
