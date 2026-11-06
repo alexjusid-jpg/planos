@@ -12,6 +12,7 @@
    "en": "Nurse call · REV08",
    "es": "Llamada de enfermería · REV08"
   },
+  "cover": "covers/Plano de Yoseftal.pdf",
   "open": {
    "he": "yoseftal_rev08/he/",
    "en": "yoseftal_rev08/en/",
@@ -53,7 +54,7 @@
      "yoseftal_rev08/tour/f_EVV049.jpg",
      "yoseftal_rev08/tour/index.html"
     ],
-    "bytes": 37197099
+    "bytes": 37197652
    },
    "en": {
     "files": [
@@ -90,7 +91,7 @@
      "yoseftal_rev08/tour/f_EVV049.jpg",
      "yoseftal_rev08/tour/index.html"
     ],
-    "bytes": 37174703
+    "bytes": 37175240
    },
    "es": {
     "files": [
@@ -127,7 +128,7 @@
      "yoseftal_rev08/tour/f_EVV049.jpg",
      "yoseftal_rev08/tour/index.html"
     ],
-    "bytes": 37176929
+    "bytes": 37177474
    }
   }
  },
@@ -144,6 +145,7 @@
    "en": "Nurse call",
    "es": "Llamada de enfermería"
   },
+  "cover": "covers/Plano de Migdalei.pdf",
   "open": {
    "he": "migdalei/he/",
    "en": "migdalei/en/",
@@ -306,6 +308,7 @@
    "en": "Nurse call",
    "es": "Llamada de enfermería"
   },
+  "cover": "covers/Plano de Nesher.pdf",
   "open": {
    "he": "nesher/",
    "en": "nesher/",

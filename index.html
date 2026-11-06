@@ -98,7 +98,7 @@ function card(p) {
   <div class="row">
     <a class="b open" href="${p.open[L]}">▶ ${t.open}</a>
     <a class="b" href="${p.open.he}">עב</a><a class="b" href="${p.open.en}">EN</a><a class="b" href="${p.open.es}">ES</a>
-    <span class="sp"></span>
+    ${p.cover ? `<a class="b" href="${encodeURI(p.cover)}">📄 PDF</a>` : ""}<span class="sp"></span>
     <button class="b share">⤴ ${t.share}</button><button class="b cp">🔗 ${t.copy}</button>
     <button class="b dz">⬇ ${t.zip} · ${mb(z.bytes)}</button>
   </div><div class="prog" hidden><i></i></div><div class="msg"></div>`;

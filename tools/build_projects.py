@@ -52,6 +52,8 @@ for p in PROJECTS:
     mine = [f for f in files if f.startswith(pid + "/")]
     has_lang = all(any(f.startswith(f"{pid}/{l}/") for f in mine) for l in LANGS)
     entry = {k: p[k] for k in ("id", "main", "name", "sub")}
+    cov = {"yoseftal_rev08": "Yoseftal", "migdalei": "Migdalei", "nesher": "Nesher"}.get(pid)
+    if cov: entry["cover"] = f"covers/Plano de {cov}.pdf"
     entry["open"] = {l: (f"{pid}/{l}/" if has_lang else f"{pid}/") for l in LANGS}
     zips = {}
     for l in (LANGS if has_lang else ["all"]):
