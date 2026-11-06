@@ -62,7 +62,7 @@ pre{white-space:pre-wrap;border:1px solid var(--line);border-radius:6px;padding:
 <div class="wrap">
   <a class="home" href="../" id="home">← <span data-t="home"></span></a>
   <header>
-    <div><h1 data-t="title"></h1><p class="sub" data-t="sub"></p></div>
+    <div><h1 data-t="title"></h1><p class="sub" data-t="sub"></p><p class="sub" id="updnote" hidden style="color:var(--accent);font-weight:600"></p></div>
     <div class="langs" role="group" aria-label="Language"><button type="button" data-lang="he">עב</button><button type="button" data-lang="en">EN</button><button type="button" data-lang="es">ES</button></div>
   </header>
 
@@ -149,6 +149,7 @@ pre{white-space:pre-wrap;border:1px solid var(--line);border-radius:6px;padding:
     <fieldset>
       <legend><span class="n">7</span><span data-t="s7"></span></legend>
       <div class="actions">
+        <button class="btn" type="button" id="send" data-t="send" hidden></button>
         <button class="btn" type="button" id="share" data-t="share"></button>
         <button class="btn navy" type="button" id="zipb" data-t="zip"></button>
         <a class="btn ghost" id="wa" href="https://wa.me/" target="_blank" rel="noopener" data-t="wa"></a>
@@ -166,7 +167,7 @@ pre{white-space:pre-wrap;border:1px solid var(--line);border-radius:6px;padding:
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 const T = {
- he:{home:"פרויקטים",title:"בקשת פרויקט · קריאת אחות",sub:"מלאו את מה שיש. גם עם מידע חלקי נכין תוכנית, מודל תלת-ממד וכתב כמויות.",
+ he:{send:"📤 שליחה",updT:"עדכון / שינוי / הוספת מידע",updS:"הוסיפו רק את מה שחדש או השתנה: טקסט, תוכניות, קבצים, תמונות.",updN:"עדכון לפרויקט: ",sent:"נשלח ✓ הכול נשמר.",big:"גדול מ-45MB – שלחו קישור",home:"פרויקטים",title:"בקשת פרויקט · קריאת אחות",sub:"מלאו את מה שיש. גם עם מידע חלקי נכין תוכנית, מודל תלת-ממד וכתב כמויות.",
   s1:"פרטי הפרויקט",project:"שם הפרויקט (אנגלית)",projectHe:"שם הפרויקט (עברית)",client:"לקוח קצה",dist:"מפיץ",req:"אחראי הדרישה",date:"תאריך הבקשה",
   s2:"מסמכי הלקוח",plansQ:"תוכניות",boqQ:"כתב כמויות (BOQ)",specQ:"מפרט טכני",cabQ:"כבילה / סכמת חיווט",otherQ:"מסמכים אחרים (וורד, PDF, אקסל…)",yes:"כן",no:"לא",unk:"לא ידוע",
   s3:"תיאור הפרויקט",floors:"מספר קומות",rooms:"מספר חדרים",beds:"מספר מיטות",baths:"חדרי רחצה",choose:"—",bathsT:"מקלחת ואסלה יחד",bathsS:"מקלחת ואסלה בנפרד",bathsM:"משולב",bathsN:"אין שירותים בחדר",
@@ -181,7 +182,7 @@ const T = {
   feats:{presence:"נוכחות / ביטול",corridor:"מנורת מסדרון",desk:"עמדת אחות",tv:"טלוויזיה / שלט דיגיטלי לקריאות",pear:"לחצן אגס"},
   extras:{tablet:"טאבלט",pa:"כריזה",intercom:"אינטרקום",cameras:"מצלמות",access:"בקרת כניסה",wireless:"צמיד / תליון אלחוטי"},
   need:"חסר שם פרויקט או לקוח קצה.",copied:"הסיכום הועתק.",copyFail:"לא ניתן להעתיק; סמנו את הטקסט למטה.",prep:"מכין חבילה…",ready:"החבילה מוכנה",noShare:"המכשיר לא משתף קבצים מכאן – הורד ZIP.",files:"קבצים",confirm:"לנקות את כל הטופס?"},
- en:{home:"Projects",title:"Project request · Nurse call",sub:"Fill in what you have. Partial information is enough to prepare the plan, 3D model and BOQ.",
+ en:{send:"📤 Send",updT:"Update / change / add information",updS:"Add only what is new or changed: text, drawings, files, photos.",updN:"Update for project: ",sent:"Sent ✓ everything was saved.",big:"over 45 MB – send a link",home:"Projects",title:"Project request · Nurse call",sub:"Fill in what you have. Partial information is enough to prepare the plan, 3D model and BOQ.",
   s1:"Project details",project:"Project name (English)",projectHe:"Project name (Hebrew)",client:"End client",dist:"Distributor",req:"Requested by",date:"Request date",
   s2:"Client documents",plansQ:"Drawings",boqQ:"BOQ (bill of quantities)",specQ:"Technical specification (מפרט טכני)",cabQ:"Cabling / wiring scheme",otherQ:"Other documents (Word, PDF, Excel…)",yes:"Yes",no:"No",unk:"Not sure",
   s3:"Project description",floors:"Number of floors",rooms:"Number of rooms",beds:"Number of beds",baths:"Bathrooms",choose:"—",bathsT:"Shower and toilet together",bathsS:"Shower and toilet separate",bathsM:"Mixed",bathsN:"No bathroom in the room",
@@ -196,7 +197,7 @@ const T = {
   feats:{presence:"Presence / cancel",corridor:"Corridor light",desk:"Nurse desk",tv:"TV / digital call display",pear:"Pear handset"},
   extras:{tablet:"Tablet",pa:"Public address",intercom:"Intercom",cameras:"Cameras",access:"Access control",wireless:"Wireless pendant / wristband"},
   need:"Project name or end client missing.",copied:"Summary copied.",copyFail:"Could not copy; select the text below.",prep:"Preparing package…",ready:"Package ready",noShare:"This device can't share files from here – download the ZIP.",files:"Files",confirm:"Clear the whole form?"},
- es:{home:"Proyectos",title:"Solicitud de proyecto · Llamada de enfermería",sub:"Complete lo que tenga. Con información parcial igual se prepara el plano, el 3D y el BOQ.",
+ es:{send:"📤 Enviar",updT:"Actualización / cambio / agregado de información",updS:"Agregue solo lo nuevo o lo que cambió: texto, planos, archivos, fotos.",updN:"Actualización del proyecto: ",sent:"Enviado ✓ todo quedó guardado.",big:"pesa más de 45 MB – envíe un link",home:"Proyectos",title:"Solicitud de proyecto · Llamada de enfermería",sub:"Complete lo que tenga. Con información parcial igual se prepara el plano, el 3D y el BOQ.",
   s1:"Datos del proyecto",project:"Nombre del proyecto (inglés)",projectHe:"Nombre del proyecto (hebreo)",client:"Cliente final",dist:"Distribuidor",req:"Responsable del requerimiento",date:"Fecha de solicitud",
   s2:"Documentos del cliente",plansQ:"Planos",boqQ:"BOQ (כתב כמויות)",specQ:"מפרט טכני (especificación técnica)",cabQ:"Cableado / esquema de cableado",otherQ:"Otros documentos (Word, PDF, Excel…)",yes:"Sí",no:"No",unk:"No sé",
   s3:"Descripción del proyecto",floors:"Cantidad de pisos",rooms:"Cantidad de habitaciones",beds:"Cantidad de camas",baths:"Baños",choose:"—",bathsT:"Ducha e inodoro juntos",bathsS:"Ducha e inodoro separados",bathsM:"Mixto",bathsN:"Sin baño en la habitación",
@@ -217,6 +218,9 @@ let LANG = QS.get("lang"); try { LANG = LANG || localStorage.getItem("planos-lan
 const FILES = { plans: [], boq: [], spec: [], cabling: [], other: [], free: [], ideas: [] };
 const FOLDER = { plans: "02 Planos", boq: "03 BOQ", spec: "04 Mifrat", cabling: "05 Cableado", other: "06 Otros", free: "07 Notas", ideas: "08 Ideas" };
 const DRAFT = "planos-solicitud-draft";
+const ENDPOINT = ""; // URL de la aplicación web de Google Apps Script (tools/apps_script/Code.gs)
+const KEY = "planos-master-2026";
+const MODE = QS.get("mode") === "update" ? "update" : "new", PRJ = QS.get("p") || "";
 
 function pills(boxId, group, dict) {
   const box = $(boxId); box.querySelectorAll(".pill").forEach(p => p.remove());
@@ -233,6 +237,9 @@ function setLang(l) {
   pills("ptypes", "ptype", L.ptypes); pills("feats", "feat", L.feats); pills("extras", "extra", L.extras);
   on.forEach(id => { const e = $(id); if (e) e.checked = true; });
   $("home").href = "../?lang=" + l;
+  if (MODE === "update") { document.querySelector("h1").textContent = L.updT; document.querySelector(".sub").textContent = L.updS; document.title = L.updT;
+    if (PRJ) { $("updnote").hidden = false; $("updnote").textContent = L.updN + PRJ; } }
+  $("send").hidden = !ENDPOINT;
   document.querySelectorAll(".drop").forEach(drawDrop); refresh();
 }
 function drawDrop(d) {
@@ -309,6 +316,21 @@ async function buildZip(d) {
 }
 function dl(file) { const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = file.name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 60000); }
 
+const b64 = f => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1] || ""); r.onerror = rej; r.readAsDataURL(f); });
+const post = o => fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(Object.assign({ key: KEY }, o)) }).then(r => r.json()).then(j => { if (!j.ok) throw new Error(j.error || "error"); return j; });
+$("send").onclick = async () => { const d = ok(); if (!d) return; const L = T[LANG], bar = $("prog").querySelector("i");
+  $("send").disabled = true; $("prog").hidden = false; bar.style.width = "3%"; st(L.prep);
+  try {
+    const s0 = await post({ action: "start", mode: MODE, meta: d });
+    const list = Object.entries(FILES).flatMap(([k, v]) => v.map(f => [k, f])); const skipped = []; let n = 0;
+    for (const [k, f] of list) { if (f.size > 45 * 1048576) { skipped.push(f.name); continue; }
+      st(`${++n}/${list.length} · ${f.name}`); await post({ action: "file", folderId: s0.folderId, field: k, name: f.name, mime: f.type, data: await b64(f) });
+      bar.style.width = (5 + 90 * n / Math.max(1, list.length)) + "%"; }
+    await post({ action: "finish", folderId: s0.folderId, mode: MODE, meta: d, summary: summary(d), count: n });
+    bar.style.width = "100%"; st(L.sent + (skipped.length ? " · " + skipped.join(", ") + " " + L.big : ""), skipped.length ? "err" : "ok");
+    try { localStorage.removeItem(DRAFT); } catch (_) {}
+  } catch (e) { st(e.message + " – ZIP ⬇", "err"); }
+  $("send").disabled = false; setTimeout(() => { $("prog").hidden = true; bar.style.width = 0; }, 2000); };
 $("share").onclick = async () => { const d = ok(); if (!d) return; const text = summary(d), all = Object.values(FILES).flat();
   const txt = new File([text], pkgName(d) + ".txt", { type: "text/plain" }); const files = [txt, ...all];
   if (navigator.canShare && navigator.canShare({ files })) { try { await navigator.share({ title: pkgName(d), text, files }); st("✓", "ok"); } catch (e) { if (e.name !== "AbortError") st(e.message, "err"); } return; }
@@ -322,7 +344,7 @@ $("copy").onclick = () => { const s = summary(collect());
   (navigator.clipboard ? navigator.clipboard.writeText(s) : Promise.reject()).then(() => st(T[LANG].copied, "ok"), () => { st(T[LANG].copyFail, "err"); const r = document.createRange(); r.selectNodeContents($("preview")); getSelection().removeAllRanges(); getSelection().addRange(r); }); };
 $("clear").onclick = () => { if (!confirm(T[LANG].confirm)) return; try { localStorage.removeItem(DRAFT); } catch (_) {} location.reload(); };
 
-setLang(LANG); load(); if (!$("date").value) $("date").value = new Date().toLocaleDateString("sv"); syncCond(); refresh();
+setLang(LANG); if (MODE !== "update") load(); if (PRJ && !$("project").value) $("project").value = PRJ; if (!$("date").value) $("date").value = new Date().toLocaleDateString("sv"); syncCond(); refresh();
 </script>
 </body>
 </html>
