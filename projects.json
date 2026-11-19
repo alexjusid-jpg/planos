@@ -471,6 +471,81 @@
   }
  },
  {
+  "id": "baana_karmiel",
+  "main": true,
+  "name": {
+   "he": "מרכז גריאטרי בענה כרמיאל",
+   "en": "מרכז גריאטרי בענה כרמיאל",
+   "es": "מרכז גריאטרי בענה כרמיאל"
+  },
+  "sub": {
+   "he": "קריאת אחות · v1",
+   "en": "Nurse call · v1",
+   "es": "Llamada de enfermería · v1"
+  },
+  "open": {
+   "he": "baana_karmiel/",
+   "en": "baana_karmiel/",
+   "es": "baana_karmiel/"
+  },
+  "zip": {
+   "he": {
+    "files": [
+     "baana_karmiel/assets/plan/3E.jpg",
+     "baana_karmiel/assets/plan/3W.jpg",
+     "baana_karmiel/assets/plan/4E.jpg",
+     "baana_karmiel/assets/plan/4W.jpg",
+     "baana_karmiel/assets/plan/5E.jpg",
+     "baana_karmiel/assets/plan/5W.jpg",
+     "baana_karmiel/assets/plan/6E.jpg",
+     "baana_karmiel/assets/plan/6W.jpg",
+     "baana_karmiel/assets/plan/7E.jpg",
+     "baana_karmiel/assets/plan/7W.jpg",
+     "baana_karmiel/docs/BaanaKarmiel_NurseCall_2D_v2.pdf",
+     "baana_karmiel/docs/BaanaKarmiel_NurseCall_BOQ_v1_EN.xlsx",
+     "baana_karmiel/index.html"
+    ],
+    "bytes": 25150334
+   },
+   "en": {
+    "files": [
+     "baana_karmiel/assets/plan/3E.jpg",
+     "baana_karmiel/assets/plan/3W.jpg",
+     "baana_karmiel/assets/plan/4E.jpg",
+     "baana_karmiel/assets/plan/4W.jpg",
+     "baana_karmiel/assets/plan/5E.jpg",
+     "baana_karmiel/assets/plan/5W.jpg",
+     "baana_karmiel/assets/plan/6E.jpg",
+     "baana_karmiel/assets/plan/6W.jpg",
+     "baana_karmiel/assets/plan/7E.jpg",
+     "baana_karmiel/assets/plan/7W.jpg",
+     "baana_karmiel/docs/BaanaKarmiel_NurseCall_2D_v2.pdf",
+     "baana_karmiel/docs/BaanaKarmiel_NurseCall_BOQ_v1_EN.xlsx",
+     "baana_karmiel/index.html"
+    ],
+    "bytes": 25150334
+   },
+   "es": {
+    "files": [
+     "baana_karmiel/assets/plan/3E.jpg",
+     "baana_karmiel/assets/plan/3W.jpg",
+     "baana_karmiel/assets/plan/4E.jpg",
+     "baana_karmiel/assets/plan/4W.jpg",
+     "baana_karmiel/assets/plan/5E.jpg",
+     "baana_karmiel/assets/plan/5W.jpg",
+     "baana_karmiel/assets/plan/6E.jpg",
+     "baana_karmiel/assets/plan/6W.jpg",
+     "baana_karmiel/assets/plan/7E.jpg",
+     "baana_karmiel/assets/plan/7W.jpg",
+     "baana_karmiel/docs/BaanaKarmiel_NurseCall_2D_v2.pdf",
+     "baana_karmiel/docs/BaanaKarmiel_NurseCall_BOQ_v1_EN.xlsx",
+     "baana_karmiel/index.html"
+    ],
+    "bytes": 25150334
+   }
+  }
+ },
+ {
   "id": "yoseftal_rev05",
   "main": false,
   "name": {
