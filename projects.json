@@ -491,6 +491,7 @@
   "zip": {
    "he": {
     "files": [
+     "baana_karmiel/LEEME.md",
      "baana_karmiel/assets/plan/3E.jpg",
      "baana_karmiel/assets/plan/3W.jpg",
      "baana_karmiel/assets/plan/4E.jpg",
@@ -505,10 +506,11 @@
      "baana_karmiel/docs/BaanaKarmiel_NurseCall_BOQ_v1_EN.xlsx",
      "baana_karmiel/index.html"
     ],
-    "bytes": 25150334
+    "bytes": 25139085
    },
    "en": {
     "files": [
+     "baana_karmiel/LEEME.md",
      "baana_karmiel/assets/plan/3E.jpg",
      "baana_karmiel/assets/plan/3W.jpg",
      "baana_karmiel/assets/plan/4E.jpg",
@@ -523,10 +525,11 @@
      "baana_karmiel/docs/BaanaKarmiel_NurseCall_BOQ_v1_EN.xlsx",
      "baana_karmiel/index.html"
     ],
-    "bytes": 25150334
+    "bytes": 25139085
    },
    "es": {
     "files": [
+     "baana_karmiel/LEEME.md",
      "baana_karmiel/assets/plan/3E.jpg",
      "baana_karmiel/assets/plan/3W.jpg",
      "baana_karmiel/assets/plan/4E.jpg",
@@ -541,7 +544,7 @@
      "baana_karmiel/docs/BaanaKarmiel_NurseCall_BOQ_v1_EN.xlsx",
      "baana_karmiel/index.html"
     ],
-    "bytes": 25150334
+    "bytes": 25139085
    }
   }
  },

@@ -15,10 +15,10 @@
 | `docs/BaanaKarmiel_NurseCall_BOQ_v1_EN.xlsx` | BOQ: Floor Summary, Legend Count, Element Schedule (n.º → piso → cuarto), BOQ, Findings |
 
 ## Elementos (color = elemento, número = corrido del piso 3 al 7)
-1 naranja estación ppal h=90 (5) · 2 celeste luz pasillo h=250 (101) · 3 verde llamada+cancelación baño h=105 (99) · 4 marrón cancelación puerta h=140 (90) · 5 rosa tirador ducha h=250 (88) · 6 azul oscuro unidad de cama con voz (90 cuartos) · 7 gris SOS áreas comunes, opción (18)
+1 naranja estación ppal h=90 (5) · 2 celeste luz pasillo h=250 (103) · 3 verde llamada+cancelación baño h=105 (103) · 4 marrón cancelación puerta h=140 (90) · 5 rosa tirador ducha h=250 (90) · 6 azul oscuro unidad de cama con voz (90 cuartos, 168 camas). Sin Shabat. Áreas comunes y baños de personal: sin llamada (no los pide el מפרט).
 
 ## Supuestos
-Pisos 5 y 7 = mezcla de cuartos del piso 6 (a confirmar). Piso 7: posiciones copiadas del piso 6. Marcadores junto al rótulo del cuarto (no en la pared exacta todavía).
+Pisos 3–6 leídos de los rótulos del plano (QA visual 19/11). Piso 7: sin rótulos → igual al piso 6 (a confirmar). Marcadores junto al rótulo del cuarto (no en la pared exacta todavía).
 
 ## Cómo modificar
 Pedir el cambio en el chat; se regeneran imágenes, `index.html`, PDF y Excel y se publica de nuevo en `baana_karmiel/`. Pendiente: posición exacta en pared y 3D.
